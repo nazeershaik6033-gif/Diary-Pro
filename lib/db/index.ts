@@ -187,7 +187,7 @@ export class DiaryProDB extends Dexie {
       // 2. Migrate tags: collect unique tags from all entries, create Tag objects
       const entries = await tx.table('diaryEntries').toArray()
       const tagMap = new Map<string, number>() // name → new id
-      const allTags = new Set(entries.flatMap((e: any) => e.tags ?? []))
+      const allTags = Array.from(new Set<string>(entries.flatMap((e: any) => e.tags ?? [])))
       for (const name of allTags) {
         const id = await tx.table('tags').add({ name, categoryId: 'custom', createdAt: Date.now() })
         tagMap.set(name as string, id as number)

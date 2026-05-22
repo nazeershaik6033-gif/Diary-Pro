@@ -130,3 +130,154 @@ export async function importAll(file: File): Promise<void> {
     if (data.decisions) { await db.decisions.clear(); await db.decisions.bulkAdd(data.decisions as never[]) }
   })
 }
+
+// ---------------------------------------------------------------------------
+// Markdown export helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Converts a subset of HTML to Markdown.
+ * Handles: bold, italic, headings h1–h3, unordered lists, ordered lists.
+ * Strips all other HTML tags.
+ */
+export function htmlToMarkdown(html: string): string {
+  let md = html
+
+  // Block-level replacements first (order matters)
+  // Headings
+  md = md.replace(/<h1[^>]*>([\s\S]*?)<\/h1>/gi, (_, inner) => `# ${stripTags(inner)}\n\n`)
+  md = md.replace(/<h2[^>]*>([\s\S]*?)<\/h2>/gi, (_, inner) => `## ${stripTags(inner)}\n\n`)
+  md = md.replace(/<h3[^>]*>([\s\S]*?)<\/h3>/gi, (_, inner) => `### ${stripTags(inner)}\n\n`)
+
+  // Paragraphs
+  md = md.replace(/<\/p>/gi, '\n\n')
+  md = md.replace(/<p[^>]*>/gi, '')
+
+  // Lists — process <li> inside <ul> vs <ol>
+  md = md.replace(/<ul[^>]*>([\s\S]*?)<\/ul>/gi, (_, inner) => {
+    return inner.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, (_: string, item: string) => `- ${stripTags(item).trim()}\n`)
+  })
+
+  let olCounter = 0
+  md = md.replace(/<ol[^>]*>([\s\S]*?)<\/ol>/gi, (_, inner) => {
+    olCounter = 0
+    return inner.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, (_: string, item: string) => {
+      olCounter++
+      return `${olCounter}. ${stripTags(item).trim()}\n`
+    })
+  })
+
+  // Inline replacements
+  md = md.replace(/<(strong|b)[^>]*>([\s\S]*?)<\/(strong|b)>/gi, (_, _tag, inner) => `**${stripTags(inner)}**`)
+  md = md.replace(/<(em|i)[^>]*>([\s\S]*?)<\/(em|i)>/gi, (_, _tag, inner) => `*${stripTags(inner)}*`)
+
+  // Line breaks
+  md = md.replace(/<br\s*\/?>/gi, '\n')
+
+  // Strip remaining tags
+  md = stripTags(md)
+
+  // Normalize whitespace: collapse 3+ consecutive newlines to 2
+  md = md.replace(/\n{3,}/g, '\n\n').trim()
+
+  return md
+}
+
+function stripTags(html: string): string {
+  return html.replace(/<[^>]*>/g, '')
+}
+
+export interface MarkdownFile {
+  filename: string
+  content: string
+}
+
+/**
+ * Converts a single diary entry + its content into a Markdown string
+ * with YAML front-matter.
+ */
+export async function exportEntryAsMarkdown(
+  entry: DiaryEntry,
+  content: EntryContent | undefined
+): Promise<string> {
+  // Resolve sticker IDs to labels
+  const stickerRecords = await db.entryStickers.where('entryId').equals(entry.id!).toArray()
+  const stickerIds = stickerRecords.map(s => s.stickerId)
+
+  // Resolve tag names
+  let tagNames: string[] = []
+  if (entry.tagIds && entry.tagIds.length > 0) {
+    const tags = await db.tags.bulkGet(entry.tagIds)
+    tagNames = tags.filter(Boolean).map(t => t!.name)
+  }
+
+  // Build YAML front-matter
+  const frontMatter = [
+    '---',
+    `title: ${JSON.stringify(entry.title || '')}`,
+    `date: ${JSON.stringify(entry.date)}`,
+    stickerIds.length > 0
+      ? `stickers: [${stickerIds.map(id => JSON.stringify(id)).join(', ')}]`
+      : 'stickers: []',
+    tagNames.length > 0
+      ? `tags: [${tagNames.map(t => JSON.stringify(t)).join(', ')}]`
+      : 'tags: []',
+    `starred: ${entry.starred ?? false}`,
+    `pinned: ${entry.pinned ?? false}`,
+    entry.colorTone ? `colorTone: ${JSON.stringify(entry.colorTone)}` : null,
+    '---',
+  ]
+    .filter(line => line !== null)
+    .join('\n')
+
+  // Build page content
+  const pages = content?.pages ?? []
+  const pageBlocks = pages.map(page => {
+    const heading = page.title ? `# ${page.title}\n\n` : ''
+    const body = htmlToMarkdown(page.content)
+    return `${heading}${body}`
+  })
+
+  const body = pageBlocks.join('\n\n---\n\n')
+
+  return `${frontMatter}\n\n${body}\n`
+}
+
+/**
+ * Exports all non-deleted diary entries as an array of {filename, content} objects.
+ * Callers can zip these or download them individually.
+ */
+export async function exportAllAsMarkdown(): Promise<MarkdownFile[]> {
+  const entries = await db.diaryEntries
+    .filter(e => !e.deletedAt)
+    .sortBy('date')
+
+  const files: MarkdownFile[] = []
+
+  for (const entry of entries) {
+    let content: EntryContent | undefined
+    if (entry.latestContentId) {
+      content = await db.entryContents.get(entry.latestContentId)
+    }
+    if (!content) {
+      const versions = await db.entryContents
+        .where('entryId')
+        .equals(entry.id!)
+        .sortBy('createdAt')
+      content = versions[versions.length - 1]
+    }
+
+    const md = await exportEntryAsMarkdown(entry, content)
+
+    // Build a safe filename
+    const safeName = (entry.title || 'Untitled')
+      .replace(/[/\\:*?"<>|]/g, '_')
+      .slice(0, 60)
+      .trim()
+    const filename = `${entry.date}_${safeName}.md`
+
+    files.push({ filename, content: md })
+  }
+
+  return files
+}
