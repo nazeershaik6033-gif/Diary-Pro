@@ -82,7 +82,7 @@ function DiaryEntryContent() {
         rightAction={
           <div className="flex gap-1">
             <button
-              onClick={() => router.push(`/diary/${date}/edit`)}
+              onClick={() => router.push(`/diary/edit?date=${date}`)}
               className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-paper-300"
             >
               <Edit size={18} className="text-ink-300" />
