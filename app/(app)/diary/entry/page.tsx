@@ -9,6 +9,7 @@ import { PageHeader } from '@/components/layout/PageHeader'
 import { Button } from '@/components/ui/Button'
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
 import { STICKER_MAP } from '@/types/stickers'
+import type { EntrySticker, DiaryPhoto } from '@/types/diary'
 import { formatDisplay, formatDay } from '@/lib/utils/date'
 import { deleteDiaryEntry } from '@/lib/db/diary'
 import { useToast } from '@/app/contexts/ToastContext'
@@ -28,7 +29,7 @@ function DiaryEntryContent() {
   )
 
   const stickers = useLiveQuery(
-    () => entry?.id ? db.entryStickers.where('entryId').equals(entry.id).toArray() : Promise.resolve([]),
+    () => entry?.id ? db.entryStickers.where('entryId').equals(entry.id).toArray() : ([] as EntrySticker[]),
     [entry?.id]
   )
 
@@ -44,7 +45,7 @@ function DiaryEntryContent() {
   }, [entry?.latestContentId])
 
   const photos = useLiveQuery(
-    () => entry?.id ? db.diaryPhotos.where('entryId').equals(entry.id).toArray() : Promise.resolve([]),
+    () => entry?.id ? db.diaryPhotos.where('entryId').equals(entry.id).toArray() : ([] as DiaryPhoto[]),
     [entry?.id]
   )
 

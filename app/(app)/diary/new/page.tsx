@@ -7,20 +7,19 @@ import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { MoodPicker } from '@/components/diary/MoodPicker'
 import { GratitudeSection } from '@/components/diary/GratitudeSection'
-import { TagInput } from '@/components/diary/TagInput'
+import { TypedTagPicker } from '@/components/diary/TypedTagPicker'
 import { RichTextEditor } from '@/components/diary/RichTextEditor'
 import { PhotoAttachment } from '@/components/diary/PhotoAttachment'
-import { addDiaryEntry, addDiaryPhoto } from '@/lib/db/diary'
+import { createDiaryEntry, addDiaryAsset, addEntrySticker } from '@/lib/db/diary'
 import { useToast } from '@/app/contexts/ToastContext'
 import { toDateString } from '@/lib/utils/date'
-import type { DiaryEntry, MoodLevel } from '@/types'
 
 interface FormValues {
   title: string
   content: string
-  mood: MoodLevel
+  stickerIds: string[]
   gratitude: [string, string, string]
-  tags: string[]
+  tagIds: number[]
   photos: { data: string; mimeType: string }[]
 }
 
@@ -33,36 +32,51 @@ export default function NewDiaryEntryPage() {
     defaultValues: {
       title: '',
       content: '',
-      mood: 3,
+      stickerIds: [],
       gratitude: ['', '', ''],
-      tags: [],
+      tagIds: [],
       photos: [],
     },
   })
 
   const photos = watch('photos')
-  const tags = watch('tags')
-  const mood = watch('mood')
+  const tagIds = watch('tagIds')
+  const stickerIds = watch('stickerIds')
 
   const onSubmit = async (data: FormValues) => {
     setLoading(true)
     try {
       const now = Date.now()
-      const entry: Omit<DiaryEntry, 'id'> = {
+      const entryId = await createDiaryEntry({
         date: toDateString(),
         title: data.title,
         content: data.content,
-        mood: data.mood,
         gratitude: data.gratitude,
-        tags: data.tags,
+        tagIds: data.tagIds,
         hasPhotos: data.photos.length > 0,
+        starred: false,
+        pinned: false,
         createdAt: now,
         updatedAt: now,
+      })
+
+      // Save stickers
+      for (const stickerId of data.stickerIds) {
+        await addEntrySticker(entryId, stickerId)
       }
-      const id = await addDiaryEntry(entry)
+
+      // Save photo assets
       for (let i = 0; i < data.photos.length; i++) {
-        await addDiaryPhoto({ entryId: id, data: data.photos[i].data, mimeType: data.photos[i].mimeType, order: i })
+        await addDiaryAsset({
+          entryId,
+          data: data.photos[i].data,
+          mimeType: data.photos[i].mimeType,
+          type: 'photo',
+          order: i,
+          createdAt: now,
+        })
       }
+
       showToast('Entry saved')
       router.push(`/diary/${toDateString()}`)
     } catch {
@@ -91,7 +105,7 @@ export default function NewDiaryEntryPage() {
 
         <div>
           <p className="text-sm font-medium font-sans text-ink-400 mb-2">How are you feeling?</p>
-          <MoodPicker value={mood} onChange={v => setValue('mood', v)} />
+          <MoodPicker value={stickerIds} onChange={v => setValue('stickerIds', v)} />
         </div>
 
         <div>
@@ -107,7 +121,7 @@ export default function NewDiaryEntryPage() {
 
         <GratitudeSection control={control as any} />
 
-        <TagInput value={tags} onChange={v => setValue('tags', v)} />
+        <TypedTagPicker selectedTagIds={tagIds} onChange={v => setValue('tagIds', v)} />
 
         <PhotoAttachment photos={photos} onChange={v => setValue('photos', v)} />
       </form>
