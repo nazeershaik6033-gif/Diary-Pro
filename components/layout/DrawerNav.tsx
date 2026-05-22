@@ -4,19 +4,22 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   BookOpen, Briefcase, ListChecks, Dumbbell, Settings, X, Flame,
-  CheckSquare, Heart, Target
+  CheckSquare, Heart, Target, CalendarDays, Scale, PartyPopper
 } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import { useStreak } from '@/lib/hooks/useStreak'
 
 const NAV_ITEMS = [
-  { href: '/diary', label: 'Diary', icon: BookOpen, color: 'text-amber-warm' },
-  { href: '/work', label: 'Work Log', icon: Briefcase, color: 'text-blue-500' },
-  { href: '/gtd', label: 'GTD', icon: ListChecks, color: 'text-sage' },
-  { href: '/gym', label: 'Gym', icon: Dumbbell, color: 'text-orange-500' },
-  { href: '/habits', label: 'Habits', icon: CheckSquare, color: 'text-purple-500' },
-  { href: '/health', label: 'Health', icon: Heart, color: 'text-blush' },
-  { href: '/goals', label: 'Goals', icon: Target, color: 'text-amber-dark' },
+  { href: '/diary',     label: 'Diary',     icon: BookOpen,     color: 'text-amber-warm' },
+  { href: '/calendar',  label: 'Calendar',  icon: CalendarDays, color: 'text-blue-400' },
+  { href: '/events',    label: 'Events',    icon: PartyPopper,  color: 'text-purple-400' },
+  { href: '/work',      label: 'Work Log',  icon: Briefcase,    color: 'text-blue-500' },
+  { href: '/gtd',       label: 'GTD',       icon: ListChecks,   color: 'text-sage' },
+  { href: '/gym',       label: 'Gym',       icon: Dumbbell,     color: 'text-orange-500' },
+  { href: '/habits',    label: 'Habits',    icon: CheckSquare,  color: 'text-purple-500' },
+  { href: '/health',    label: 'Health',    icon: Heart,        color: 'text-blush' },
+  { href: '/goals',     label: 'Goals',     icon: Target,       color: 'text-amber-dark' },
+  { href: '/decisions', label: 'Decisions', icon: Scale,        color: 'text-green-500' },
 ]
 
 interface DrawerNavProps {
@@ -71,7 +74,7 @@ export function DrawerNav({ open, onClose }: DrawerNavProps) {
                     href={item.href}
                     onClick={onClose}
                     className={cn(
-                      'flex items-center gap-4 px-6 py-3.5 mx-3 rounded-xl transition-colors',
+                      'flex items-center gap-4 px-6 py-3 mx-3 rounded-xl transition-colors',
                       active ? 'bg-amber-warm text-white' : 'text-ink hover:bg-paper-300'
                     )}
                   >
@@ -87,7 +90,7 @@ export function DrawerNav({ open, onClose }: DrawerNavProps) {
                 href="/settings"
                 onClick={onClose}
                 className={cn(
-                  'flex items-center gap-4 px-6 py-3.5 mx-3 rounded-xl transition-colors',
+                  'flex items-center gap-4 px-6 py-3 mx-3 rounded-xl transition-colors',
                   pathname.startsWith('/settings') ? 'bg-amber-warm text-white' : 'text-ink hover:bg-paper-300'
                 )}
               >

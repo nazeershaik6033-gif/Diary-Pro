@@ -1,5 +1,7 @@
 'use client'
-import { use, useState } from 'react'
+import { Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '@/lib/db'
@@ -13,8 +15,9 @@ import { useToast } from '@/app/contexts/ToastContext'
 import { Trash2, Edit } from 'lucide-react'
 import { Spinner } from '@/components/ui/Spinner'
 
-export default function DiaryEntryPage({ params }: { params: Promise<{ date: string }> }) {
-  const { date } = use(params)
+function DiaryEntryContent() {
+  const searchParams = useSearchParams()
+  const date = searchParams.get('date') ?? ''
   const router = useRouter()
   const { showToast } = useToast()
   const [confirmDelete, setConfirmDelete] = useState(false)
@@ -133,4 +136,8 @@ export default function DiaryEntryPage({ params }: { params: Promise<{ date: str
       />
     </div>
   )
+}
+
+export default function DiaryEntryPage() {
+  return <Suspense><DiaryEntryContent /></Suspense>
 }

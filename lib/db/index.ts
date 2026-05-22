@@ -8,6 +8,7 @@ import type {
   Habit, HabitLog,
   HealthLog, SleepLog, WaterLog, Supplement, SupplementLog,
   Goal, GoalMilestone, DailyAffirmation,
+  CalendarEvent, Decision,
 } from '@/types'
 import { DEFAULT_SETTINGS } from '@/types/settings'
 import { SEED_EXERCISES, SEED_TEMPLATES } from '@/lib/constants/gym'
@@ -41,6 +42,9 @@ export class DiaryProDB extends Dexie {
   goals!: Table<Goal>
   goalMilestones!: Table<GoalMilestone>
   dailyAffirmations!: Table<DailyAffirmation>
+  // v3 tables
+  events!: Table<CalendarEvent>
+  decisions!: Table<Decision>
 
   constructor() {
     super('DiaryProDB')
@@ -64,7 +68,6 @@ export class DiaryProDB extends Dexie {
     })
 
     this.version(2).stores({
-      // existing tables unchanged (Dexie requires listing them to keep)
       diaryEntries:    '++id, date, mood, *tags, createdAt, updatedAt',
       diaryPhotos:     '++id, entryId',
       workEntries:     '++id, date, category, priority, createdAt',
@@ -81,7 +84,6 @@ export class DiaryProDB extends Dexie {
       bodyMetrics:     '++id, date',
       personalRecords: '++id, exerciseId, date',
       settings:        'id',
-      // new v2 tables
       habits:             '++id, name, active, createdAt',
       habitLogs:          '++id, habitId, date',
       healthLogs:         '++id, date, energyLevel, createdAt',
@@ -92,6 +94,38 @@ export class DiaryProDB extends Dexie {
       goals:              '++id, tier, createdAt, updatedAt',
       goalMilestones:     '++id, goalId, order',
       dailyAffirmations:  '++id, active, createdAt',
+    })
+
+    this.version(3).stores({
+      diaryEntries:    '++id, date, mood, *tags, createdAt, updatedAt',
+      diaryPhotos:     '++id, entryId',
+      workEntries:     '++id, date, category, priority, createdAt',
+      gtdInbox:        '++id, createdAt, processed',
+      gtdProjects:     '++id, status, createdAt',
+      gtdNextActions:  '++id, projectId, context, dueDate, completed, createdAt',
+      gtdWaitingFor:   '++id, delegatedTo, dueDate, completed, createdAt',
+      gtdSomedayMaybe: '++id, category, createdAt',
+      gtdWeeklyReviews:'++id, weekStartDate, completedAt',
+      exercises:       '++id, name, muscleGroup, isCustom',
+      workoutTemplates:'++id, name, type, createdAt',
+      workoutLogs:     '++id, templateId, date, completedAt',
+      workoutSets:     '++id, workoutLogId, exerciseId, setNumber',
+      bodyMetrics:     '++id, date',
+      personalRecords: '++id, exerciseId, date',
+      settings:        'id',
+      habits:             '++id, name, active, createdAt',
+      habitLogs:          '++id, habitId, date',
+      healthLogs:         '++id, date, energyLevel, createdAt',
+      sleepLogs:          '++id, date, quality',
+      waterLogs:          '++id, date',
+      supplements:        '++id, timing, active, createdAt',
+      supplementLogs:     '++id, date, supplementId',
+      goals:              '++id, tier, createdAt, updatedAt',
+      goalMilestones:     '++id, goalId, order',
+      dailyAffirmations:  '++id, active, createdAt',
+      // v3
+      events:    '++id, startDate, category, createdAt',
+      decisions: '++id, type, status, createdAt',
     })
 
     this.on('populate', async () => {

@@ -1,5 +1,7 @@
 'use client'
-import { use } from 'react'
+import { Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
+
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '@/lib/db'
 import { PageHeader } from '@/components/layout/PageHeader'
@@ -8,8 +10,9 @@ import { EmptyState } from '@/components/shared/EmptyState'
 import { Spinner } from '@/components/ui/Spinner'
 import { CheckSquare } from 'lucide-react'
 
-export default function ProjectDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params)
+function ProjectDetailContent() {
+  const searchParams = useSearchParams()
+  const id = searchParams.get('id') ?? ''
   const projectId = Number(id)
 
   const project = useLiveQuery(() => db.gtdProjects.get(projectId), [projectId])
@@ -40,4 +43,8 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
       </div>
     </div>
   )
+}
+
+export default function ProjectDetailPage() {
+  return <Suspense><ProjectDetailContent /></Suspense>
 }

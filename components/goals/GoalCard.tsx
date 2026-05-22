@@ -52,7 +52,7 @@ export function GoalCard({ goal }: GoalCardProps) {
             </button>
           </div>
 
-          <button className="w-full text-left" onClick={() => goal.id && router.push(`/goals/${goal.id}`)}>
+          <button className="w-full text-left" onClick={() => goal.id && router.push(`/goals/detail?id=${goal.id}`)}>
             <h3 className="font-serif font-semibold text-ink text-lg leading-snug mb-2">{goal.title}</h3>
             {goal.description && (
               <p className="text-sm font-sans text-ink-300 line-clamp-2 mb-3">{goal.description}</p>

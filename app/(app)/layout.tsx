@@ -7,8 +7,10 @@ import { DrawerNav } from '@/components/layout/DrawerNav'
 import { FloatingActionButton } from '@/components/layout/FloatingActionButton'
 import { Menu } from 'lucide-react'
 import { useEffect } from 'react'
+import { useTheme } from '@/lib/hooks/useTheme'
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
+  useTheme()
   const [drawerOpen, setDrawerOpen] = useState(false)
   const { isVerified, pinEnabled } = useAuth()
   const router = useRouter()
