@@ -10,6 +10,8 @@ import {
 import { cn } from '@/lib/utils/cn'
 import { useStreak } from '@/lib/hooks/useStreak'
 
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? ''
+
 const NAV_ITEMS = [
   { href: '/diary',           label: 'Diary',      icon: BookOpen,     color: 'text-amber-warm' },
   { href: '/diary/throwback', label: 'On This Day', icon: RotateCcw,    color: 'text-rose-400' },
@@ -58,7 +60,8 @@ export function DrawerNav({ open, onClose }: DrawerNavProps) {
               <div className="flex items-center gap-3 min-w-0">
                 <div className="w-10 h-10 flex-shrink-0 rounded-xl overflow-hidden bg-paper-300 flex items-center justify-center">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/logo.svg" alt="" className="w-9 h-9 object-contain" />
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={`${basePath}/logo.svg`} alt="" className="w-9 h-9 object-contain" />
                 </div>
                 <div className="min-w-0">
                   <h2 className="text-lg font-serif font-bold text-ink leading-none">My Journal</h2>

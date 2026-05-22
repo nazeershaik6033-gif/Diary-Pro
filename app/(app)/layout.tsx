@@ -41,14 +41,17 @@ function AppShell({ children }: { children: React.ReactNode }) {
           <Menu size={22} className="text-ink" />
         </button>
 
-        {/* Logo */}
+        {/* Logo + name — both link to /diary */}
         <Link href="/diary" className="flex items-center gap-2 flex-shrink-0">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={`${basePath}/logo.svg`}
-            alt="My Journal"
-            className="w-8 h-8 object-contain"
+            alt="My Journal logo"
+            className="w-7 h-7 object-contain"
           />
+          <span className="font-serif font-bold text-ink text-[15px] leading-none">
+            My Journal
+          </span>
         </Link>
 
         <div className="flex-1" />
