@@ -1,4 +1,6 @@
 import { db } from '@/lib/db'
+import type { DiaryEntry, EntryContent } from '@/types'
+import { STICKER_MAP } from '@/types/stickers'
 
 export interface ExportData {
   version: number
