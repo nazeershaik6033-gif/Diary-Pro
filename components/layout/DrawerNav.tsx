@@ -4,15 +4,18 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   BookOpen, Briefcase, ListChecks, Dumbbell, Settings, X, Flame,
-  CheckSquare, Heart, Target, CalendarDays, Scale, PartyPopper
+  CheckSquare, Heart, Target, CalendarDays, Scale, PartyPopper,
+  RotateCcw, Images
 } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import { useStreak } from '@/lib/hooks/useStreak'
 
 const NAV_ITEMS = [
-  { href: '/diary',     label: 'Diary',     icon: BookOpen,     color: 'text-amber-warm' },
-  { href: '/calendar',  label: 'Calendar',  icon: CalendarDays, color: 'text-blue-400' },
-  { href: '/events',    label: 'Events',    icon: PartyPopper,  color: 'text-purple-400' },
+  { href: '/diary',           label: 'Diary',      icon: BookOpen,     color: 'text-amber-warm' },
+  { href: '/diary/throwback', label: 'On This Day', icon: RotateCcw,    color: 'text-rose-400' },
+  { href: '/calendar',        label: 'Calendar',   icon: CalendarDays, color: 'text-blue-400' },
+  { href: '/events',          label: 'Events',     icon: PartyPopper,  color: 'text-purple-400' },
+  { href: '/library',         label: 'Library',    icon: Images,       color: 'text-indigo-400' },
   { href: '/work',      label: 'Work Log',  icon: Briefcase,    color: 'text-blue-500' },
   { href: '/gtd',       label: 'GTD',       icon: ListChecks,   color: 'text-sage' },
   { href: '/gym',       label: 'Gym',       icon: Dumbbell,     color: 'text-orange-500' },

@@ -8,7 +8,8 @@ import { db } from '@/lib/db'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { Button } from '@/components/ui/Button'
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
-import { MOOD_CONFIG } from '@/types'
+import { STICKER_MAP } from '@/types/stickers'
+import type { EntrySticker, DiaryPhoto } from '@/types/diary'
 import { formatDisplay, formatDay } from '@/lib/utils/date'
 import { deleteDiaryEntry } from '@/lib/db/diary'
 import { useToast } from '@/app/contexts/ToastContext'
@@ -23,12 +24,28 @@ function DiaryEntryContent() {
   const [confirmDelete, setConfirmDelete] = useState(false)
 
   const entry = useLiveQuery(
-    () => db.diaryEntries.where('date').equals(date).first(),
+    () => db.diaryEntries.where('date').equals(date).filter(e => !e.deletedAt).first(),
     [date]
   )
 
+  const stickers = useLiveQuery(
+    () => entry?.id ? db.entryStickers.where('entryId').equals(entry.id).toArray() : ([] as EntrySticker[]),
+    [entry?.id]
+  )
+
+  const tags = useLiveQuery(async () => {
+    if (!entry?.tagIds || entry.tagIds.length === 0) return []
+    const results = await db.tags.bulkGet(entry.tagIds)
+    return results.filter(Boolean)
+  }, [entry?.tagIds?.join(',')])
+
+  const entryContent = useLiveQuery(async () => {
+    if (!entry?.latestContentId) return undefined
+    return db.entryContents.get(entry.latestContentId)
+  }, [entry?.latestContentId])
+
   const photos = useLiveQuery(
-    () => entry?.id ? db.diaryPhotos.where('entryId').equals(entry.id).toArray() : [],
+    () => entry?.id ? db.diaryPhotos.where('entryId').equals(entry.id).toArray() : ([] as DiaryPhoto[]),
     [entry?.id]
   )
 
@@ -48,14 +65,15 @@ function DiaryEntryContent() {
     )
   }
 
-  const mood = MOOD_CONFIG[entry.mood]
-
   const handleDelete = async () => {
     if (!entry.id) return
     await deleteDiaryEntry(entry.id)
     showToast('Entry deleted')
     router.replace('/diary')
   }
+
+  // Get HTML content from the latest content record's first page
+  const htmlContent = entryContent?.pages?.[0]?.content ?? ''
 
   return (
     <div>
@@ -81,17 +99,20 @@ function DiaryEntryContent() {
 
       <div className="px-4 space-y-5 pb-8">
         <div className="flex items-center gap-3">
-          <span className="text-3xl">{mood.emoji}</span>
+          {stickers && stickers.length > 0 && (
+            <span className="text-3xl leading-none">
+              {stickers.map(s => STICKER_MAP[s.stickerId]?.emoji ?? '').join('')}
+            </span>
+          )}
           <div>
             <p className="font-serif font-bold text-ink text-xl">{entry.title || formatDay(date)}</p>
-            <p className="text-sm font-sans text-ink-300 capitalize">{mood.label}</p>
           </div>
         </div>
 
-        {entry.content && (
+        {htmlContent && (
           <div
             className="prose prose-sm max-w-none font-sans text-ink leading-relaxed"
-            dangerouslySetInnerHTML={{ __html: entry.content }}
+            dangerouslySetInnerHTML={{ __html: htmlContent }}
           />
         )}
 
@@ -114,11 +135,11 @@ function DiaryEntryContent() {
           </div>
         )}
 
-        {entry.tags.length > 0 && (
+        {tags && tags.length > 0 && (
           <div className="flex flex-wrap gap-2">
-            {entry.tags.map(tag => (
-              <span key={tag} className="text-xs font-sans text-amber-dark bg-amber-faint px-3 py-1 rounded-full">
-                #{tag}
+            {tags.map(tag => (
+              <span key={tag!.id} className="text-xs font-sans text-amber-dark bg-amber-faint px-3 py-1 rounded-full">
+                #{tag!.name}
               </span>
             ))}
           </div>

@@ -1,4 +1,6 @@
 export * from './diary'
+export * from './tags'
+export * from './stickers'
 export * from './work'
 export * from './gtd'
 export * from './gym'

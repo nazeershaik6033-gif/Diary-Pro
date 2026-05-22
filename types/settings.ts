@@ -23,6 +23,7 @@ export interface AppSettings {
   lastBackupAt?: number
   firstLaunch: boolean
   createdAt: number
+  securityQuestions?: Array<{ questionIndex: number; answerHash: string }>
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {

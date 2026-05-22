@@ -4,12 +4,12 @@ import { PageHeader } from '@/components/layout/PageHeader'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
-import { exportAll, importAll } from '@/lib/utils/export'
+import { exportAll, importAll, exportAllAsMarkdown } from '@/lib/utils/export'
 import { useToast } from '@/app/contexts/ToastContext'
-import { Download, Upload, AlertTriangle, FileJson, FileText } from 'lucide-react'
+import { Download, Upload, AlertTriangle, FileJson, FileText, FileDown } from 'lucide-react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '@/lib/db'
-import { formatDisplay, toDateString } from '@/lib/utils/date'
+import { formatDisplay, toDateString, format } from '@/lib/utils/date'
 
 export default function BackupPage() {
   const { showToast } = useToast()
@@ -22,6 +22,27 @@ export default function BackupPage() {
   const lastBackup = settings?.lastBackupAt
     ? formatDisplay(toDateString(new Date(settings.lastBackupAt)))
     : 'Never'
+
+  const handleMarkdownExport = async () => {
+    setLoading('markdown')
+    try {
+      const files = await exportAllAsMarkdown()
+      if (!files.length) { showToast('No entries to export', 'error'); return }
+      const combined = files.map(f => `# ${f.filename}\n\n${f.content}`).join('\n\n---\n\n')
+      const blob = new Blob([combined], { type: 'text/markdown' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `diary-pro-export-${format(new Date(), 'yyyy-MM-dd')}.md`
+      a.click()
+      URL.revokeObjectURL(url)
+      showToast('Markdown exported')
+    } catch {
+      showToast('Markdown export failed', 'error')
+    } finally {
+      setLoading(null)
+    }
+  }
 
   const handleExportJSON = async () => {
     setLoading('json')
@@ -74,6 +95,21 @@ export default function BackupPage() {
           </div>
           <Button fullWidth onClick={handleExportJSON} disabled={loading === 'json'}>
             <Download size={16} /> {loading === 'json' ? 'Exporting…' : 'Export JSON Backup'}
+          </Button>
+        </Card>
+
+        <Card className="p-4 space-y-3">
+          <div className="flex items-start gap-3">
+            <FileDown size={20} className="text-indigo-400 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="font-sans font-semibold text-ink">Export as Markdown</p>
+              <p className="text-xs font-sans text-ink-300 mt-0.5">
+                Download all diary entries as a single .md file with clear separators. Great for use with Obsidian, Notion, or other tools.
+              </p>
+            </div>
+          </div>
+          <Button fullWidth onClick={handleMarkdownExport} disabled={loading === 'markdown'}>
+            <FileDown size={16} /> {loading === 'markdown' ? 'Exporting…' : 'Export Markdown'}
           </Button>
         </Card>
 
