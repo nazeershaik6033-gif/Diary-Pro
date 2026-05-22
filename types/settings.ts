@@ -7,11 +7,17 @@ export interface NotificationSettings {
   workoutTime: string
 }
 
+export type AppTheme = 'warm' | 'dark' | 'ocean' | 'forest' | 'midnight'
+export type FontStyle = 'sans' | 'serif' | 'mono'
+export type FontSize = 'sm' | 'md' | 'lg' | 'xl'
+
 export interface AppSettings {
   id: 'singleton'
   pinHash?: string // SHA-256 hex of PIN
   pinEnabled: boolean
-  theme: 'warm'
+  theme: AppTheme
+  fontStyle: FontStyle
+  fontSize: FontSize
   notifications: NotificationSettings
   diaryGratitudePrompts: [string, string, string]
   lastBackupAt?: number
@@ -23,6 +29,8 @@ export const DEFAULT_SETTINGS: AppSettings = {
   id: 'singleton',
   pinEnabled: false,
   theme: 'warm',
+  fontStyle: 'sans',
+  fontSize: 'md',
   notifications: {
     diaryPromptEnabled: false,
     diaryPromptTime: '21:00',

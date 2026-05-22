@@ -2,25 +2,145 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Theme color tokens (RGB triplets for Tailwind opacity support) ── */
 :root {
   --sat: env(safe-area-inset-top);
   --sar: env(safe-area-inset-right);
   --sab: env(safe-area-inset-bottom);
   --sal: env(safe-area-inset-left);
+
+  /* Warm (default) */
+  --paper:      245 240 232;
+  --paper-50:   253 249 243;
+  --paper-100:  249 241 228;
+  --paper-300:  237 227 208;
+  --paper-400:  221 208 184;
+  --ink:        44 24 16;
+  --ink-300:    154 112 96;
+  --ink-400:    107 61 48;
+  --amber-warm: 196 147 63;
+  --amber-light:212 168 79;
+  --amber-dark: 163 116 48;
+  --amber-faint:247 234 216;
+  --sage:       122 158 126;
+  --sage-light: 165 196 169;
+  --sage-dark:  82 117 86;
+  --blush:      196 133 122;
+  --blush-light:212 160 153;
+  --blush-dark: 154 95 86;
+
+  /* Font system */
+  --font-body: var(--font-lato), Lato, system-ui, sans-serif;
+  --font-size-base: 16px;
 }
+
+[data-theme="dark"] {
+  --paper:      26 26 46;
+  --paper-50:   13 13 26;
+  --paper-100:  20 20 38;
+  --paper-300:  35 35 60;
+  --paper-400:  45 45 77;
+  --ink:        230 220 210;
+  --ink-300:    160 140 128;
+  --ink-400:    190 170 158;
+  --amber-warm: 230 168 74;
+  --amber-light:245 185 95;
+  --amber-dark: 196 135 42;
+  --amber-faint:50 40 26;
+  --sage:       107 158 112;
+  --sage-light: 140 190 145;
+  --sage-dark:  76 118 80;
+  --blush:      196 122 112;
+  --blush-light:220 155 145;
+  --blush-dark: 155 85 76;
+}
+
+[data-theme="ocean"] {
+  --paper:      238 244 248;
+  --paper-50:   248 252 255;
+  --paper-100:  244 249 253;
+  --paper-300:  212 228 238;
+  --paper-400:  184 208 224;
+  --ink:        26 58 74;
+  --ink-300:    74 122 154;
+  --ink-400:    50 90 118;
+  --amber-warm: 42 142 184;
+  --amber-light:74 168 210;
+  --amber-dark: 28 106 140;
+  --amber-faint:214 236 248;
+  --sage:       58 158 142;
+  --sage-light: 90 190 174;
+  --sage-dark:  38 118 106;
+  --blush:      122 158 212;
+  --blush-light:155 188 230;
+  --blush-dark: 88 120 174;
+}
+
+[data-theme="forest"] {
+  --paper:      238 242 236;
+  --paper-50:   248 252 248;
+  --paper-100:  244 248 242;
+  --paper-300:  212 224 208;
+  --paper-400:  184 206 184;
+  --ink:        26 46 26;
+  --ink-300:    74 122 74;
+  --ink-400:    50 90 50;
+  --amber-warm: 74 138 42;
+  --amber-light:110 166 74;
+  --amber-dark: 54 104 14;
+  --amber-faint:214 234 210;
+  --sage:       90 158 90;
+  --sage-light: 122 190 122;
+  --sage-dark:  60 118 60;
+  --blush:      158 122 90;
+  --blush-light:188 155 122;
+  --blush-dark: 120 88 60;
+}
+
+[data-theme="midnight"] {
+  --paper:      13 17 23;
+  --paper-50:   5 8 12;
+  --paper-100:  10 13 18;
+  --paper-300:  22 27 34;
+  --paper-400:  33 38 45;
+  --ink:        230 236 241;
+  --ink-300:    139 148 158;
+  --ink-400:    180 190 200;
+  --amber-warm: 167 139 250;
+  --amber-light:196 176 255;
+  --amber-dark: 124 98 220;
+  --amber-faint:30 24 40;
+  --sage:       86 211 100;
+  --sage-light: 120 230 134;
+  --sage-dark:  56 168 70;
+  --blush:      250 121 112;
+  --blush-light:255 155 148;
+  --blush-dark: 210 80 72;
+}
+
+/* Font style overrides */
+[data-font="serif"] { --font-body: var(--font-playfair), 'Playfair Display', Georgia, serif; }
+[data-font="mono"]  { --font-body: 'SF Mono', Monaco, 'Fira Code', Consolas, monospace; }
+
+/* Font size */
+html[data-fontsize="sm"] { font-size: 14px; }
+html[data-fontsize="md"] { font-size: 16px; }
+html[data-fontsize="lg"] { font-size: 18px; }
+html[data-fontsize="xl"] { font-size: 20px; }
 
 @layer base {
   html {
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
+    font-size: 16px;
   }
 
   body {
-    background-color: #f5f0e8;
-    color: #2C1810;
+    background-color: rgb(var(--paper));
+    color: rgb(var(--ink));
     overscroll-behavior: none;
     -webkit-overflow-scrolling: touch;
-    font-family: var(--font-lato), Lato, system-ui, sans-serif;
+    font-family: var(--font-body);
   }
 
   * {
@@ -28,7 +148,7 @@
   }
 
   input, textarea, select {
-    font-size: 16px !important;
+    font-size: max(1rem, 16px) !important;
   }
 }
 
@@ -46,9 +166,6 @@
   .top-safe-4 {
     top: calc(1rem + env(safe-area-inset-top));
   }
-  .bg-paper {
-    background-color: #f5f0e8;
-  }
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
@@ -62,16 +179,16 @@
 .ProseMirror {
   outline: none;
   min-height: 120px;
-  font-size: 16px;
+  font-size: 1rem;
   line-height: 1.7;
-  color: #2C1810;
-  font-family: var(--font-lato), Lato, system-ui, sans-serif;
+  color: rgb(var(--ink));
+  font-family: var(--font-body);
 }
 
 .ProseMirror p.is-editor-empty:first-child::before {
   content: attr(data-placeholder);
   float: left;
-  color: #c4a99f;
+  color: rgb(var(--ink-300));
   pointer-events: none;
   height: 0;
 }
@@ -86,13 +203,8 @@
   padding-left: 1.25rem;
 }
 
-.ProseMirror strong {
-  font-weight: 700;
-}
-
-.ProseMirror em {
-  font-style: italic;
-}
+.ProseMirror strong { font-weight: 700; }
+.ProseMirror em { font-style: italic; }
 
 /* Smooth page transitions */
 .page-enter {

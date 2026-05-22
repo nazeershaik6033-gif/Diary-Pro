@@ -29,6 +29,8 @@ export interface ExportData {
   goals: unknown[]
   goalMilestones: unknown[]
   dailyAffirmations: unknown[]
+  events: unknown[]
+  decisions: unknown[]
 }
 
 export async function exportAll(): Promise<void> {
@@ -61,6 +63,8 @@ export async function exportAll(): Promise<void> {
     goals: await db.goals.toArray(),
     goalMilestones: await db.goalMilestones.toArray(),
     dailyAffirmations: await db.dailyAffirmations.toArray(),
+    events: await db.events.toArray(),
+    decisions: await db.decisions.toArray(),
   }
 
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
@@ -120,5 +124,7 @@ export async function importAll(file: File): Promise<void> {
     if (data.goals) { await db.goals.clear(); await db.goals.bulkAdd(data.goals as never[]) }
     if (data.goalMilestones) { await db.goalMilestones.clear(); await db.goalMilestones.bulkAdd(data.goalMilestones as never[]) }
     if (data.dailyAffirmations) { await db.dailyAffirmations.clear(); await db.dailyAffirmations.bulkAdd(data.dailyAffirmations as never[]) }
+    if (data.events) { await db.events.clear(); await db.events.bulkAdd(data.events as never[]) }
+    if (data.decisions) { await db.decisions.clear(); await db.decisions.bulkAdd(data.decisions as never[]) }
   })
 }

@@ -2,16 +2,17 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '@/lib/db'
 import { Card } from '@/components/ui/Card'
-import { ChevronRight, Lock, Bell, Download, Info, LogOut } from 'lucide-react'
+import { ChevronRight, Lock, Bell, Download, Palette, LogOut } from 'lucide-react'
 import Link from 'next/link'
 import { useAuth } from '@/app/contexts/AuthContext'
 import { formatDisplay, toDateString } from '@/lib/utils/date'
 import { motion } from 'framer-motion'
 
 const SETTINGS_LINKS = [
-  { href: '/settings/security', label: 'Security & PIN', icon: Lock, desc: 'Set up PIN lock' },
-  { href: '/settings/notifications', label: 'Notifications', icon: Bell, desc: 'Reminders and prompts' },
-  { href: '/settings/backup', label: 'Backup & Export', icon: Download, desc: 'JSON and PDF export' },
+  { href: '/settings/appearance',    label: 'Appearance',      icon: Palette,  desc: 'Theme, font style and size' },
+  { href: '/settings/security',      label: 'Security & PIN',  icon: Lock,     desc: 'Set up PIN lock' },
+  { href: '/settings/notifications', label: 'Notifications',   icon: Bell,     desc: 'Reminders and prompts' },
+  { href: '/settings/backup',        label: 'Backup & Export', icon: Download, desc: 'JSON and PDF export' },
 ]
 
 export default function SettingsPage() {
@@ -40,7 +41,7 @@ export default function SettingsPage() {
                   <p className="font-sans font-medium text-ink">{link.label}</p>
                   <p className="text-xs font-sans text-ink-300">{link.desc}</p>
                 </div>
-                <ChevronRight size={16} className="text-ink-200" />
+                <ChevronRight size={16} className="text-ink-300" />
               </Card>
             </Link>
           </motion.div>
@@ -58,9 +59,9 @@ export default function SettingsPage() {
       )}
 
       <div className="mt-8 text-center">
-        <p className="text-xs font-sans text-ink-200">Diary Pro · v0.1.0</p>
-        <p className="text-xs font-sans text-ink-200 mt-1">All data stored locally on your device</p>
-        <p className="text-xs font-sans text-ink-200 mt-0.5">Last backup: {lastBackup}</p>
+        <p className="text-xs font-sans text-ink-300">Diary Pro · v0.1.0</p>
+        <p className="text-xs font-sans text-ink-300 mt-1">All data stored locally on your device</p>
+        <p className="text-xs font-sans text-ink-300 mt-0.5">Last backup: {lastBackup}</p>
       </div>
     </div>
   )
