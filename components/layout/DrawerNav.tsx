@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation'
 import {
   BookOpen, Briefcase, ListChecks, Dumbbell, Settings, X, Flame,
   CheckSquare, Heart, Target, CalendarDays, Scale, PartyPopper,
-  RotateCcw, Images
+  RotateCcw, Images, Search
 } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import { useStreak } from '@/lib/hooks/useStreak'
@@ -54,18 +54,37 @@ export function DrawerNav({ open, onClose }: DrawerNavProps) {
             style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}
           >
             <div className="flex items-center justify-between px-6 py-5 border-b border-paper-400">
-              <div>
-                <h2 className="text-xl font-serif font-bold text-ink">Diary Pro</h2>
-                {streak > 0 && (
-                  <div className="flex items-center gap-1 mt-1">
-                    <Flame size={14} className="text-orange-400" />
-                    <span className="text-xs font-sans text-ink-300">{streak} day streak</span>
-                  </div>
-                )}
+              {/* Logo + brand */}
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-10 h-10 flex-shrink-0 rounded-xl overflow-hidden bg-paper-300 flex items-center justify-center">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src="/logo.svg" alt="" className="w-9 h-9 object-contain" />
+                </div>
+                <div className="min-w-0">
+                  <h2 className="text-lg font-serif font-bold text-ink leading-none">My Journal</h2>
+                  {streak > 0 && (
+                    <div className="flex items-center gap-1 mt-0.5">
+                      <Flame size={12} className="text-orange-400" />
+                      <span className="text-xs font-sans text-ink-300">{streak} day streak</span>
+                    </div>
+                  )}
+                </div>
               </div>
-              <button onClick={onClose} className="p-2 rounded-xl hover:bg-paper-300 transition-colors">
-                <X size={18} className="text-ink-300" />
-              </button>
+
+              {/* Right side: search + close */}
+              <div className="flex items-center gap-1">
+                <Link
+                  href="/diary/search"
+                  onClick={onClose}
+                  className="p-2 rounded-xl hover:bg-paper-300 transition-colors"
+                  aria-label="Search"
+                >
+                  <Search size={18} className="text-ink-300" />
+                </Link>
+                <button onClick={onClose} className="p-2 rounded-xl hover:bg-paper-300 transition-colors">
+                  <X size={18} className="text-ink-300" />
+                </button>
+              </div>
             </div>
 
             <div className="flex-1 overflow-y-auto py-4">

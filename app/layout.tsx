@@ -21,13 +21,13 @@ const lato = Lato({
 })
 
 export const metadata: Metadata = {
-  title: 'Diary Pro',
+  title: 'My Journal',
   description: 'Your personal premium diary — journal, GTD, gym, and work log in one beautiful app.',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'Diary Pro',
+    title: 'My Journal',
     startupImage: [
       { url: '/splash/splash-1170x2532.png', media: '(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)' },
       { url: '/splash/splash-1125x2436.png', media: '(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)' },
@@ -35,8 +35,9 @@ export const metadata: Metadata = {
     ],
   },
   icons: {
-    apple: '/icons/apple-touch-icon.png',
+    apple: '/icons/icon-192x192.png',
     icon: [
+      { url: '/logo.svg', type: 'image/svg+xml' },
       { url: '/icons/icon-192x192.png', sizes: '192x192' },
       { url: '/icons/icon-512x512.png', sizes: '512x512' },
     ],

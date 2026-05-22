@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 210" fill="none">
+  <!-- Steam wisps -->
+  <path d="M80 52 C76 44 80 34 76 26 C72 18 76 10 72 4"
+        stroke="#2D1F12" stroke-width="5" stroke-linecap="round" fill="none"/>
+  <path d="M100 48 C96 38 100 28 96 20 C92 12 96 4 92 0"
+        stroke="#2D1F12" stroke-width="5" stroke-linecap="round" fill="none"/>
+  <path d="M120 52 C116 44 120 34 116 26 C112 18 116 10 112 4"
+        stroke="#2D1F12" stroke-width="5" stroke-linecap="round" fill="none"/>
+
+  <!-- Cup body -->
+  <path d="M55 68 L60 140 L140 140 L145 68 Z" fill="#2D1F12"/>
+
+  <!-- Cup rim top ellipse -->
+  <ellipse cx="100" cy="68" rx="45" ry="10" fill="#2D1F12"/>
+  <!-- Coffee surface (amber) -->
+  <ellipse cx="100" cy="68" rx="40" ry="8" fill="#B5651D"/>
+  <!-- Coffee surface highlight -->
+  <ellipse cx="90" cy="66" rx="15" ry="3" fill="#D4803A" opacity="0.7"/>
+
+  <!-- Handle -->
+  <path d="M55 80 Q28 80 28 100 Q28 120 55 120"
+        stroke="#2D1F12" stroke-width="13" stroke-linecap="round" fill="none"/>
+
+  <!-- Coffee bean on cup face -->
+  <ellipse cx="120" cy="108" rx="18" ry="13" fill="#B5651D" transform="rotate(-20 120 108)"/>
+  <path d="M112 102 Q120 108 128 114" stroke="#7A3B10" stroke-width="2.5" stroke-linecap="round"/>
+
+  <!-- Open book -->
+  <!-- Left page -->
+  <path d="M8 155 L95 142 L95 198 L8 205 Z" fill="#2D1F12"/>
+  <!-- Right page -->
+  <path d="M105 142 L192 155 L192 205 L105 198 Z" fill="#2D1F12"/>
+  <!-- Spine -->
+  <rect x="95" y="142" width="10" height="56" fill="#1A0D05"/>
+
+  <!-- Book page lines left (amber + dark) -->
+  <line x1="14" y1="193" x2="94" y2="182" stroke="#B5651D" stroke-width="3"/>
+  <line x1="14" y1="198" x2="94" y2="187" stroke="#1A0D05" stroke-width="2"/>
+
+  <!-- Book page lines right -->
+  <line x1="106" y1="182" x2="186" y2="193" stroke="#B5651D" stroke-width="3"/>
+  <line x1="106" y1="187" x2="186" y2="198" stroke="#1A0D05" stroke-width="2"/>
+</svg>
