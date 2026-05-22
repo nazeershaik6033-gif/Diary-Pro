@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '@/lib/db'
@@ -14,6 +14,8 @@ import { motion } from 'framer-motion'
 import { Card } from '@/components/ui/Card'
 import { STICKER_MAP } from '@/types/stickers'
 import type { DiaryEntry } from '@/types'
+import { useHeader } from '@/app/contexts/HeaderContext'
+import { cn } from '@/lib/utils/cn'
 
 // ---------------------------------------------------------------------------
 // Color tone accent map
@@ -45,7 +47,7 @@ function DiaryEntryCard({ entry }: { entry: DiaryEntry }) {
   const borderClass = entry.colorTone ? TONE_BORDER[entry.colorTone] : ''
 
   return (
-    <Link href={`/diary/${entry.date}`}>
+    <Link href={`/diary/entry?date=${entry.date}`}>
       <Card className={`p-4 hover:shadow-warm-md transition-shadow active:scale-[0.99] ${borderClass ? 'border-l-4 ' + borderClass : ''}`}>
         <div className="flex items-start justify-between mb-1">
           <div className="flex-1 min-w-0">
@@ -90,7 +92,33 @@ function DiaryEntryCard({ entry }: { entry: DiaryEntry }) {
 export default function DiaryPage() {
   const router = useRouter()
   const [showCalendar, setShowCalendar] = useState(false)
+  const { setRightSlot } = useHeader()
   const today = toDateString()
+
+  // Inject calendar + search icons into the global top bar
+  useEffect(() => {
+    setRightSlot(
+      <div className="flex items-center gap-1">
+        <button
+          onClick={() => setShowCalendar(v => !v)}
+          className={cn(
+            'w-9 h-9 flex items-center justify-center rounded-xl transition-colors',
+            showCalendar ? 'bg-amber-warm/15 text-amber-warm' : 'hover:bg-paper-300 text-ink-300'
+          )}
+          aria-label="Toggle calendar"
+        >
+          <Calendar size={18} />
+        </button>
+        <Link href="/diary/search">
+          <button className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-paper-300 text-ink-300 transition-colors" aria-label="Search entries">
+            <Search size={18} />
+          </button>
+        </Link>
+      </div>
+    )
+    return () => setRightSlot(null)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [setRightSlot, showCalendar])
 
   const allEntries = useLiveQuery(
     () => db.diaryEntries
@@ -114,91 +142,69 @@ export default function DiaryPage() {
   const regular = allEntries?.filter(e => !e.pinned) ?? []
 
   return (
-    <div className="pb-4">
-      <div className="px-4 pt-2 pb-4 flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-serif font-bold text-ink">My Diary</h2>
-          <p className="text-sm font-sans text-ink-300">{formatDisplay(today)}</p>
-        </div>
-        <div className="flex gap-2">
-          <button
-            onClick={() => setShowCalendar(v => !v)}
-            className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-paper-300 transition-colors"
-          >
-            <Calendar size={18} className="text-ink-300" />
-          </button>
-          <Link href="/diary/search">
-            <button className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-paper-300 transition-colors">
-              <Search size={18} className="text-ink-300" />
-            </button>
-          </Link>
-        </div>
-      </div>
+    <div className="pb-4 px-4 pt-3">
+      <StreakBanner />
 
-      <div className="px-4">
-        <StreakBanner />
+      {showCalendar && (
+        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-4">
+          <CalendarView />
+        </motion.div>
+      )}
 
-        {showCalendar && (
-          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-4">
-            <CalendarView />
-          </motion.div>
-        )}
-
-        {!todayEntry && (
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-            className="bg-amber-faint border border-amber-warm/30 rounded-2xl p-4 mb-4 flex items-center justify-between">
-            <div>
-              <p className="font-serif font-semibold text-ink text-base">Write today's entry</p>
-              <p className="text-xs font-sans text-ink-300 mt-0.5">Capture your thoughts for {formatDisplay(today)}</p>
-            </div>
-            <Button size="sm" onClick={() => router.push('/diary/new')}>
-              <Plus size={14} /> Write
-            </Button>
-          </motion.div>
-        )}
-
-        {allEntries === undefined ? (
-          <div className="space-y-3">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="h-24 rounded-2xl bg-paper-300 animate-pulse" />
-            ))}
+      {!todayEntry && (
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+          className="bg-amber-faint border border-amber-warm/30 rounded-2xl p-4 mb-4 flex items-center justify-between">
+          <div>
+            <p className="font-serif font-semibold text-ink text-base">Write today's entry</p>
+            <p className="text-xs font-sans text-ink-300 mt-0.5">Capture your thoughts for {formatDisplay(today)}</p>
           </div>
-        ) : allEntries.length === 0 ? (
-          <EmptyState
-            icon={BookOpen}
-            title="No entries yet"
-            description="Start your journaling journey today."
-            action={<Button onClick={() => router.push('/diary/new')}><Plus size={16} /> Write First Entry</Button>}
-          />
-        ) : (
-          <>
-            {pinned.length > 0 && (
-              <div className="mb-4">
-                <p className="text-xs font-sans font-semibold text-ink-300 uppercase tracking-wider mb-2 flex items-center gap-1">
-                  <span>📌</span> Pinned
-                </p>
-                <div className="space-y-3">
-                  {pinned.map((entry, i) => (
-                    <motion.div key={entry.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
-                      <DiaryEntryCard entry={entry} />
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
-            )}
+          <Button size="sm" onClick={() => router.push('/diary/new')}>
+            <Plus size={14} /> Write
+          </Button>
+        </motion.div>
+      )}
 
-            {regular.length > 0 && (
+      {allEntries === undefined ? (
+        <div className="space-y-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="h-24 rounded-2xl bg-paper-300 animate-pulse" />
+          ))}
+        </div>
+      ) : allEntries.length === 0 ? (
+        <EmptyState
+          icon={BookOpen}
+          title="No entries yet"
+          description="Start your journaling journey today."
+          action={<Button onClick={() => router.push('/diary/new')}><Plus size={16} /> Write First Entry</Button>}
+        />
+      ) : (
+        <>
+          {pinned.length > 0 && (
+            <div className="mb-4">
+              <p className="text-xs font-sans font-semibold text-ink-300 uppercase tracking-wider mb-2 flex items-center gap-1">
+                <span>📌</span> Pinned
+              </p>
               <div className="space-y-3">
-                {regular.map((entry, i) => (
+                {pinned.map((entry, i) => (
                   <motion.div key={entry.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
                     <DiaryEntryCard entry={entry} />
                   </motion.div>
                 ))}
               </div>
-            )}
-          </>
-        )}
-      </div>
+            </div>
+          )}
+
+          {regular.length > 0 && (
+            <div className="space-y-3">
+              {regular.map((entry, i) => (
+                <motion.div key={entry.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
+                  <DiaryEntryCard entry={entry} />
+                </motion.div>
+              ))}
+            </div>
+          )}
+        </>
+      )}
     </div>
   )
 }
