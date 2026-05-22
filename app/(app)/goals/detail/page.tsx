@@ -1,15 +1,18 @@
 'use client'
-import { use, useState } from 'react'
+import { Suspense } from 'react'
+import { useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '@/lib/db'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { MilestoneList } from '@/components/goals/MilestoneList'
 import { GOAL_TIER_CONFIG } from '@/types'
 import { Spinner } from '@/components/ui/Spinner'
-import { Sparkles, Image as ImageIcon } from 'lucide-react'
+import { Sparkles } from 'lucide-react'
 
-export default function GoalDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params)
+function GoalDetailContent() {
+  const searchParams = useSearchParams()
+  const id = searchParams.get('id') ?? ''
   const goalId = Number(id)
   const [photoIndex, setPhotoIndex] = useState(0)
 
@@ -22,7 +25,7 @@ export default function GoalDetailPage({ params }: { params: Promise<{ id: strin
 
   return (
     <div>
-      <PageHeader title={goal.title} />
+      <PageHeader title={goal.title} showBack />
 
       <div className="px-4 space-y-5 pb-8">
         {goal.photos.length > 0 && (
@@ -62,4 +65,8 @@ export default function GoalDetailPage({ params }: { params: Promise<{ id: strin
       </div>
     </div>
   )
+}
+
+export default function GoalDetailPage() {
+  return <Suspense><GoalDetailContent /></Suspense>
 }

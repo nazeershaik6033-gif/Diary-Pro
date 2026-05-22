@@ -28,7 +28,7 @@ export function TemplateCard({ template, onStart }: TemplateCardProps) {
           Start
         </button>
       ) : (
-        <Link href={`/gym/templates/${template.id}`}>
+        <Link href={`/gym/templates/detail?id=${template.id}`}>
           <ChevronRight size={16} className="text-ink-200" />
         </Link>
       )}

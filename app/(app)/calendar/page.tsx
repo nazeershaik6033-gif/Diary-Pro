@@ -146,7 +146,7 @@ function WeekView({ current, onDaySelect }: { current: Date; onDaySelect: (d: Da
             <div key={ds}>
               <p className="text-xs font-sans text-ink-300 mb-1">{format(day, 'EEEE, MMM d')}</p>
               {dayEvents.map(e => (
-                <Link key={e.id} href={`/events/${e.id}`}>
+                <Link key={e.id} href={`/events/detail?id=${e.id}`}>
                   <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white border border-paper-300 mb-1">
                     <div className={cn('w-2 h-2 rounded-full flex-shrink-0', EVENT_CATEGORY_CONFIG[e.category].dot)} />
                     <span className="text-sm font-sans text-ink truncate">{e.title}</span>
@@ -182,7 +182,7 @@ function DayView({ current }: { current: Date }) {
       {allDayEvents.length > 0 && (
         <div className="space-y-1">
           {allDayEvents.map(e => (
-            <Link key={e.id} href={`/events/${e.id}`}>
+            <Link key={e.id} href={`/events/detail?id=${e.id}`}>
               <div className={cn('px-3 py-2 rounded-xl text-sm font-sans font-medium', EVENT_CATEGORY_CONFIG[e.category].badge)}>
                 {e.title}
               </div>
@@ -192,7 +192,7 @@ function DayView({ current }: { current: Date }) {
       )}
 
       {diaryEntry && (
-        <Link href={`/diary/${ds}`}>
+        <Link href={`/diary/entry?date=${ds}`}>
           <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-amber-faint border border-amber-warm/30">
             <BookOpen size={16} className="text-amber-warm flex-shrink-0" />
             <div>
@@ -223,7 +223,7 @@ function DayView({ current }: { current: Date }) {
         <div className="space-y-1.5">
           <p className="text-xs font-sans font-semibold text-ink-300 uppercase tracking-wider">Schedule</p>
           {timedEvents.map(e => (
-            <Link key={e.id} href={`/events/${e.id}`}>
+            <Link key={e.id} href={`/events/detail?id=${e.id}`}>
               <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white border border-paper-300">
                 <div className={cn('w-2 h-full min-h-[20px] rounded-full flex-shrink-0', EVENT_CATEGORY_CONFIG[e.category].dot)} />
                 <div className="flex-1">

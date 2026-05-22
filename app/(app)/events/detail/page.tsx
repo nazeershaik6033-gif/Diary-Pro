@@ -1,5 +1,7 @@
 'use client'
-import { use } from 'react'
+import { Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
+
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useRouter } from 'next/navigation'
 import { db } from '@/lib/db'
@@ -9,8 +11,9 @@ import { MapPin, Clock, RotateCcw, Users, Trash2 } from 'lucide-react'
 import { EVENT_CATEGORY_CONFIG, RSVP_CONFIG } from '@/types/events'
 import { cn } from '@/lib/utils/cn'
 
-export default function EventDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params)
+function EventDetailContent() {
+  const searchParams = useSearchParams()
+  const id = searchParams.get('id') ?? ''
   const router = useRouter()
   const event = useLiveQuery(() => db.events.get(Number(id)), [id])
 
@@ -79,4 +82,8 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
       </div>
     </div>
   )
+}
+
+export default function EventDetailPage() {
+  return <Suspense><EventDetailContent /></Suspense>
 }

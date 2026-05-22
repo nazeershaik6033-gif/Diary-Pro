@@ -1,5 +1,7 @@
 'use client'
-import { use, useState } from 'react'
+import { Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
+import { useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useRouter } from 'next/navigation'
 import { db } from '@/lib/db'
@@ -261,8 +263,9 @@ function MatrixView({ decision }: { decision: Decision }) {
 // ── Main page ─────────────────────────────────────────────────────
 const STATUS_OPTIONS = ['exploring', 'decided', 'reviewing', 'archived'] as const
 
-export default function DecisionDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params)
+function DecisionDetailContent() {
+  const searchParams = useSearchParams()
+  const id = searchParams.get('id') ?? ''
   const router = useRouter()
   const decision = useLiveQuery(() => db.decisions.get(Number(id)), [id])
 
@@ -325,4 +328,8 @@ export default function DecisionDetailPage({ params }: { params: Promise<{ id: s
       </div>
     </div>
   )
+}
+
+export default function DecisionDetailPage() {
+  return <Suspense><DecisionDetailContent /></Suspense>
 }

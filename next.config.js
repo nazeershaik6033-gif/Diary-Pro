@@ -38,27 +38,25 @@ const withPWA = require('next-pwa')({
       },
     },
     {
-      urlPattern: /\/_next\/data\/.*/i,
-      handler: 'NetworkFirst',
-      options: {
-        cacheName: 'next-data',
-        expiration: { maxEntries: 32, maxAgeSeconds: 24 * 60 * 60 },
-      },
-    },
-    {
       urlPattern: /^\/.*$/i,
-      handler: 'NetworkFirst',
+      handler: 'StaleWhileRevalidate',
       options: {
         cacheName: 'pages',
-        expiration: { maxEntries: 32, maxAgeSeconds: 24 * 60 * 60 },
-        networkTimeoutSeconds: 10,
+        expiration: { maxEntries: 64, maxAgeSeconds: 24 * 60 * 60 },
       },
     },
   ],
 });
 
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? ''
+
 const nextConfig = {
+  output: 'export',
+  trailingSlash: true,
   reactStrictMode: true,
+  images: { unoptimized: true },
+  basePath,
+  assetPrefix: basePath,
 };
 
 module.exports = withPWA(nextConfig);

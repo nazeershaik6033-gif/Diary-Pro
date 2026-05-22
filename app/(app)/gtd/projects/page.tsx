@@ -44,7 +44,7 @@ export default function ProjectsPage() {
         ) : (
           projects.map((p, i) => (
             <motion.div key={p.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
-              <Link href={`/gtd/projects/${p.id}`}>
+              <Link href={`/gtd/projects/detail?id=${p.id}`}>
                 <Card className="p-4 flex items-center gap-3 hover:shadow-warm-md transition-shadow">
                   <div className="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0">
                     <FolderOpen size={16} className="text-blue-500" />
