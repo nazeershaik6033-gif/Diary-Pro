@@ -78,7 +78,7 @@ export default function NewDiaryEntryPage() {
       }
 
       showToast('Entry saved')
-      router.push(`/diary/${toDateString()}`)
+      router.push(`/diary/entry?date=${toDateString()}`)
     } catch {
       showToast('Failed to save', 'error')
     } finally {
