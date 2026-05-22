@@ -1,6 +1,6 @@
 {
-  "name": "Diary Pro",
-  "short_name": "Diary Pro",
+  "name": "My Journal",
+  "short_name": "My Journal",
   "description": "Your personal premium diary — journal, GTD, gym, and work log.",
   "start_url": "/",
   "scope": "/",
@@ -9,6 +9,12 @@
   "background_color": "#f5f0e8",
   "theme_color": "#C4933F",
   "icons": [
+    {
+      "src": "/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
     {
       "src": "/icons/icon-72x72.png",
       "sizes": "72x72",
