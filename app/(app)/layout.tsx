@@ -32,7 +32,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
         className="flex items-center gap-2 px-3 sticky top-0 bg-paper z-10 border-b border-paper-300"
         style={{ paddingTop: 'env(safe-area-inset-top)', height: 'calc(56px + env(safe-area-inset-top))' }}
       >
-        {/* Hamburger */}
+        {/* Hamburger — left */}
         <button
           onClick={() => setDrawerOpen(true)}
           className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-paper-300 transition-colors flex-shrink-0"
@@ -41,8 +41,11 @@ function AppShell({ children }: { children: React.ReactNode }) {
           <Menu size={22} className="text-ink" />
         </button>
 
-        {/* Logo + name — both link to /diary */}
-        <Link href="/diary" className="flex items-center gap-2 flex-shrink-0">
+        {/* Logo + name — centered absolutely so it's always mid-header */}
+        <Link
+          href="/diary"
+          className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2"
+        >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={`${basePath}/logo.svg`}
