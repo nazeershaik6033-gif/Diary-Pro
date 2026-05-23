@@ -59,8 +59,8 @@ export function WeeklyReviewWizard() {
   const [priorities, setPriorities] = useState<[string, string, string]>(['', '', ''])
   const [saving, setSaving] = useState(false)
 
-  const inboxCount = useLiveQuery(() => db.gtdInbox.where('processed').equals(0).count(), [])
-  const actionsCount = useLiveQuery(() => db.gtdNextActions.where('completed').equals(0).count(), [])
+  const inboxCount = useLiveQuery(() => db.gtdInbox.filter(i => !i.processed).count(), [])
+  const actionsCount = useLiveQuery(() => db.gtdNextActions.filter(a => !a.completed).count(), [])
 
   const current = STEPS[step]
 

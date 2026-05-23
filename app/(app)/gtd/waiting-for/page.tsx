@@ -16,7 +16,7 @@ export default function WaitingForPage() {
   const [title, setTitle] = useState('')
   const [person, setPerson] = useState('')
 
-  const items = useLiveQuery(() => db.gtdWaitingFor.where('completed').equals(0).toArray(), [])
+  const items = useLiveQuery(() => db.gtdWaitingFor.filter(w => !w.completed).toArray(), [])
 
   const handleAdd = async () => {
     if (!title.trim() || !person.trim()) return
