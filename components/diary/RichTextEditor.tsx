@@ -16,7 +16,7 @@ import {
   Bold, Italic, Underline as UnderlineIcon, Strikethrough, Code,
   List, ListOrdered, AlignLeft, AlignCenter, AlignRight,
   Heading1, Heading2, Heading3, Table as TableIcon,
-  Indent, Outdent, Minus, RotateCcw, RotateCw,
+  Indent, Outdent, RotateCcw, RotateCw,
   Type, ChevronDown,
 } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
@@ -277,12 +277,7 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
         >
           <TableIcon size={13} />
         </Btn>
-        <Divider />
 
-        {/* Horizontal rule */}
-        <Btn onClick={() => editor.chain().focus().setHorizontalRule().run()} title="Horizontal rule" active={false}>
-          <Minus size={13} />
-        </Btn>
       </div>
 
       {/* Editor area */}
