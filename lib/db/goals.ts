@@ -37,7 +37,7 @@ export async function toggleAffirmation(id: number, active: boolean): Promise<vo
 }
 
 export async function getRandomAffirmation(): Promise<DailyAffirmation | undefined> {
-  const all = await db.dailyAffirmations.where('active').equals(1).toArray()
+  const all = await db.dailyAffirmations.filter(a => !!a.active).toArray()
   if (all.length === 0) return undefined
   return all[Math.floor(Math.random() * all.length)]
 }

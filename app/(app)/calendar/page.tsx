@@ -43,7 +43,7 @@ function useCalendarData(startDate: Date, endDate: Date) {
     [start, end]
   )
 
-  const habits = useLiveQuery(() => db.habits.where('active').equals(1).toArray())
+  const habits = useLiveQuery(() => db.habits.filter(h => !!h.active).toArray())
 
   return { diaryDates: diaryDates ?? [], events: events ?? [], workoutDates: workoutDates ?? [], habitLogs: habitLogs ?? [], habits: habits ?? [] }
 }
@@ -168,7 +168,7 @@ function DayView({ current }: { current: Date }) {
   const { events, workoutDates } = useCalendarData(current, current)
 
   const diaryEntry = useLiveQuery(() => db.diaryEntries.where('date').equals(ds).first(), [ds])
-  const habits = useLiveQuery(() => db.habits.where('active').equals(1).toArray())
+  const habits = useLiveQuery(() => db.habits.filter(h => !!h.active).toArray())
   const habitLogs = useLiveQuery(() => db.habitLogs.where('date').equals(ds).toArray(), [ds])
 
   const dayEvents = events.filter(e => e.startDate === ds)

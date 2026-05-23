@@ -4,9 +4,9 @@ import { db } from '@/lib/db'
 import { Inbox, CheckSquare, Clock, Star } from 'lucide-react'
 
 export function GTDStats() {
-  const inboxCount = useLiveQuery(() => db.gtdInbox.where('processed').equals(0).count(), [])
-  const activeActionsCount = useLiveQuery(() => db.gtdNextActions.where('completed').equals(0).count(), [])
-  const waitingCount = useLiveQuery(() => db.gtdWaitingFor.where('completed').equals(0).count(), [])
+  const inboxCount = useLiveQuery(() => db.gtdInbox.filter(i => !i.processed).count(), [])
+  const activeActionsCount = useLiveQuery(() => db.gtdNextActions.filter(a => !a.completed).count(), [])
+  const waitingCount = useLiveQuery(() => db.gtdWaitingFor.filter(w => !w.completed).count(), [])
   const somedayCount = useLiveQuery(() => db.gtdSomedayMaybe.count(), [])
 
   const stats = [

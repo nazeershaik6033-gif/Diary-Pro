@@ -15,7 +15,7 @@ export function SupplementChecklist() {
   const [name, setName] = useState('')
   const [dosage, setDosage] = useState('')
 
-  const supplements = useLiveQuery(() => db.supplements.where('active').equals(1).toArray(), [])
+  const supplements = useLiveQuery(() => db.supplements.filter(s => !!s.active).toArray(), [])
   const logs = useLiveQuery(() => db.supplementLogs.where('date').equals(today).toArray(), [today])
 
   const isTaken = (suppId: number) => logs?.some(l => l.supplementId === suppId && l.taken) ?? false
