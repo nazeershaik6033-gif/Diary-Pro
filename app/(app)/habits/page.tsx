@@ -24,7 +24,7 @@ export default function HabitsPage() {
   const [targetCount, setTargetCount] = useState('1')
   const [unit, setUnit] = useState('')
 
-  const habits = useLiveQuery(() => db.habits.where('active').equals(1).toArray(), [])
+  const habits = useLiveQuery(() => db.habits.filter(h => !!h.active).toArray(), [])
 
   useEffect(() => { seedHabitsIfEmpty() }, [])
 

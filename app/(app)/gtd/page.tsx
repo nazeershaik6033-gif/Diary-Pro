@@ -4,7 +4,7 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '@/lib/db'
 import { GTDStats } from '@/components/gtd/GTDStats'
 import { Card } from '@/components/ui/Card'
-import { Inbox, CheckSquare, Clock, Star, FolderOpen, CalendarCheck, ChevronRight } from 'lucide-react'
+import { Inbox, CheckSquare, Clock, Star, FolderOpen, CalendarCheck, ChevronRight, ClipboardList } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { getWeekStart, formatDisplay } from '@/lib/utils/date'
 import { parseISO, addDays } from 'date-fns'
@@ -16,6 +16,7 @@ const LINKS = [
   { href: '/gtd/waiting-for', label: 'Waiting For', icon: Clock, desc: 'Delegated items', color: 'text-purple-500', bg: 'bg-purple-50' },
   { href: '/gtd/someday', label: 'Someday Maybe', icon: Star, desc: 'Future ideas', color: 'text-amber-warm', bg: 'bg-amber-faint' },
   { href: '/gtd/weekly-review', label: 'Weekly Review', icon: CalendarCheck, desc: 'Review and reflect', color: 'text-blush', bg: 'bg-blush/10' },
+  { href: '/gtd/logs', label: 'Activity Logs', icon: ClipboardList, desc: 'History of all GTD actions', color: 'text-ink-300', bg: 'bg-paper-300' },
 ]
 
 export default function GTDPage() {

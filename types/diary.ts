@@ -44,6 +44,7 @@ export interface DiaryEntry {
   date: string            // 'YYYY-MM-DD'
   title: string
   gratitude: [string, string, string]
+  learnings?: string      // HTML from Tiptap — "Learnings of the day" tab
   tagIds: number[]
   hasPhotos: boolean
   starred: boolean

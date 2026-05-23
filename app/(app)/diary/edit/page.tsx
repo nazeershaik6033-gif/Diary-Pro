@@ -14,15 +14,21 @@ import { updateDiaryEntry, addEntrySticker, removeEntrySticker, addDiaryAsset } 
 import { db } from '@/lib/db'
 import { useToast } from '@/app/contexts/ToastContext'
 import { Spinner } from '@/components/ui/Spinner'
+import { formatDisplay, formatDay } from '@/lib/utils/date'
+import { cn } from '@/lib/utils/cn'
 
 interface FormValues {
   title: string
   content: string
+  learnings: string
   stickerIds: string[]
   gratitude: [string, string, string]
   tagIds: number[]
   photos: { data: string; mimeType: string }[]
 }
+
+const TABS = ['Write', 'Mood', 'Gratitude', 'Learnings', 'Photos'] as const
+type Tab = typeof TABS[number]
 
 function EditDiaryContent() {
   const searchParams = useSearchParams()
@@ -32,11 +38,13 @@ function EditDiaryContent() {
   const [loading, setLoading] = useState(false)
   const [entryId, setEntryId] = useState<number | null>(null)
   const [ready, setReady] = useState(false)
+  const [activeTab, setActiveTab] = useState<Tab>('Write')
 
   const { control, handleSubmit, setValue, watch, reset } = useForm<FormValues>({
     defaultValues: {
       title: '',
       content: '',
+      learnings: '',
       stickerIds: [],
       gratitude: ['', '', ''],
       tagIds: [],
@@ -48,7 +56,6 @@ function EditDiaryContent() {
   const tagIds = watch('tagIds')
   const stickerIds = watch('stickerIds')
 
-  // Load existing entry on mount
   useEffect(() => {
     if (!date) return
     ;(async () => {
@@ -64,27 +71,25 @@ function EditDiaryContent() {
 
       setEntryId(entry.id)
 
-      // Load content
       let content = ''
       if (entry.latestContentId) {
         const ec = await db.entryContents.get(entry.latestContentId)
         content = ec?.pages?.[0]?.content ?? ''
       }
 
-      // Load stickers
       const stickers = await db.entryStickers.where('entryId').equals(entry.id).toArray()
 
-      // Load photos
       const dbPhotos = await db.diaryPhotos.where('entryId').equals(entry.id).toArray()
-      const assets = await db.diaryAssets.where('entryId').equals(entry.id).toArray()
+      const assets = await db.diaryAssets.where('entryId').equals(entry.id).filter(a => a.type === 'photo').sortBy('order')
       const allPhotos = [
         ...dbPhotos.map(p => ({ data: p.data, mimeType: p.mimeType })),
-        ...assets.filter(a => a.type === 'photo').map(a => ({ data: a.data, mimeType: a.mimeType })),
+        ...assets.map(a => ({ data: a.data, mimeType: a.mimeType })),
       ]
 
       reset({
         title: entry.title ?? '',
         content,
+        learnings: entry.learnings ?? '',
         stickerIds: stickers.map(s => s.stickerId),
         gratitude: (entry.gratitude ?? ['', '', '']) as [string, string, string],
         tagIds: entry.tagIds ?? [],
@@ -104,13 +109,13 @@ function EditDiaryContent() {
       await updateDiaryEntry(entryId, {
         title: data.title,
         content: data.content,
+        learnings: data.learnings || undefined,
         gratitude: data.gratitude,
         tagIds: data.tagIds,
         hasPhotos: data.photos.length > 0,
         updatedAt: now,
       })
 
-      // Sync stickers: remove all then re-add
       const existing = await db.entryStickers.where('entryId').equals(entryId).toArray()
       for (const s of existing) {
         await removeEntrySticker(entryId, s.stickerId)
@@ -119,7 +124,6 @@ function EditDiaryContent() {
         await addEntrySticker(entryId, stickerId)
       }
 
-      // Sync photos: replace assets (simple approach — delete old, add new)
       await db.diaryAssets.where('entryId').equals(entryId).delete()
       await db.diaryPhotos.where('entryId').equals(entryId).delete()
       for (let i = 0; i < data.photos.length; i++) {
@@ -154,7 +158,12 @@ function EditDiaryContent() {
         </Button>
       } />
 
-      <form onSubmit={handleSubmit(onSubmit)} className="px-4 space-y-5 pb-8">
+      <div className="px-4 pb-8 space-y-4">
+        {/* Date display (read-only in edit mode) */}
+        <div className="rounded-xl border border-paper-400 bg-paper-200 px-4 py-2.5">
+          <p className="text-sm font-sans text-ink-300">{formatDisplay(date)} · {formatDay(date)}</p>
+        </div>
+
         <Controller
           name="title"
           control={control}
@@ -163,28 +172,73 @@ function EditDiaryContent() {
           )}
         />
 
-        <div>
-          <p className="text-sm font-medium font-sans text-ink-400 mb-2">How are you feeling?</p>
-          <MoodPicker value={stickerIds} onChange={v => setValue('stickerIds', v)} />
+        {/* Tab bar */}
+        <div className="flex gap-1 border-b border-paper-400 overflow-x-auto">
+          {TABS.map(tab => (
+            <button
+              key={tab}
+              type="button"
+              onClick={() => setActiveTab(tab)}
+              className={cn(
+                'pb-2 px-3 text-sm font-sans font-medium whitespace-nowrap border-b-2 transition-colors flex-shrink-0',
+                activeTab === tab
+                  ? 'border-amber-warm text-amber-warm'
+                  : 'border-transparent text-ink-300 hover:text-ink'
+              )}
+            >
+              {tab}
+              {tab === 'Photos' && photos.length > 0 && (
+                <span className="ml-1 text-xs bg-amber-warm text-white rounded-full px-1.5">{photos.length}</span>
+              )}
+            </button>
+          ))}
         </div>
 
-        <div>
-          <p className="text-sm font-medium font-sans text-ink-400 mb-2">Today's thoughts</p>
+        {activeTab === 'Write' && (
           <Controller
             name="content"
             control={control}
             render={({ field }) => (
-              <RichTextEditor value={field.value} onChange={field.onChange} />
+              <RichTextEditor value={field.value} onChange={field.onChange} placeholder="Write your thoughts…" />
             )}
           />
-        </div>
+        )}
 
-        <GratitudeSection control={control as any} />
+        {activeTab === 'Mood' && (
+          <div>
+            <p className="text-sm font-medium font-sans text-ink-400 mb-3">How are you feeling?</p>
+            <MoodPicker value={stickerIds} onChange={v => setValue('stickerIds', v)} />
+            <div className="mt-4">
+              <TypedTagPicker selectedTagIds={tagIds} onChange={v => setValue('tagIds', v)} />
+            </div>
+          </div>
+        )}
 
-        <TypedTagPicker selectedTagIds={tagIds} onChange={v => setValue('tagIds', v)} />
+        {activeTab === 'Gratitude' && (
+          <GratitudeSection control={control as any} />
+        )}
 
-        <PhotoAttachment photos={photos} onChange={v => setValue('photos', v)} />
-      </form>
+        {activeTab === 'Learnings' && (
+          <div>
+            <p className="text-sm font-medium font-sans text-ink-400 mb-2">What did you learn today?</p>
+            <Controller
+              name="learnings"
+              control={control}
+              render={({ field }) => (
+                <RichTextEditor
+                  value={field.value}
+                  onChange={field.onChange}
+                  placeholder="Key insights, lessons learned, things to remember…"
+                />
+              )}
+            />
+          </div>
+        )}
+
+        {activeTab === 'Photos' && (
+          <PhotoAttachment photos={photos} onChange={v => setValue('photos', v)} />
+        )}
+      </div>
     </div>
   )
 }

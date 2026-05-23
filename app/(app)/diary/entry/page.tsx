@@ -9,12 +9,16 @@ import { PageHeader } from '@/components/layout/PageHeader'
 import { Button } from '@/components/ui/Button'
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
 import { STICKER_MAP } from '@/types/stickers'
-import type { EntrySticker, DiaryPhoto } from '@/types/diary'
+import type { EntrySticker } from '@/types/diary'
 import { formatDisplay, formatDay } from '@/lib/utils/date'
 import { deleteDiaryEntry } from '@/lib/db/diary'
 import { useToast } from '@/app/contexts/ToastContext'
 import { Trash2, Edit } from 'lucide-react'
 import { Spinner } from '@/components/ui/Spinner'
+import { cn } from '@/lib/utils/cn'
+
+const TABS = ['Content', 'Learnings'] as const
+type Tab = typeof TABS[number]
 
 function DiaryEntryContent() {
   const searchParams = useSearchParams()
@@ -22,6 +26,7 @@ function DiaryEntryContent() {
   const router = useRouter()
   const { showToast } = useToast()
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [activeTab, setActiveTab] = useState<Tab>('Content')
 
   const entry = useLiveQuery(
     () => db.diaryEntries.where('date').equals(date).filter(e => !e.deletedAt).first(),
@@ -44,8 +49,11 @@ function DiaryEntryContent() {
     return db.entryContents.get(entry.latestContentId)
   }, [entry?.latestContentId])
 
+  // Fix: query diaryAssets (photos migrated from diaryPhotos in v4)
   const photos = useLiveQuery(
-    () => entry?.id ? db.diaryPhotos.where('entryId').equals(entry.id).toArray() : ([] as DiaryPhoto[]),
+    () => entry?.id
+      ? db.diaryAssets.where('entryId').equals(entry.id).filter(a => a.type === 'photo').sortBy('order')
+      : Promise.resolve([] as import('@/types').DiaryAsset[]),
     [entry?.id]
   )
 
@@ -72,7 +80,6 @@ function DiaryEntryContent() {
     router.replace('/diary')
   }
 
-  // Get HTML content from the latest content record's first page
   const htmlContent = entryContent?.pages?.[0]?.content ?? ''
 
   return (
@@ -98,24 +105,56 @@ function DiaryEntryContent() {
       />
 
       <div className="px-4 space-y-5 pb-8">
-        <div className="flex items-center gap-3">
+        {/* Title + stickers */}
+        <div className="flex items-start gap-3">
           {stickers && stickers.length > 0 && (
-            <span className="text-3xl leading-none">
+            <span className="text-3xl leading-none mt-0.5">
               {stickers.map(s => STICKER_MAP[s.stickerId]?.emoji ?? '').join('')}
             </span>
           )}
           <div>
-            <p className="font-serif font-bold text-ink text-xl">{entry.title || formatDay(date)}</p>
+            <p className="font-sans text-xs text-ink-300 mb-0.5">{formatDay(date)}</p>
+            <p className="font-serif font-bold text-ink text-xl leading-snug">
+              {entry.title || formatDisplay(date)}
+            </p>
           </div>
         </div>
 
-        {htmlContent && (
+        {/* Tabs — only show if there are learnings */}
+        {entry.learnings && (
+          <div className="flex gap-2 border-b border-paper-400">
+            {TABS.map(tab => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={cn(
+                  'pb-2 px-1 text-sm font-sans font-medium border-b-2 transition-colors',
+                  activeTab === tab
+                    ? 'border-amber-warm text-amber-warm'
+                    : 'border-transparent text-ink-300'
+                )}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {activeTab === 'Content' && htmlContent && (
           <div
             className="prose prose-sm max-w-none font-sans text-ink leading-relaxed"
             dangerouslySetInnerHTML={{ __html: htmlContent }}
           />
         )}
 
+        {activeTab === 'Learnings' && entry.learnings && (
+          <div
+            className="prose prose-sm max-w-none font-sans text-ink leading-relaxed"
+            dangerouslySetInnerHTML={{ __html: entry.learnings }}
+          />
+        )}
+
+        {/* Gratitude */}
         {entry.gratitude.some(g => g) && (
           <div className="bg-blush/10 rounded-2xl p-4 space-y-2">
             <p className="text-sm font-medium font-sans text-blush-dark mb-2">Gratitude</p>
@@ -127,6 +166,7 @@ function DiaryEntryContent() {
           </div>
         )}
 
+        {/* Photos */}
         {photos && photos.length > 0 && (
           <div className="grid grid-cols-3 gap-2">
             {photos.map(photo => (
@@ -135,6 +175,7 @@ function DiaryEntryContent() {
           </div>
         )}
 
+        {/* Tags */}
         {tags && tags.length > 0 && (
           <div className="flex flex-wrap gap-2">
             {tags.map(tag => (
