@@ -25,7 +25,7 @@ export default function NextActionsPage() {
   const { showToast } = useToast()
 
   const actions = useLiveQuery(
-    () => db.gtdNextActions.where('completed').equals(0).toArray(),
+    () => db.gtdNextActions.orderBy('createdAt').reverse().filter(a => !a.completed).toArray(),
     []
   )
 

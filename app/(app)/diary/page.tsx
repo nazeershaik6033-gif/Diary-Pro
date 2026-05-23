@@ -3,23 +3,20 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '@/lib/db'
-import { Plus, BookOpen, Search, Calendar, Star } from 'lucide-react'
+import { Plus, BookOpen, Search, Calendar, Star, SlidersHorizontal, X } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { StreakBanner } from '@/components/diary/StreakBanner'
 import { CalendarView } from '@/components/diary/CalendarView'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { toDateString, formatDisplay, formatDay } from '@/lib/utils/date'
 import Link from 'next/link'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Card } from '@/components/ui/Card'
 import { STICKER_MAP } from '@/types/stickers'
 import type { DiaryEntry } from '@/types'
 import { useHeader } from '@/app/contexts/HeaderContext'
 import { cn } from '@/lib/utils/cn'
 
-// ---------------------------------------------------------------------------
-// Color tone accent map
-// ---------------------------------------------------------------------------
 const TONE_BORDER: Record<string, string> = {
   warm:     'border-l-amber-400',
   ocean:    'border-l-sky-400',
@@ -28,15 +25,11 @@ const TONE_BORDER: Record<string, string> = {
   midnight: 'border-l-violet-400',
 }
 
-// ---------------------------------------------------------------------------
-// DiaryEntryCard — loads stickers & tags live per entry
-// ---------------------------------------------------------------------------
 function DiaryEntryCard({ entry }: { entry: DiaryEntry }) {
   const stickers = useLiveQuery(
     () => db.entryStickers.where('entryId').equals(entry.id!).toArray(),
     [entry.id]
   )
-
   const tags = useLiveQuery(async () => {
     if (!entry.tagIds || entry.tagIds.length === 0) return []
     const results = await db.tags.bulkGet(entry.tagIds)
@@ -51,15 +44,13 @@ function DiaryEntryCard({ entry }: { entry: DiaryEntry }) {
       <Card className={`p-4 hover:shadow-warm-md transition-shadow active:scale-[0.99] ${borderClass ? 'border-l-4 ' + borderClass : ''}`}>
         <div className="flex items-start justify-between mb-1">
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-sans text-ink-300">{formatDay(entry.date)}</p>
+            <p className="text-xs font-sans text-ink-300">{formatDisplay(entry.date)} · {formatDay(entry.date)}</p>
             <h3 className="font-serif font-semibold text-ink text-base leading-snug truncate">
               {entry.title || formatDisplay(entry.date)}
             </h3>
           </div>
           <div className="flex items-center gap-1.5 ml-2 flex-shrink-0">
-            {entry.starred && (
-              <Star size={14} className="text-amber-400 fill-amber-400" />
-            )}
+            {entry.starred && <Star size={14} className="text-amber-400 fill-amber-400" />}
             {stickers && stickers.length > 0 && (
               <span className="text-lg leading-none">
                 {stickers.map(s => STICKER_MAP[s.stickerId]?.emoji ?? '').join('')}
@@ -67,11 +58,7 @@ function DiaryEntryCard({ entry }: { entry: DiaryEntry }) {
             )}
           </div>
         </div>
-
-        {preview && (
-          <p className="text-sm font-sans text-ink-300 line-clamp-2 leading-relaxed">{preview}</p>
-        )}
-
+        {preview && <p className="text-sm font-sans text-ink-300 line-clamp-2 leading-relaxed">{preview}</p>}
         {tags && tags.length > 0 && (
           <div className="flex gap-1 flex-wrap mt-2">
             {tags.slice(0, 3).map(tag => (
@@ -86,19 +73,35 @@ function DiaryEntryCard({ entry }: { entry: DiaryEntry }) {
   )
 }
 
-// ---------------------------------------------------------------------------
-// DiaryPage
-// ---------------------------------------------------------------------------
+interface Filters {
+  dateFrom: string
+  dateTo: string
+  starred: boolean
+}
+
 export default function DiaryPage() {
   const router = useRouter()
   const [showCalendar, setShowCalendar] = useState(false)
+  const [showFilters, setShowFilters] = useState(false)
+  const [filters, setFilters] = useState<Filters>({ dateFrom: '', dateTo: '', starred: false })
   const { setRightSlot } = useHeader()
   const today = toDateString()
 
-  // Inject calendar + search icons into the global top bar
+  const hasActiveFilters = filters.dateFrom || filters.dateTo || filters.starred
+
   useEffect(() => {
     setRightSlot(
       <div className="flex items-center gap-1">
+        <button
+          onClick={() => setShowFilters(v => !v)}
+          className={cn(
+            'w-9 h-9 flex items-center justify-center rounded-xl transition-colors',
+            showFilters || hasActiveFilters ? 'bg-amber-warm/15 text-amber-warm' : 'hover:bg-paper-300 text-ink-300'
+          )}
+          aria-label="Filter entries"
+        >
+          <SlidersHorizontal size={17} />
+        </button>
         <button
           onClick={() => setShowCalendar(v => !v)}
           className={cn(
@@ -110,7 +113,7 @@ export default function DiaryPage() {
           <Calendar size={18} />
         </button>
         <Link href="/diary/search">
-          <button className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-paper-300 text-ink-300 transition-colors" aria-label="Search entries">
+          <button className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-paper-300 text-ink-300 transition-colors" aria-label="Search">
             <Search size={18} />
           </button>
         </Link>
@@ -118,32 +121,87 @@ export default function DiaryPage() {
     )
     return () => setRightSlot(null)
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [setRightSlot, showCalendar])
+  }, [setRightSlot, showCalendar, showFilters, hasActiveFilters])
 
   const allEntries = useLiveQuery(
-    () => db.diaryEntries
-      .orderBy('date')
-      .reverse()
-      .filter(e => !e.deletedAt)
-      .limit(50)
-      .toArray(),
+    () => db.diaryEntries.orderBy('date').reverse().filter(e => !e.deletedAt).limit(200).toArray(),
     []
   )
 
   const todayEntry = useLiveQuery(
-    () => db.diaryEntries
-      .where('date').equals(today)
-      .filter(e => !e.deletedAt)
-      .first(),
+    () => db.diaryEntries.where('date').equals(today).filter(e => !e.deletedAt).first(),
     [today]
   )
 
-  const pinned = allEntries?.filter(e => e.pinned) ?? []
-  const regular = allEntries?.filter(e => !e.pinned) ?? []
+  // Apply filters
+  const filteredEntries = (allEntries ?? []).filter(e => {
+    if (filters.dateFrom && e.date < filters.dateFrom) return false
+    if (filters.dateTo && e.date > filters.dateTo) return false
+    if (filters.starred && !e.starred) return false
+    return true
+  })
+
+  const pinned = filteredEntries.filter(e => e.pinned)
+  const regular = filteredEntries.filter(e => !e.pinned)
+
+  const clearFilters = () => setFilters({ dateFrom: '', dateTo: '', starred: false })
 
   return (
     <div className="pb-4 px-4 pt-3">
       <StreakBanner />
+
+      {/* Filter panel */}
+      <AnimatePresence>
+        {showFilters && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="overflow-hidden mb-4"
+          >
+            <div className="bg-white rounded-2xl border border-paper-400 p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-sans font-semibold text-ink">Filter entries</p>
+                {hasActiveFilters && (
+                  <button onClick={clearFilters} className="flex items-center gap-1 text-xs text-amber-warm font-sans">
+                    <X size={12} /> Clear
+                  </button>
+                )}
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="text-xs font-sans text-ink-300 block mb-1">From date</label>
+                  <input
+                    type="date"
+                    value={filters.dateFrom}
+                    onChange={e => setFilters(f => ({ ...f, dateFrom: e.target.value }))}
+                    className="w-full rounded-xl border border-paper-400 px-3 py-2 text-sm font-sans text-ink focus:outline-none focus:ring-2 focus:ring-amber-warm"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-sans text-ink-300 block mb-1">To date</label>
+                  <input
+                    type="date"
+                    value={filters.dateTo}
+                    onChange={e => setFilters(f => ({ ...f, dateTo: e.target.value }))}
+                    className="w-full rounded-xl border border-paper-400 px-3 py-2 text-sm font-sans text-ink focus:outline-none focus:ring-2 focus:ring-amber-warm"
+                  />
+                </div>
+              </div>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={filters.starred}
+                  onChange={e => setFilters(f => ({ ...f, starred: e.target.checked }))}
+                  className="w-4 h-4 rounded accent-amber-warm"
+                />
+                <span className="text-sm font-sans text-ink">Starred entries only</span>
+                <Star size={14} className="text-amber-400" />
+              </label>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {showCalendar && (
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-4">
@@ -151,7 +209,7 @@ export default function DiaryPage() {
         </motion.div>
       )}
 
-      {!todayEntry && (
+      {!todayEntry && !hasActiveFilters && (
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
           className="bg-amber-faint border border-amber-warm/30 rounded-2xl p-4 mb-4 flex items-center justify-between">
           <div>
@@ -170,15 +228,20 @@ export default function DiaryPage() {
             <div key={i} className="h-24 rounded-2xl bg-paper-300 animate-pulse" />
           ))}
         </div>
-      ) : allEntries.length === 0 ? (
+      ) : filteredEntries.length === 0 ? (
         <EmptyState
           icon={BookOpen}
-          title="No entries yet"
-          description="Start your journaling journey today."
-          action={<Button onClick={() => router.push('/diary/new')}><Plus size={16} /> Write First Entry</Button>}
+          title={hasActiveFilters ? 'No entries match' : 'No entries yet'}
+          description={hasActiveFilters ? 'Try adjusting your filters.' : 'Start your journaling journey today.'}
+          action={!hasActiveFilters ? <Button onClick={() => router.push('/diary/new')}><Plus size={16} /> Write First Entry</Button> : undefined}
         />
       ) : (
         <>
+          {hasActiveFilters && (
+            <p className="text-xs font-sans text-ink-300 mb-3">
+              {filteredEntries.length} {filteredEntries.length === 1 ? 'entry' : 'entries'} found
+            </p>
+          )}
           {pinned.length > 0 && (
             <div className="mb-4">
               <p className="text-xs font-sans font-semibold text-ink-300 uppercase tracking-wider mb-2 flex items-center gap-1">
@@ -193,7 +256,6 @@ export default function DiaryPage() {
               </div>
             </div>
           )}
-
           {regular.length > 0 && (
             <div className="space-y-3">
               {regular.map((entry, i) => (

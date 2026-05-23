@@ -11,6 +11,15 @@ import type {
   CalendarEvent, Decision,
   Tag, TagCategory,
 } from '@/types'
+
+export interface GTDLog {
+  id?: number
+  date: string       // 'YYYY-MM-DD'
+  action: 'created' | 'completed' | 'deleted' | 'processed'
+  area: string       // 'inbox' | 'next-actions' | 'projects' | 'waiting-for' | 'someday'
+  itemTitle: string
+  createdAt: number
+}
 import { DEFAULT_SETTINGS } from '@/types/settings'
 import { SEED_EXERCISES, SEED_TEMPLATES } from '@/lib/constants/gym'
 
@@ -53,6 +62,8 @@ export class DiaryProDB extends Dexie {
   entryContents!: Table<EntryContent>
   diaryTemplates!: Table<DiaryTemplate>
   diaryAssets!: Table<DiaryAsset>
+  // v5 tables
+  gtdLogs!: Table<GTDLog>
 
   constructor() {
     super('DiaryProDB')
@@ -327,6 +338,47 @@ export class DiaryProDB extends Dexie {
         await tx.table('diaryTemplates').add(t)
       }
     })
+
+    this.version(5).stores({
+      diaryEntries:   '++id, date, *tagIds, starred, pinned, deletedAt, createdAt, updatedAt',
+      diaryPhotos:    '++id, entryId',
+      diaryAssets:    '++id, entryId, type, createdAt',
+      tags:           '++id, name, categoryId, createdAt',
+      tagCategories:  '++id, order',
+      entryStickers:  '++id, entryId, stickerId',
+      entryContents:  '++id, entryId, createdAt',
+      diaryTemplates: '++id, name, category, isUserCreated, createdAt',
+      workEntries:     '++id, date, category, priority, createdAt',
+      gtdInbox:        '++id, createdAt',
+      gtdProjects:     '++id, status, createdAt',
+      gtdNextActions:  '++id, projectId, context, dueDate, createdAt',
+      gtdWaitingFor:   '++id, delegatedTo, dueDate, createdAt',
+      gtdSomedayMaybe: '++id, category, createdAt',
+      gtdWeeklyReviews:'++id, weekStartDate, completedAt',
+      gtdLogs:         '++id, date, area, createdAt',
+      exercises:       '++id, name, muscleGroup, isCustom',
+      workoutTemplates:'++id, name, type, createdAt',
+      workoutLogs:     '++id, templateId, date, completedAt',
+      workoutSets:     '++id, workoutLogId, exerciseId, setNumber',
+      bodyMetrics:     '++id, date',
+      personalRecords: '++id, exerciseId, date',
+      settings:        'id',
+      habits:             '++id, name, createdAt',
+      habitLogs:          '++id, habitId, date',
+      healthLogs:         '++id, date, energyLevel, createdAt',
+      sleepLogs:          '++id, date, quality',
+      waterLogs:          '++id, date',
+      supplements:        '++id, timing, createdAt',
+      supplementLogs:     '++id, date, supplementId',
+      goals:              '++id, tier, createdAt, updatedAt',
+      goalMilestones:     '++id, goalId, order',
+      dailyAffirmations:  '++id, createdAt',
+      events:    '++id, startDate, category, createdAt',
+      decisions: '++id, type, status, createdAt',
+    })
+    // Note: v5 removes boolean index fields (processed, completed, active) that caused
+    // cross-browser issues with boolean vs number comparisons in IndexedDB.
+    // All queries now use .filter() instead of .where().equals(bool/0/1).
 
     this.on('populate', async () => {
       await this.settings.add(DEFAULT_SETTINGS)
