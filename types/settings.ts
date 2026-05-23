@@ -24,6 +24,7 @@ export interface AppSettings {
   firstLaunch: boolean
   createdAt: number
   securityQuestions?: Array<{ questionIndex: number; answerHash: string }>
+  anthropicApiKey?: string
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {
