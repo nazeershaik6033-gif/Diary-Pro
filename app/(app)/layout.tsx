@@ -3,12 +3,13 @@ import { useRouter } from 'next/navigation'
 import { useAuth } from '@/app/contexts/AuthContext'
 import { HeaderProvider, useHeader } from '@/app/contexts/HeaderContext'
 import { ActiveWorkoutProvider } from '@/app/contexts/ActiveWorkoutContext'
-import { DrawerNav, useSidebarState } from '@/components/layout/DrawerNav'
+import { DrawerNav, useSidebarState, getSidebarWidth } from '@/components/layout/DrawerNav'
 import { FloatingActionButton } from '@/components/layout/FloatingActionButton'
+import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import { useEffect } from 'react'
 import { useTheme } from '@/lib/hooks/useTheme'
 import Link from 'next/link'
-import { cn } from '@/lib/utils/cn'
+import { Search, Plus } from 'lucide-react'
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? ''
 
@@ -25,23 +26,23 @@ function AppShell({ children }: { children: React.ReactNode }) {
     }
   }, [pinEnabled, isVerified, router])
 
-  const sideW = collapsed ? 'ml-[60px]' : 'ml-[220px]'
+  const sideWidth = getSidebarWidth(collapsed)
 
   return (
     <div className="min-h-screen bg-paper">
       <DrawerNav collapsed={collapsed} onToggle={toggle} />
 
-      {/* All content sits to the right of the sidebar */}
-      <div className={cn('flex flex-col transition-[margin-left] duration-200 ease-in-out', sideW)}>
+      {/* Main content shifts right of sidebar */}
+      <div
+        style={{ marginLeft: sideWidth, transition: 'margin-left 0.2s ease' }}
+        className="flex flex-col min-h-screen"
+      >
         <header
           className="flex items-center gap-2 px-3 sticky top-0 bg-paper z-10 border-b border-paper-300"
           style={{ paddingTop: 'env(safe-area-inset-top)', height: 'calc(56px + env(safe-area-inset-top))' }}
         >
-          {/* Logo + name — centered */}
-          <Link
-            href="/diary"
-            className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2"
-          >
+          {/* Logo + name — left-aligned */}
+          <Link href="/diary" className="flex items-center gap-2 flex-shrink-0">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={`${basePath}/logo.svg`}
@@ -55,11 +56,30 @@ function AppShell({ children }: { children: React.ReactNode }) {
 
           <div className="flex-1" />
 
-          {/* Page-injected right actions */}
+          {/* Global actions — visible on all pages */}
+          <Link href="/diary/new">
+            <button
+              className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-paper-300 text-ink-300 transition-colors"
+              aria-label="New diary entry"
+            >
+              <Plus size={18} />
+            </button>
+          </Link>
+          <Link href="/diary/search">
+            <button
+              className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-paper-300 text-ink-300 transition-colors"
+              aria-label="Search"
+            >
+              <Search size={18} />
+            </button>
+          </Link>
+          <ThemeToggle />
+
+          {/* Page-specific right actions (injected by individual pages) */}
           {rightSlot}
         </header>
 
-        <main className="pb-24">
+        <main className="pb-24 flex-1">
           {children}
         </main>
       </div>
