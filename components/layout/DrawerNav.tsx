@@ -4,7 +4,7 @@ import { usePathname } from 'next/navigation'
 import {
   BookOpen, Briefcase, ListChecks, Dumbbell, Settings,
   CheckSquare, Heart, Target, CalendarDays, Scale, PartyPopper,
-  RotateCcw, Images, Flame, Search, Sparkles,
+  RotateCcw, Images, Flame, Search, Sparkles, BookMarked,
 } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import { useStreak } from '@/lib/hooks/useStreak'
@@ -25,6 +25,7 @@ const NAV_ITEMS = [
   { href: '/health',          label: 'Health',      icon: Heart,       color: 'text-blush' },
   { href: '/goals',           label: 'Goals',       icon: Target,      color: 'text-amber-dark' },
   { href: '/decisions',       label: 'Decisions',   icon: Scale,       color: 'text-green-500' },
+  { href: '/articles',        label: 'Article Reader', icon: BookMarked, color: 'text-teal-500' },
 ]
 
 const BOTTOM_ITEMS = [

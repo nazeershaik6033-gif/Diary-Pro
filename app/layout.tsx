@@ -20,26 +20,28 @@ const lato = Lato({
   preload: true,
 })
 
+const bp = process.env.NEXT_PUBLIC_BASE_PATH ?? ''
+
 export const metadata: Metadata = {
   title: 'My Journal',
   description: 'Your personal premium diary — journal, GTD, gym, and work log in one beautiful app.',
-  manifest: '/manifest.json',
+  manifest: `${bp}/manifest.json`,
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
     title: 'My Journal',
     startupImage: [
-      { url: '/splash/splash-1170x2532.png', media: '(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)' },
-      { url: '/splash/splash-1125x2436.png', media: '(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)' },
-      { url: '/splash/splash-750x1334.png', media: '(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)' },
+      { url: `${bp}/splash/splash-1170x2532.png`, media: '(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)' },
+      { url: `${bp}/splash/splash-1125x2436.png`, media: '(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)' },
+      { url: `${bp}/splash/splash-750x1334.png`, media: '(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)' },
     ],
   },
   icons: {
-    apple: '/icons/icon-192x192.png',
+    apple: `${bp}/icons/icon-192x192.png`,
     icon: [
-      { url: '/logo.svg', type: 'image/svg+xml' },
-      { url: '/icons/icon-192x192.png', sizes: '192x192' },
-      { url: '/icons/icon-512x512.png', sizes: '512x512' },
+      { url: `${bp}/logo.svg`, type: 'image/svg+xml' },
+      { url: `${bp}/icons/icon-192x192.png`, sizes: '192x192' },
+      { url: `${bp}/icons/icon-512x512.png`, sizes: '512x512' },
     ],
   },
 }
