@@ -10,6 +10,7 @@ import type {
   Goal, GoalMilestone, DailyAffirmation,
   CalendarEvent, Decision,
   Tag, TagCategory,
+  Article, ArticleHighlight,
 } from '@/types'
 
 export interface GTDLog {
@@ -64,6 +65,9 @@ export class DiaryProDB extends Dexie {
   diaryAssets!: Table<DiaryAsset>
   // v5 tables
   gtdLogs!: Table<GTDLog>
+  // v6 tables
+  articles!: Table<Article>
+  articleHighlights!: Table<ArticleHighlight>
 
   constructor() {
     super('DiaryProDB')
@@ -379,6 +383,47 @@ export class DiaryProDB extends Dexie {
     // Note: v5 removes boolean index fields (processed, completed, active) that caused
     // cross-browser issues with boolean vs number comparisons in IndexedDB.
     // All queries now use .filter() instead of .where().equals(bool/0/1).
+
+    this.version(6).stores({
+      diaryEntries:   '++id, date, *tagIds, starred, pinned, deletedAt, createdAt, updatedAt',
+      diaryPhotos:    '++id, entryId',
+      diaryAssets:    '++id, entryId, type, createdAt',
+      tags:           '++id, name, categoryId, createdAt',
+      tagCategories:  '++id, order',
+      entryStickers:  '++id, entryId, stickerId',
+      entryContents:  '++id, entryId, createdAt',
+      diaryTemplates: '++id, name, category, isUserCreated, createdAt',
+      workEntries:     '++id, date, category, priority, createdAt',
+      gtdInbox:        '++id, createdAt',
+      gtdProjects:     '++id, status, createdAt',
+      gtdNextActions:  '++id, projectId, context, dueDate, createdAt',
+      gtdWaitingFor:   '++id, delegatedTo, dueDate, createdAt',
+      gtdSomedayMaybe: '++id, category, createdAt',
+      gtdWeeklyReviews:'++id, weekStartDate, completedAt',
+      gtdLogs:         '++id, date, area, createdAt',
+      exercises:       '++id, name, muscleGroup, isCustom',
+      workoutTemplates:'++id, name, type, createdAt',
+      workoutLogs:     '++id, templateId, date, completedAt',
+      workoutSets:     '++id, workoutLogId, exerciseId, setNumber',
+      bodyMetrics:     '++id, date',
+      personalRecords: '++id, exerciseId, date',
+      settings:        'id',
+      habits:             '++id, name, createdAt',
+      habitLogs:          '++id, habitId, date',
+      healthLogs:         '++id, date, energyLevel, createdAt',
+      sleepLogs:          '++id, date, quality',
+      waterLogs:          '++id, date',
+      supplements:        '++id, timing, createdAt',
+      supplementLogs:     '++id, date, supplementId',
+      goals:              '++id, tier, createdAt, updatedAt',
+      goalMilestones:     '++id, goalId, order',
+      dailyAffirmations:  '++id, createdAt',
+      events:    '++id, startDate, category, createdAt',
+      decisions: '++id, type, status, createdAt',
+      // v6
+      articles:           '++id, section, folder, createdAt, updatedAt',
+      articleHighlights:  '++id, articleId, createdAt',
+    })
 
     this.on('populate', async () => {
       await this.settings.add(DEFAULT_SETTINGS)
