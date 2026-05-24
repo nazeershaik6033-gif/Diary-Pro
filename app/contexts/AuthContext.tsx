@@ -19,8 +19,18 @@ const AuthContext = createContext<AuthContextValue>({
   lock: () => {},
 })
 
+const SESSION_KEY = 'diary_pin_verified'
+
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [isVerified, setIsVerified] = useState(false)
+  // Initialise from sessionStorage so refreshes don't re-trigger the PIN gate.
+  // sessionStorage is cleared automatically when the tab/PWA is closed.
+  const [isVerified, setIsVerified] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return sessionStorage.getItem(SESSION_KEY) === '1'
+    }
+    return false
+  })
+
   const settings = useLiveQuery(() => db.settings.get('singleton'))
 
   // `settings` is `undefined` while Dexie is loading, then the actual value (or null)
@@ -34,23 +44,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   useEffect(() => {
-    // Wait until DB has loaded before deciding verified state.
-    // Without this guard, pinEnabled defaults to false while loading,
-    // causing setIsVerified(true) before we know whether PIN is actually enabled.
     if (!loaded) return
-    if (!pinEnabled) setIsVerified(true)
+    if (!pinEnabled) {
+      setIsVerified(true)
+      sessionStorage.setItem(SESSION_KEY, '1')
+    }
   }, [pinEnabled, loaded])
 
-  useEffect(() => {
-    const handleVisibility = () => {
-      if (document.hidden && pinEnabled) setIsVerified(false)
-    }
-    document.addEventListener('visibilitychange', handleVisibility)
-    return () => document.removeEventListener('visibilitychange', handleVisibility)
-  }, [pinEnabled])
+  const verify = useCallback(() => {
+    setIsVerified(true)
+    sessionStorage.setItem(SESSION_KEY, '1')
+  }, [])
 
-  const verify = useCallback(() => setIsVerified(true), [])
-  const lock = useCallback(() => { if (pinEnabled) setIsVerified(false) }, [pinEnabled])
+  const lock = useCallback(() => {
+    if (pinEnabled) {
+      setIsVerified(false)
+      sessionStorage.removeItem(SESSION_KEY)
+    }
+  }, [pinEnabled])
 
   return (
     <AuthContext.Provider value={{ isVerified, pinEnabled, loaded, verify, lock }}>
