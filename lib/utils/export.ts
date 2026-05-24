@@ -35,6 +35,8 @@ export interface ExportData {
   decisions: unknown[]
   articles?: unknown[]
   articleHighlights?: unknown[]
+  articleCollections?: unknown[]
+  articleCollectionItems?: unknown[]
 }
 
 export async function exportAll(): Promise<void> {
@@ -71,6 +73,8 @@ export async function exportAll(): Promise<void> {
     decisions: await db.decisions.toArray(),
     articles: (await db.articles.toArray()).map(a => { const { pdfBlob: _, ...rest } = a; return rest }),
     articleHighlights: await db.articleHighlights.toArray(),
+    articleCollections: await db.articleCollections.toArray(),
+    articleCollectionItems: await db.articleCollectionItems.toArray(),
   }
 
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
@@ -103,7 +107,7 @@ export async function importAll(file: File): Promise<void> {
     db.habits, db.habitLogs,
     db.healthLogs, db.sleepLogs, db.waterLogs, db.supplements, db.supplementLogs,
     db.goals, db.goalMilestones, db.dailyAffirmations,
-    db.articles, db.articleHighlights,
+    db.articles, db.articleHighlights, db.articleCollections, db.articleCollectionItems,
   ], async () => {
     await db.diaryEntries.clear(); await db.diaryEntries.bulkAdd(data.diaryEntries as never[])
     await db.diaryPhotos.clear(); await db.diaryPhotos.bulkAdd(data.diaryPhotos as never[])
@@ -135,6 +139,8 @@ export async function importAll(file: File): Promise<void> {
     if (data.decisions) { await db.decisions.clear(); await db.decisions.bulkAdd(data.decisions as never[]) }
     if (data.articles) { await db.articles.clear(); await db.articles.bulkAdd(data.articles as never[]) }
     if (data.articleHighlights) { await db.articleHighlights.clear(); await db.articleHighlights.bulkAdd(data.articleHighlights as never[]) }
+    if (data.articleCollections) { await db.articleCollections.clear(); await db.articleCollections.bulkAdd(data.articleCollections as never[]) }
+    if (data.articleCollectionItems) { await db.articleCollectionItems.clear(); await db.articleCollectionItems.bulkAdd(data.articleCollectionItems as never[]) }
   })
 }
 

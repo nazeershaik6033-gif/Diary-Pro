@@ -2,12 +2,12 @@
 import { useState, useRef, useEffect, Suspense } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '@/lib/db'
-import { updateArticle, moveArticle, addHighlight, deleteHighlight, updateHighlight } from '@/lib/db/articles'
+import { updateArticle, moveArticle, addHighlight, deleteHighlight, updateHighlight, getCollectionItems } from '@/lib/db/articles'
 import { useRouter, useSearchParams } from 'next/navigation'
 import {
   ArrowLeft, ExternalLink, Clock, CheckCircle2, Star, Inbox,
   Highlighter, Trash2, MessageSquare, X, ChevronDown,
-  StickyNote, FileText,
+  StickyNote, FileText, ChevronLeft, ChevronRight,
 } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import { useToast } from '@/app/contexts/ToastContext'
@@ -82,6 +82,26 @@ function ReaderInner() {
     () => (id ? db.articleHighlights.where('articleId').equals(id).sortBy('createdAt') : []),
     [id],
   ) ?? []
+
+  const collectionId = searchParams.get('collectionId') ? Number(searchParams.get('collectionId')) : null
+
+  const collection = useLiveQuery(
+    () => (collectionId ? db.articleCollections.get(collectionId) : undefined),
+    [collectionId],
+  )
+
+  const collectionItems = useLiveQuery(
+    () => (collectionId ? getCollectionItems(collectionId) : undefined),
+    [collectionId],
+  )
+
+  const collectionPosition = collectionItems ? collectionItems.findIndex(a => a.id === id) : -1
+  const prevArticle = collectionPosition > 0 ? collectionItems![collectionPosition - 1] : null
+  const nextArticle = collectionItems && collectionPosition < collectionItems.length - 1 ? collectionItems![collectionPosition + 1] : null
+
+  function goToInCollection(articleId: number) {
+    router.push(`/articles/reader?id=${articleId}&collectionId=${collectionId}`)
+  }
 
   const [highlightPanel, setHighlightPanel] = useState(false)
   const [notesOpen, setNotesOpen] = useState(false)
@@ -208,6 +228,38 @@ function ReaderInner() {
           </button>
         ))}
       </div>
+
+      {/* Collection nav bar */}
+      {collectionId && collection && collectionItems && collectionPosition !== -1 && (
+        <div className="flex items-center justify-between px-4 py-2.5 bg-amber-faint border-b border-amber-warm/20">
+          <button
+            onClick={() => prevArticle && goToInCollection(prevArticle.id!)}
+            disabled={!prevArticle}
+            className={cn(
+              'flex items-center gap-1 text-xs font-sans max-w-[110px]',
+              prevArticle ? 'text-amber-dark' : 'text-ink-300 opacity-40 cursor-default',
+            )}
+          >
+            <ChevronLeft size={14} className="flex-shrink-0" />
+            <span className="truncate">{prevArticle?.title ?? ''}</span>
+          </button>
+          <div className="text-center flex-shrink-0 mx-2">
+            <p className="text-[10px] text-ink-300 font-sans truncate max-w-[120px]">{collection.name}</p>
+            <p className="text-xs font-sans font-semibold text-ink">{collectionPosition + 1} of {collectionItems.length}</p>
+          </div>
+          <button
+            onClick={() => nextArticle && goToInCollection(nextArticle.id!)}
+            disabled={!nextArticle}
+            className={cn(
+              'flex items-center gap-1 text-xs font-sans max-w-[110px]',
+              nextArticle ? 'text-amber-dark' : 'text-ink-300 opacity-40 cursor-default',
+            )}
+          >
+            <span className="truncate">{nextArticle?.title ?? ''}</span>
+            <ChevronRight size={14} className="flex-shrink-0" />
+          </button>
+        </div>
+      )}
 
       {/* Article / PDF content */}
       {article.type === 'pdf' ? (

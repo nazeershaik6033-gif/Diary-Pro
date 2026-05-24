@@ -32,3 +32,20 @@ export interface ArticleHighlight {
   color: HighlightColor
   createdAt: number
 }
+
+export interface ArticleCollection {
+  id?: number
+  name: string
+  description?: string
+  color?: string  // 'amber' | 'rose' | 'blue' | 'green' | 'violet'
+  createdAt: number
+  updatedAt: number
+}
+
+export interface ArticleCollectionItem {
+  id?: number
+  collectionId: number
+  articleId: number
+  position: number
+  addedAt: number
+}
