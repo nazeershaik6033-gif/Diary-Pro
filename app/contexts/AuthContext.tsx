@@ -6,6 +6,7 @@ import { db } from '@/lib/db'
 interface AuthContextValue {
   isVerified: boolean
   pinEnabled: boolean
+  loaded: boolean
   verify: () => void
   lock: () => void
 }
@@ -13,6 +14,7 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue>({
   isVerified: false,
   pinEnabled: false,
+  loaded: false,
   verify: () => {},
   lock: () => {},
 })
@@ -21,11 +23,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isVerified, setIsVerified] = useState(false)
   const settings = useLiveQuery(() => db.settings.get('singleton'))
 
+  // `settings` is `undefined` while Dexie is loading, then the actual value (or null)
+  const loaded = settings !== undefined
   const pinEnabled = settings?.pinEnabled ?? false
 
   useEffect(() => {
+    // Wait until DB has loaded before deciding verified state.
+    // Without this guard, pinEnabled defaults to false while loading,
+    // causing setIsVerified(true) before we know whether PIN is actually enabled.
+    if (!loaded) return
     if (!pinEnabled) setIsVerified(true)
-  }, [pinEnabled])
+  }, [pinEnabled, loaded])
 
   useEffect(() => {
     const handleVisibility = () => {
@@ -39,7 +47,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const lock = useCallback(() => { if (pinEnabled) setIsVerified(false) }, [pinEnabled])
 
   return (
-    <AuthContext.Provider value={{ isVerified, pinEnabled, verify, lock }}>
+    <AuthContext.Provider value={{ isVerified, pinEnabled, loaded, verify, lock }}>
       {children}
     </AuthContext.Provider>
   )

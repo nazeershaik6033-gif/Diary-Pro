@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '@/lib/db'
-import { Plus, BookOpen, Search, Calendar, Star, SlidersHorizontal, X } from 'lucide-react'
+import { Plus, BookOpen, Search, Calendar, Star, SlidersHorizontal, X, Bell } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { StreakBanner } from '@/components/diary/StreakBanner'
 import { CalendarView } from '@/components/diary/CalendarView'
@@ -16,6 +16,7 @@ import { STICKER_MAP } from '@/types/stickers'
 import type { DiaryEntry } from '@/types'
 import { useHeader } from '@/app/contexts/HeaderContext'
 import { cn } from '@/lib/utils/cn'
+import { startOfWeek, endOfWeek, getWeekOfMonth, format } from 'date-fns'
 
 const TONE_BORDER: Record<string, string> = {
   warm:     'border-l-amber-400',
@@ -38,6 +39,7 @@ function DiaryEntryCard({ entry }: { entry: DiaryEntry }) {
 
   const preview = (entry.plainText ?? '').slice(0, 80)
   const borderClass = entry.colorTone ? TONE_BORDER[entry.colorTone] : ''
+  const hasUpcomingReminder = entry.reminderAt && entry.reminderAt > Date.now()
 
   return (
     <Link href={`/diary/entry?date=${entry.date}`}>
@@ -50,6 +52,7 @@ function DiaryEntryCard({ entry }: { entry: DiaryEntry }) {
             </h3>
           </div>
           <div className="flex items-center gap-1.5 ml-2 flex-shrink-0">
+            {hasUpcomingReminder && <Bell size={13} className="text-amber-warm" />}
             {entry.starred && <Star size={14} className="text-amber-400 fill-amber-400" />}
             {stickers && stickers.length > 0 && (
               <span className="text-lg leading-none">
@@ -79,6 +82,17 @@ interface Filters {
   starred: boolean
 }
 
+function getCurrentWeekBounds() {
+  const today = new Date()
+  const weekStart = startOfWeek(today, { weekStartsOn: 1 })
+  const weekEnd = endOfWeek(today, { weekStartsOn: 1 })
+  const weekNum = getWeekOfMonth(today, { weekStartsOn: 1 })
+  const label = `Week ${weekNum} of ${format(today, 'MMMM yyyy')}`
+  return { from: toDateString(weekStart), to: toDateString(weekEnd), label }
+}
+
+const WEEK = getCurrentWeekBounds()
+
 export default function DiaryPage() {
   const router = useRouter()
   const [showCalendar, setShowCalendar] = useState(false)
@@ -87,7 +101,18 @@ export default function DiaryPage() {
   const { setRightSlot } = useHeader()
   const today = toDateString()
 
-  const hasActiveFilters = filters.dateFrom || filters.dateTo || filters.starred
+  const hasActiveFilters = !!(filters.dateFrom || filters.dateTo || filters.starred)
+
+  // Logo click resets all local state
+  useEffect(() => {
+    const handler = () => {
+      setFilters({ dateFrom: '', dateTo: '', starred: false })
+      setShowCalendar(false)
+      setShowFilters(false)
+    }
+    window.addEventListener('diary:reset', handler)
+    return () => window.removeEventListener('diary:reset', handler)
+  }, [])
 
   useEffect(() => {
     setRightSlot(
@@ -123,9 +148,32 @@ export default function DiaryPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setRightSlot, showCalendar, showFilters, hasActiveFilters])
 
-  const allEntries = useLiveQuery(
-    () => db.diaryEntries.orderBy('date').reverse().filter(e => !e.deletedAt).limit(200).toArray(),
+  // Default: show only this week's entries (Mon–Sun)
+  const weekEntries = useLiveQuery(
+    () => db.diaryEntries
+      .where('date').between(WEEK.from, WEEK.to, true, true)
+      .filter(e => !e.deletedAt)
+      .sortBy('date')
+      .then(r => r.reverse()),
     []
+  )
+
+  // When filters active: show all matching entries
+  const filteredEntries = useLiveQuery(
+    () => {
+      if (!hasActiveFilters) return Promise.resolve(null)
+      return db.diaryEntries.orderBy('date').reverse()
+        .filter(e => {
+          if (e.deletedAt) return false
+          if (filters.dateFrom && e.date < filters.dateFrom) return false
+          if (filters.dateTo && e.date > filters.dateTo) return false
+          if (filters.starred && !e.starred) return false
+          return true
+        })
+        .limit(200)
+        .toArray()
+    },
+    [hasActiveFilters, filters.dateFrom, filters.dateTo, filters.starred]
   )
 
   const todayEntry = useLiveQuery(
@@ -133,24 +181,18 @@ export default function DiaryPage() {
     [today]
   )
 
-  // Apply filters
-  const filteredEntries = (allEntries ?? []).filter(e => {
-    if (filters.dateFrom && e.date < filters.dateFrom) return false
-    if (filters.dateTo && e.date > filters.dateTo) return false
-    if (filters.starred && !e.starred) return false
-    return true
-  })
-
-  const pinned = filteredEntries.filter(e => e.pinned)
-  const regular = filteredEntries.filter(e => !e.pinned)
-
   const clearFilters = () => setFilters({ dateFrom: '', dateTo: '', starred: false })
+
+  const displayEntries: DiaryEntry[] = hasActiveFilters ? ((filteredEntries as unknown as DiaryEntry[]) ?? []) : ((weekEntries as unknown as DiaryEntry[]) ?? [])
+  const loading = hasActiveFilters ? filteredEntries === undefined : weekEntries === undefined
+
+  const pinned = displayEntries.filter(e => e.pinned)
+  const regular = displayEntries.filter(e => !e.pinned)
 
   return (
     <div className="pb-4 px-4 pt-3">
       <StreakBanner />
 
-      {/* Filter panel */}
       <AnimatePresence>
         {showFilters && (
           <motion.div
@@ -222,24 +264,32 @@ export default function DiaryPage() {
         </motion.div>
       )}
 
-      {allEntries === undefined ? (
+      {loading ? (
         <div className="space-y-3">
           {Array.from({ length: 3 }).map((_, i) => (
             <div key={i} className="h-24 rounded-2xl bg-paper-300 animate-pulse" />
           ))}
         </div>
-      ) : filteredEntries.length === 0 ? (
-        <EmptyState
-          icon={BookOpen}
-          title={hasActiveFilters ? 'No entries match' : 'No entries yet'}
-          description={hasActiveFilters ? 'Try adjusting your filters.' : 'Start your journaling journey today.'}
-          action={!hasActiveFilters ? <Button onClick={() => router.push('/diary/new')}><Plus size={16} /> Write First Entry</Button> : undefined}
-        />
+      ) : displayEntries.length === 0 ? (
+        <div>
+          {!hasActiveFilters && (
+            <p className="text-xs font-sans font-semibold text-ink-300 uppercase tracking-wider mb-3">{WEEK.label}</p>
+          )}
+          <EmptyState
+            icon={BookOpen}
+            title={hasActiveFilters ? 'No entries match' : 'No entries this week'}
+            description={hasActiveFilters ? 'Try adjusting your filters.' : 'Start writing — your first entry this week awaits.'}
+            action={!hasActiveFilters ? <Button onClick={() => router.push('/diary/new')}><Plus size={16} /> Write First Entry</Button> : undefined}
+          />
+        </div>
       ) : (
         <>
+          {!hasActiveFilters && (
+            <p className="text-xs font-sans font-semibold text-ink-300 uppercase tracking-wider mb-3">{WEEK.label}</p>
+          )}
           {hasActiveFilters && (
             <p className="text-xs font-sans text-ink-300 mb-3">
-              {filteredEntries.length} {filteredEntries.length === 1 ? 'entry' : 'entries'} found
+              {displayEntries.length} {displayEntries.length === 1 ? 'entry' : 'entries'} found
             </p>
           )}
           {pinned.length > 0 && (

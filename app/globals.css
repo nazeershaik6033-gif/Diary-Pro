@@ -166,6 +166,14 @@ html[data-fontsize="xl"] { font-size: 20px; }
   .top-safe-4 {
     top: calc(1rem + env(safe-area-inset-top));
   }
+  /* FAB-aware bottom padding — clears the floating action button on all devices */
+  .pb-fab {
+    padding-bottom: calc(6rem + env(safe-area-inset-bottom));
+  }
+  /* Toast container sits just above the FAB */
+  .bottom-toast {
+    bottom: calc(5.5rem + env(safe-area-inset-bottom));
+  }
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
@@ -205,6 +213,46 @@ html[data-fontsize="xl"] { font-size: 20px; }
 
 .ProseMirror strong { font-weight: 700; }
 .ProseMirror em { font-style: italic; }
+
+/* Task list (Tiptap TaskList / TaskItem) */
+.ProseMirror ul[data-type="taskList"] {
+  list-style: none;
+  padding-left: 0.25rem;
+}
+.ProseMirror ul[data-type="taskList"] li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+.ProseMirror ul[data-type="taskList"] li > label {
+  flex-shrink: 0;
+  margin-top: 0.2rem;
+}
+.ProseMirror ul[data-type="taskList"] li > label input[type="checkbox"] {
+  width: 1rem;
+  height: 1rem;
+  cursor: pointer;
+  accent-color: #C4933F;
+  border-radius: 4px;
+}
+.ProseMirror ul[data-type="taskList"] li[data-checked="true"] > div {
+  text-decoration: line-through;
+  opacity: 0.5;
+}
+/* Render task list checkboxes in read-only prose view */
+.prose ul[data-type="taskList"] {
+  list-style: none;
+  padding-left: 0.25rem;
+}
+.prose ul[data-type="taskList"] li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+.prose ul[data-type="taskList"] li[data-checked="true"] > div {
+  text-decoration: line-through;
+  opacity: 0.5;
+}
 
 /* Smooth page transitions */
 .page-enter {
