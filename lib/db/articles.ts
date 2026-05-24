@@ -1,5 +1,5 @@
 import { db } from '@/lib/db'
-import type { Article, ArticleHighlight, ArticleFolder, ArticleSection } from '@/types'
+import type { Article, ArticleHighlight, ArticleFolder, ArticleSection, ArticleCollection, ArticleCollectionItem } from '@/types'
 
 export async function addArticle(data: Omit<Article, 'id' | 'createdAt' | 'updatedAt'>): Promise<number> {
   return db.articles.add({
@@ -34,6 +34,65 @@ export async function updateHighlight(id: number, data: Partial<ArticleHighlight
 
 export async function deleteHighlight(id: number): Promise<void> {
   await db.articleHighlights.delete(id)
+}
+
+// ---------------------------------------------------------------------------
+// Collections
+// ---------------------------------------------------------------------------
+
+export async function addCollection(data: Omit<ArticleCollection, 'id' | 'createdAt' | 'updatedAt'>): Promise<number> {
+  return db.articleCollections.add({ ...data, createdAt: Date.now(), updatedAt: Date.now() }) as Promise<number>
+}
+
+export async function updateCollection(id: number, data: Partial<ArticleCollection>): Promise<void> {
+  await db.articleCollections.update(id, { ...data, updatedAt: Date.now() })
+}
+
+export async function deleteCollection(id: number): Promise<void> {
+  await db.articleCollections.delete(id)
+  await db.articleCollectionItems.where('collectionId').equals(id).delete()
+}
+
+export async function addArticleToCollection(collectionId: number, articleId: number): Promise<void> {
+  const existing = await db.articleCollectionItems
+    .where('[collectionId+articleId]').equals([collectionId, articleId]).count()
+  if (existing > 0) return
+  const items = await db.articleCollectionItems.where('collectionId').equals(collectionId).toArray()
+  const maxPos = items.reduce((m, i) => Math.max(m, i.position), -1)
+  await db.articleCollectionItems.add({ collectionId, articleId, position: maxPos + 1, addedAt: Date.now() })
+}
+
+export async function removeArticleFromCollection(collectionId: number, articleId: number): Promise<void> {
+  await db.articleCollectionItems
+    .where('collectionId').equals(collectionId)
+    .and(i => i.articleId === articleId)
+    .delete()
+}
+
+export async function reorderCollectionItems(collectionId: number, orderedArticleIds: number[]): Promise<void> {
+  const items = await db.articleCollectionItems.where('collectionId').equals(collectionId).toArray()
+  await db.transaction('rw', db.articleCollectionItems, async () => {
+    for (const item of items) {
+      const newPos = orderedArticleIds.indexOf(item.articleId)
+      if (newPos !== -1 && newPos !== item.position) {
+        await db.articleCollectionItems.update(item.id!, { position: newPos })
+      }
+    }
+  })
+}
+
+export async function getCollectionItems(collectionId: number): Promise<Article[]> {
+  const items = await db.articleCollectionItems
+    .where('collectionId').equals(collectionId)
+    .sortBy('position')
+  const articles = await db.articles.bulkGet(items.map(i => i.articleId))
+  return articles.filter(Boolean) as Article[]
+}
+
+export async function getArticleCollections(articleId: number): Promise<ArticleCollection[]> {
+  const items = await db.articleCollectionItems.where('articleId').equals(articleId).toArray()
+  const collections = await db.articleCollections.bulkGet(items.map(i => i.collectionId))
+  return collections.filter(Boolean) as ArticleCollection[]
 }
 
 /** Fetch article metadata + content via CORS proxy and Readability */
