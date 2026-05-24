@@ -26,11 +26,8 @@ const NAV_ITEMS = [
   { href: '/goals',           label: 'Goals',       icon: Target,      color: 'text-amber-dark' },
   { href: '/decisions',       label: 'Decisions',   icon: Scale,       color: 'text-green-500' },
   { href: '/articles',        label: 'Article Reader', icon: BookMarked, color: 'text-teal-500' },
-]
-
-const BOTTOM_ITEMS = [
-  { href: '/diary/search', label: 'Search',   icon: Search,   color: 'text-sky-500' },
-  { href: '/settings',     label: 'Settings', icon: Settings, color: 'text-slate-500' },
+  { href: '/diary/search',    label: 'Search',         icon: Search,     color: 'text-sky-500' },
+  { href: '/settings',        label: 'Settings',       icon: Settings,   color: 'text-slate-500' },
 ]
 
 interface DrawerNavProps {
@@ -94,13 +91,6 @@ export function DrawerNav({ open, onClose }: DrawerNavProps) {
           })}
         </div>
 
-        {/* Bottom items — same style as nav items */}
-        <div className="border-t border-paper-300 py-2 flex-shrink-0">
-          {BOTTOM_ITEMS.map(item => {
-            const active = pathname === item.href || pathname.startsWith(item.href + '/')
-            return <NavItem key={item.href} {...item} active={active} onClose={onClose} />
-          })}
-        </div>
       </aside>
     </>
   )
