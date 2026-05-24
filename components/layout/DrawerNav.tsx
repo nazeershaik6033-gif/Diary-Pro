@@ -25,7 +25,7 @@ const DEFAULT_NAV_ITEMS = [
   { href: '/library',         label: 'Library',        icon: Images,      color: 'text-indigo-400' },
   { href: '/work',            label: 'Work Log',       icon: Briefcase,   color: 'text-blue-500' },
   { href: '/gtd',             label: 'GTD',            icon: ListChecks,  color: 'text-sage' },
-  { href: '/gym',             label: 'Gym',            icon: Dumbbell,    color: 'text-orange-500' },
+  { href: '/gym',             label: 'Exercise & Calories', icon: Dumbbell, color: 'text-orange-500' },
   { href: '/habits',          label: 'Habits',         icon: CheckSquare, color: 'text-purple-500' },
   { href: '/health',          label: 'Health',         icon: Heart,       color: 'text-blush' },
   { href: '/goals',           label: 'Goals',          icon: Target,      color: 'text-amber-dark' },

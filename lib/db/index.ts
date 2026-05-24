@@ -11,6 +11,7 @@ import type {
   CalendarEvent, Decision,
   Tag, TagCategory,
   Article, ArticleHighlight, ArticleCollection, ArticleCollectionItem,
+  NutritionLog, FoodLibraryItem, NutritionGoals,
 } from '@/types'
 
 export interface GTDLog {
@@ -71,6 +72,10 @@ export class DiaryProDB extends Dexie {
   // v7 tables
   articleCollections!: Table<ArticleCollection>
   articleCollectionItems!: Table<ArticleCollectionItem>
+  // v8 tables
+  nutritionLogs!: Table<NutritionLog>
+  foodLibrary!: Table<FoodLibraryItem>
+  nutritionGoals!: Table<NutritionGoals>
 
   constructor() {
     super('DiaryProDB')
@@ -469,6 +474,52 @@ export class DiaryProDB extends Dexie {
       // v7
       articleCollections:     '++id, createdAt',
       articleCollectionItems: '++id, collectionId, articleId',
+    })
+
+    this.version(8).stores({
+      diaryEntries:   '++id, date, *tagIds, starred, pinned, deletedAt, createdAt, updatedAt',
+      diaryPhotos:    '++id, entryId',
+      diaryAssets:    '++id, entryId, type, createdAt',
+      tags:           '++id, name, categoryId, createdAt',
+      tagCategories:  '++id, order',
+      entryStickers:  '++id, entryId, stickerId',
+      entryContents:  '++id, entryId, createdAt',
+      diaryTemplates: '++id, name, category, isUserCreated, createdAt',
+      workEntries:     '++id, date, category, priority, createdAt',
+      gtdInbox:        '++id, createdAt',
+      gtdProjects:     '++id, status, createdAt',
+      gtdNextActions:  '++id, projectId, context, dueDate, createdAt',
+      gtdWaitingFor:   '++id, delegatedTo, dueDate, createdAt',
+      gtdSomedayMaybe: '++id, category, createdAt',
+      gtdWeeklyReviews:'++id, weekStartDate, completedAt',
+      gtdLogs:         '++id, date, area, createdAt',
+      exercises:       '++id, name, muscleGroup, isCustom',
+      workoutTemplates:'++id, name, type, createdAt',
+      workoutLogs:     '++id, templateId, date, completedAt',
+      workoutSets:     '++id, workoutLogId, exerciseId, setNumber',
+      bodyMetrics:     '++id, date',
+      personalRecords: '++id, exerciseId, date',
+      settings:        'id',
+      habits:             '++id, name, createdAt',
+      habitLogs:          '++id, habitId, date',
+      healthLogs:         '++id, date, energyLevel, createdAt',
+      sleepLogs:          '++id, date, quality',
+      waterLogs:          '++id, date',
+      supplements:        '++id, timing, createdAt',
+      supplementLogs:     '++id, date, supplementId',
+      goals:              '++id, tier, createdAt, updatedAt',
+      goalMilestones:     '++id, goalId, order',
+      dailyAffirmations:  '++id, createdAt',
+      events:    '++id, startDate, category, createdAt',
+      decisions: '++id, type, status, createdAt',
+      articles:           '++id, section, folder, createdAt, updatedAt',
+      articleHighlights:  '++id, articleId, createdAt',
+      articleCollections:     '++id, createdAt',
+      articleCollectionItems: '++id, collectionId, articleId',
+      // v8 — calorie & nutrition tracking
+      nutritionLogs:  '++id, date, mealType, createdAt',
+      foodLibrary:    '++id, name, createdAt',
+      nutritionGoals: '++id',
     })
 
     this.on('populate', async () => {
