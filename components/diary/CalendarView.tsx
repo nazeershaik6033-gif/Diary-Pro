@@ -59,12 +59,12 @@ export function CalendarView() {
           return (
             <button
               key={dateStr}
-              onClick={() => hasEntry && router.push(`/diary/${dateStr}`)}
+              onClick={() => hasEntry ? router.push(`/diary/entry?date=${dateStr}`) : router.push(`/diary/new?date=${dateStr}`)}
               className={cn(
-                'relative mx-auto w-8 h-8 flex items-center justify-center rounded-full text-sm font-sans transition-colors',
+                'relative mx-auto w-8 h-8 flex items-center justify-center rounded-full text-sm font-sans transition-colors cursor-pointer',
                 isToday && 'bg-amber-warm text-white font-semibold',
                 !isToday && hasEntry && 'hover:bg-amber-faint text-ink font-medium',
-                !isToday && !hasEntry && 'text-ink-200 cursor-default'
+                !isToday && !hasEntry && 'text-ink-300 hover:bg-paper-300'
               )}
             >
               {day.getDate()}

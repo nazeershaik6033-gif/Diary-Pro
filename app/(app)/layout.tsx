@@ -11,21 +11,35 @@ import { useEffect } from 'react'
 import { useTheme } from '@/lib/hooks/useTheme'
 import Link from 'next/link'
 import { Search, Plus, Menu } from 'lucide-react'
+import { usePathname } from 'next/navigation'
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? ''
 
 function AppShell({ children }: { children: React.ReactNode }) {
   useTheme()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const { isVerified, pinEnabled } = useAuth()
+  const { isVerified, pinEnabled, loaded } = useAuth()
   const { rightSlot } = useHeader()
   const router = useRouter()
+  const pathname = usePathname()
 
   useEffect(() => {
+    if (!loaded) return // wait until DB settings are read
     if (pinEnabled && !isVerified) {
       router.replace('/pin')
     }
-  }, [pinEnabled, isVerified, router])
+  }, [pinEnabled, isVerified, router, loaded])
+
+  // Show nothing while DB loads — prevents flash of content before PIN redirect
+  if (!loaded) return null
+
+  const handleLogoClick = () => {
+    // Dispatch reset event so DiaryPage clears its local state
+    window.dispatchEvent(new Event('diary:reset'))
+    if (pathname !== '/diary') {
+      router.push('/diary')
+    }
+  }
 
   return (
     <div className="min-h-screen bg-paper">
@@ -47,12 +61,16 @@ function AppShell({ children }: { children: React.ReactNode }) {
             <Menu size={20} />
           </button>
 
-          {/* Logo + name — left-aligned */}
-          <Link href="/diary" className="flex items-center gap-2 flex-shrink-0">
+          {/* Logo + name — left-aligned, click resets diary state */}
+          <button
+            type="button"
+            onClick={handleLogoClick}
+            className="flex items-center gap-2 flex-shrink-0 hover:opacity-80 transition-opacity"
+          >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={`${basePath}/logo.svg`} alt="My Journal logo" className="w-7 h-7 object-contain" />
             <span className="font-serif font-bold text-ink text-[15px] leading-none">My Journal</span>
-          </Link>
+          </button>
 
           <div className="flex-1" />
 
@@ -73,7 +91,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
           {rightSlot}
         </header>
 
-        <main className="pb-24 flex-1">
+        <main className="pb-fab flex-1">
           {children}
         </main>
       </div>

@@ -132,6 +132,128 @@ export async function importAll(file: File): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------
+// Duration-filtered export
+// ---------------------------------------------------------------------------
+
+export type ExportDuration = 'weekly' | 'monthly' | 'quarterly' | 'half-yearly' | 'yearly'
+
+const DURATION_DAYS: Record<ExportDuration, number> = {
+  'weekly': 7,
+  'monthly': 30,
+  'quarterly': 90,
+  'half-yearly': 180,
+  'yearly': 365,
+}
+
+function subtractDays(days: number): string {
+  const d = new Date()
+  d.setDate(d.getDate() - (days - 1))
+  return d.toISOString().split('T')[0]
+}
+
+export async function exportByDuration(duration: ExportDuration, fmt: 'json' | 'markdown'): Promise<void> {
+  const days = DURATION_DAYS[duration]
+  const fromDate = subtractDays(days)
+  const today = new Date().toISOString().split('T')[0]
+
+  const filterByDate = (items: any[], dateField = 'date') =>
+    items.filter(item => item[dateField] >= fromDate && item[dateField] <= today)
+  const filterByCreatedAt = (items: any[]) =>
+    items.filter(item => {
+      const d = new Date(item.createdAt).toISOString().split('T')[0]
+      return d >= fromDate && d <= today
+    })
+
+  const [
+    diaryEntries, workEntries, workoutLogs, habitLogs,
+    healthLogs, sleepLogs, waterLogs, supplementLogs, events,
+    habits, exercises, workoutTemplates, supplements,
+    goals, goalMilestones, decisions,
+    bodyMetrics, personalRecords, diaryPhotos,
+    gtdInbox, gtdProjects, gtdNextActions, gtdWaitingFor,
+    gtdSomedayMaybe, gtdWeeklyReviews, workoutSets,
+    dailyAffirmations, settings,
+  ] = await Promise.all([
+    db.diaryEntries.toArray().then(a => filterByDate(a)),
+    db.workEntries.toArray().then(a => filterByDate(a)),
+    db.workoutLogs.toArray().then(a => filterByDate(a)),
+    db.habitLogs.toArray().then(a => filterByDate(a)),
+    db.healthLogs.toArray().then(a => filterByDate(a)),
+    db.sleepLogs.toArray().then(a => filterByDate(a)),
+    db.waterLogs.toArray().then(a => filterByDate(a)),
+    db.supplementLogs.toArray().then(a => filterByDate(a)),
+    db.events.toArray().then(a => filterByDate(a, 'startDate')),
+    db.habits.toArray(),
+    db.exercises.toArray(),
+    db.workoutTemplates.toArray(),
+    db.supplements.toArray(),
+    db.goals.toArray().then(a => filterByCreatedAt(a)),
+    db.goalMilestones.toArray().then(a => filterByCreatedAt(a)),
+    db.decisions.toArray().then(a => filterByCreatedAt(a)),
+    db.bodyMetrics.toArray().then(a => filterByDate(a)),
+    db.personalRecords.toArray().then(a => filterByDate(a)),
+    db.diaryPhotos.toArray(),
+    db.gtdInbox.toArray().then(a => filterByCreatedAt(a)),
+    db.gtdProjects.toArray().then(a => filterByCreatedAt(a)),
+    db.gtdNextActions.toArray().then(a => filterByCreatedAt(a)),
+    db.gtdWaitingFor.toArray().then(a => filterByCreatedAt(a)),
+    db.gtdSomedayMaybe.toArray().then(a => filterByCreatedAt(a)),
+    db.gtdWeeklyReviews.toArray(),
+    db.workoutSets.toArray(),
+    db.dailyAffirmations.toArray().then(a => filterByDate(a)),
+    db.settings.toArray(),
+  ])
+
+  const label = duration.charAt(0).toUpperCase() + duration.slice(1)
+  const dateStr = today
+
+  if (fmt === 'json') {
+    const data: ExportData = {
+      version: 2,
+      exportedAt: Date.now(),
+      diaryEntries, diaryPhotos, workEntries,
+      gtdInbox, gtdProjects, gtdNextActions, gtdWaitingFor,
+      gtdSomedayMaybe, gtdWeeklyReviews,
+      exercises, workoutTemplates, workoutLogs, workoutSets,
+      bodyMetrics, personalRecords, settings,
+      habits, habitLogs, healthLogs, sleepLogs, waterLogs,
+      supplements, supplementLogs, goals, goalMilestones,
+      dailyAffirmations, events, decisions,
+    }
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `diary-pro-${duration}-${dateStr}.json`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  } else {
+    const files: MarkdownFile[] = []
+    for (const entry of diaryEntries as DiaryEntry[]) {
+      let content: EntryContent | undefined
+      if (entry.latestContentId) {
+        content = await db.entryContents.get(entry.latestContentId)
+      }
+      const md = await exportEntryAsMarkdown(entry, content)
+      const safeName = (entry.title || 'Untitled').replace(/[/\\:*?"<>|]/g, '_').slice(0, 60).trim()
+      files.push({ filename: `${entry.date}_${safeName}.md`, content: md })
+    }
+    const combined = files.map(f => `# ${f.filename}\n\n${f.content}`).join('\n\n---\n\n')
+    const blob = new Blob([combined], { type: 'text/markdown' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `diary-pro-${duration}-${dateStr}.md`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Markdown export helpers
 // ---------------------------------------------------------------------------
 

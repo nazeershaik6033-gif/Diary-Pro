@@ -12,12 +12,14 @@ import TableRow from '@tiptap/extension-table-row'
 import TableCell from '@tiptap/extension-table-cell'
 import TableHeader from '@tiptap/extension-table-header'
 import { Extension } from '@tiptap/core'
+import TaskList from '@tiptap/extension-task-list'
+import TaskItem from '@tiptap/extension-task-item'
 import {
   Bold, Italic, Underline as UnderlineIcon, Strikethrough, Code,
   List, ListOrdered, AlignLeft, AlignCenter, AlignRight,
   Heading1, Heading2, Heading3, Table as TableIcon,
   Indent, Outdent, RotateCcw, RotateCw,
-  Type, ChevronDown,
+  Type, ChevronDown, CheckSquare,
 } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import { useEffect, useState, useRef } from 'react'
@@ -81,6 +83,8 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
       TableRow,
       TableCell,
       TableHeader,
+      TaskList,
+      TaskItem.configure({ nested: true }),
     ],
     content: value,
     onUpdate: ({ editor }) => onChange(editor.getHTML()),
@@ -276,6 +280,15 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
           active={editor.isActive('table')}
         >
           <TableIcon size={13} />
+        </Btn>
+
+        {/* Checklist / Task list */}
+        <Btn
+          onClick={() => editor.chain().focus().toggleTaskList().run()}
+          title="Checklist"
+          active={editor.isActive('taskList')}
+        >
+          <CheckSquare size={13} />
         </Btn>
 
       </div>
