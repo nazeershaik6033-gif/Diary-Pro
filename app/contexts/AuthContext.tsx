@@ -28,6 +28,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const pinEnabled = settings?.pinEnabled ?? false
 
   useEffect(() => {
+    if (typeof navigator !== 'undefined' && navigator.storage?.persist) {
+      navigator.storage.persist()
+    }
+  }, [])
+
+  useEffect(() => {
     // Wait until DB has loaded before deciding verified state.
     // Without this guard, pinEnabled defaults to false while loading,
     // causing setIsVerified(true) before we know whether PIN is actually enabled.

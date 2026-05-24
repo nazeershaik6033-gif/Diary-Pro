@@ -7,7 +7,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import {
   ArrowLeft, ExternalLink, Clock, CheckCircle2, Star, Inbox,
   Highlighter, Trash2, MessageSquare, X, ChevronDown,
-  StickyNote,
+  StickyNote, FileText,
 } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import { useToast } from '@/app/contexts/ToastContext'
@@ -31,6 +31,44 @@ const COLOR_CLASS: Record<HighlightColor, string> = {
   green:  'bg-green-200',
   blue:   'bg-blue-200',
   pink:   'bg-pink-200',
+}
+
+function PdfViewer({ article }: { article: import('@/types').Article }) {
+  const [blobUrl, setBlobUrl] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (article.pdfBlob) {
+      const url = URL.createObjectURL(article.pdfBlob)
+      setBlobUrl(url)
+      return () => URL.revokeObjectURL(url)
+    }
+  }, [article.pdfBlob])
+
+  const src = blobUrl || article.url || null
+
+  return (
+    <div className="flex flex-col" style={{ height: 'calc(100vh - 110px)' }}>
+      {src ? (
+        <>
+          <embed src={src} type="application/pdf" className="flex-1 w-full" />
+          <div className="px-4 py-2 border-t border-paper-200 bg-white flex items-center gap-3">
+            <FileText size={14} className="text-red-400 flex-shrink-0" />
+            <p className="text-xs font-sans text-ink-300 truncate flex-1">{article.title}</p>
+            {article.url && (
+              <a href={article.url} target="_blank" rel="noopener noreferrer" className="text-xs font-sans text-amber-dark flex items-center gap-1">
+                <ExternalLink size={12} /> Open
+              </a>
+            )}
+          </div>
+        </>
+      ) : (
+        <div className="flex-1 flex flex-col items-center justify-center gap-4 p-8">
+          <FileText size={48} className="text-red-300" />
+          <p className="font-sans text-ink-300 text-center text-sm">PDF not available</p>
+        </div>
+      )}
+    </div>
+  )
 }
 
 function ReaderInner() {
@@ -128,12 +166,16 @@ function ReaderInner() {
         </button>
         <div className="flex-1 min-w-0">
           <p className="text-xs font-sans text-ink-300 truncate">
-            {article.siteName || (() => { try { return new URL(article.url).hostname } catch { return article.url } })()}
+            {article.type === 'pdf'
+              ? (article.url ? (() => { try { return new URL(article.url).hostname } catch { return 'PDF' } })() : 'Local PDF')
+              : (article.siteName || (() => { try { return new URL(article.url).hostname } catch { return article.url } })())}
           </p>
         </div>
-        <a href={article.url} target="_blank" rel="noopener noreferrer" className="p-1.5 rounded-xl hover:bg-paper-300 text-ink-300">
-          <ExternalLink size={18} />
-        </a>
+        {article.url && (
+          <a href={article.url} target="_blank" rel="noopener noreferrer" className="p-1.5 rounded-xl hover:bg-paper-300 text-ink-300">
+            <ExternalLink size={18} />
+          </a>
+        )}
         <button
           onClick={() => setHighlightPanel(v => !v)}
           className={cn('p-1.5 rounded-xl text-ink-300 hover:bg-paper-300', highlightPanel && 'bg-yellow-100 text-yellow-600')}
@@ -167,54 +209,54 @@ function ReaderInner() {
         ))}
       </div>
 
-      {/* Article content */}
-      <div className="max-w-2xl mx-auto px-5 py-8">
-        <h1 className="font-serif font-bold text-ink text-2xl leading-snug mb-3">{article.title}</h1>
+      {/* Article / PDF content */}
+      {article.type === 'pdf' ? (
+        <PdfViewer article={article} />
+      ) : (
+        <div className="max-w-2xl mx-auto px-5 py-8">
+          <h1 className="font-serif font-bold text-ink text-2xl leading-snug mb-3">{article.title}</h1>
 
-        <div className="flex items-center gap-3 text-xs text-ink-300 font-sans mb-6 flex-wrap">
-          <span className="font-medium text-ink-300">
-            {article.siteName || (() => { try { return new URL(article.url).hostname } catch { return '' } })()}
-          </span>
-          {article.estimatedReadTime && (
-            <span className="flex items-center gap-1">
-              <Clock size={11} /> {article.estimatedReadTime} min read
+          <div className="flex items-center gap-3 text-xs text-ink-300 font-sans mb-6 flex-wrap">
+            <span className="font-medium text-ink-300">
+              {article.siteName || (() => { try { return new URL(article.url).hostname } catch { return '' } })()}
             </span>
-          )}
-          {article.tags.length > 0 && article.tags.map(t => (
-            <span key={t} className="bg-paper-300 px-2 py-0.5 rounded-full text-[11px]">{t}</span>
-          ))}
-        </div>
-
-        {article.content ? (
-          <div
-            onMouseUp={handleTextSelection}
-            onTouchEnd={handleTextSelection}
-            className={cn(
-              'prose prose-sm max-w-none font-sans text-ink',
-              'prose-headings:font-serif prose-headings:text-ink',
-              'prose-p:leading-relaxed prose-p:text-[15px]',
-              'prose-a:text-amber-dark prose-a:no-underline hover:prose-a:underline',
-              'prose-img:rounded-xl prose-img:shadow-warm-sm',
-              'prose-blockquote:border-l-amber-warm prose-blockquote:text-ink-300',
+            {article.estimatedReadTime && (
+              <span className="flex items-center gap-1">
+                <Clock size={11} /> {article.estimatedReadTime} min read
+              </span>
             )}
-            dangerouslySetInnerHTML={{ __html: article.content }}
-          />
-        ) : (
-          <div className="text-center py-16 space-y-4">
-            <p className="text-ink-300 font-sans text-sm">
-              Article content couldn't be extracted. Read it in your browser.
-            </p>
-            <a
-              href={article.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-amber-warm text-white font-sans text-sm font-semibold"
-            >
-              <ExternalLink size={15} /> Open in Browser
-            </a>
+            {article.tags.length > 0 && article.tags.map(t => (
+              <span key={t} className="bg-paper-300 px-2 py-0.5 rounded-full text-[11px]">{t}</span>
+            ))}
           </div>
-        )}
-      </div>
+
+          {article.content ? (
+            <div
+              onMouseUp={handleTextSelection}
+              onTouchEnd={handleTextSelection}
+              className={cn(
+                'prose prose-sm max-w-none font-sans text-ink',
+                'prose-headings:font-serif prose-headings:text-ink',
+                'prose-p:leading-relaxed prose-p:text-[15px]',
+                'prose-a:text-amber-dark prose-a:no-underline hover:prose-a:underline',
+                'prose-img:rounded-xl prose-img:shadow-warm-sm',
+                'prose-blockquote:border-l-amber-warm prose-blockquote:text-ink-300',
+              )}
+              dangerouslySetInnerHTML={{ __html: article.content }}
+            />
+          ) : (
+            <div className="text-center py-16 space-y-4">
+              <p className="text-ink-300 font-sans text-sm">
+                Article content couldn't be extracted. Read it in your browser.
+              </p>
+              <a href={article.url} target="_blank" rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-amber-warm text-white font-sans text-sm font-semibold">
+                <ExternalLink size={15} /> Open in Browser
+              </a>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Floating highlight toolbar */}
       {highlightToolbar && selectedText && (

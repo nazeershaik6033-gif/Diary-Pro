@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Show environment
+        run: node --version && npm --version && cat package.json | python3 -c "import sys,json; d=json.load(sys.stdin); print('deps:', len(d.get('dependencies',{})+d.get('devDependencies',{})))" 2>/dev/null || true
+
+      - name: Install dependencies
+        run: npm install --prefer-offline || npm install
+
+      - name: Build
+        run: npm run build
+        env:
+          NEXT_PUBLIC_BASE_PATH: /Diary-Pro

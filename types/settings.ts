@@ -25,6 +25,7 @@ export interface AppSettings {
   createdAt: number
   securityQuestions?: Array<{ questionIndex: number; answerHash: string }>
   anthropicApiKey?: string
+  sidebarOrder?: string[]
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {
