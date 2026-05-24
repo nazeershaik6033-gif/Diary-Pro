@@ -116,37 +116,20 @@ export default function DiaryPage() {
 
   useEffect(() => {
     setRightSlot(
-      <div className="flex items-center gap-1">
-        <button
-          onClick={() => setShowFilters(v => !v)}
-          className={cn(
-            'w-9 h-9 flex items-center justify-center rounded-xl transition-colors',
-            showFilters || hasActiveFilters ? 'bg-amber-warm/15 text-amber-warm' : 'hover:bg-paper-300 text-ink-300'
-          )}
-          aria-label="Filter entries"
-        >
-          <SlidersHorizontal size={17} />
-        </button>
-        <button
-          onClick={() => setShowCalendar(v => !v)}
-          className={cn(
-            'w-9 h-9 flex items-center justify-center rounded-xl transition-colors',
-            showCalendar ? 'bg-amber-warm/15 text-amber-warm' : 'hover:bg-paper-300 text-ink-300'
-          )}
-          aria-label="Toggle calendar"
-        >
-          <Calendar size={18} />
-        </button>
-        <Link href="/diary/search">
-          <button className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-paper-300 text-ink-300 transition-colors" aria-label="Search">
-            <Search size={18} />
-          </button>
-        </Link>
-      </div>
+      <button
+        onClick={() => setShowFilters(v => !v)}
+        className={cn(
+          'w-9 h-9 flex items-center justify-center rounded-xl transition-colors',
+          showFilters || hasActiveFilters ? 'bg-amber-warm/15 text-amber-warm' : 'hover:bg-paper-300 text-ink-300'
+        )}
+        aria-label="Filter entries"
+      >
+        <SlidersHorizontal size={17} />
+      </button>
     )
     return () => setRightSlot(null)
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [setRightSlot, showCalendar, showFilters, hasActiveFilters])
+  }, [setRightSlot, showFilters, hasActiveFilters])
 
   // Default: show only this week's entries (Mon–Sun)
   const weekEntries = useLiveQuery(

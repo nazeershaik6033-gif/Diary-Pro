@@ -55,7 +55,9 @@ export async function deleteCollection(id: number): Promise<void> {
 
 export async function addArticleToCollection(collectionId: number, articleId: number): Promise<void> {
   const existing = await db.articleCollectionItems
-    .where('[collectionId+articleId]').equals([collectionId, articleId]).count()
+    .where('collectionId').equals(collectionId)
+    .and(i => i.articleId === articleId)
+    .count()
   if (existing > 0) return
   const items = await db.articleCollectionItems.where('collectionId').equals(collectionId).toArray()
   const maxPos = items.reduce((m, i) => Math.max(m, i.position), -1)

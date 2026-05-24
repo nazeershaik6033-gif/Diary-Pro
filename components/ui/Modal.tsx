@@ -1,5 +1,6 @@
 'use client'
 import { type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
@@ -13,7 +14,7 @@ interface ModalProps {
 }
 
 export function Modal({ open, onClose, title, children, className }: ModalProps) {
-  return (
+  const content = (
     <AnimatePresence>
       {open && (
         <>
@@ -30,7 +31,7 @@ export function Modal({ open, onClose, title, children, className }: ModalProps)
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             className={cn(
-              'fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-sm bg-white rounded-3xl shadow-warm-lg z-50 p-6',
+              'fixed left-4 right-4 top-1/2 -translate-y-1/2 bg-white rounded-3xl shadow-warm-lg z-50 p-6 mx-auto max-w-sm',
               className
             )}
           >
@@ -48,4 +49,9 @@ export function Modal({ open, onClose, title, children, className }: ModalProps)
       )}
     </AnimatePresence>
   )
+
+  // Use portal to escape any transform stacking contexts (e.g. framer-motion page transitions)
+  if (typeof document === 'undefined') return content
+  return createPortal(content, document.body)
 }
+
