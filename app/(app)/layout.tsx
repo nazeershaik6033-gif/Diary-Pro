@@ -10,7 +10,7 @@ import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import { useEffect } from 'react'
 import { useTheme } from '@/lib/hooks/useTheme'
 import Link from 'next/link'
-import { Search, Menu } from 'lucide-react'
+import { Search, Menu, CalendarDays } from 'lucide-react'
 import { usePathname } from 'next/navigation'
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? ''
@@ -78,6 +78,11 @@ function AppShell({ children }: { children: React.ReactNode }) {
           <Link href="/diary/new">
             <button className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-paper-300 text-ink-300 transition-colors font-serif font-bold text-base" aria-label="New diary entry">
               N
+            </button>
+          </Link>
+          <Link href="/calendar">
+            <button className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-paper-300 text-ink-300 transition-colors" aria-label="Calendar">
+              <CalendarDays size={18} />
             </button>
           </Link>
           <Link href="/diary/search">

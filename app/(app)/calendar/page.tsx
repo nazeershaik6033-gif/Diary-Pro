@@ -50,7 +50,7 @@ function useCalendarData(startDate: Date, endDate: Date) {
 }
 
 // ── Selected Day Panel (shown below month grid) ───────────────────
-function SelectedDayPanel({ day }: { day: Date }) {
+function SelectedDayPanel({ day, onViewDay }: { day: Date; onViewDay: (d: Date) => void }) {
   const ds = toDateString(day)
   const holiday = getHoliday(ds)
   const events = useLiveQuery(() => db.events.where('startDate').equals(ds).toArray(), [ds])
@@ -71,9 +71,12 @@ function SelectedDayPanel({ day }: { day: Date }) {
             </p>
           )}
         </div>
-        <Link href={`/diary/entry?date=${ds}`}>
-          <button className="text-xs font-sans text-amber-warm font-medium hover:underline">View day →</button>
-        </Link>
+        <button
+          onClick={() => onViewDay(day)}
+          className="text-xs font-sans text-amber-warm font-medium hover:underline"
+        >
+          View day →
+        </button>
       </div>
 
       {/* Content */}
@@ -419,6 +422,11 @@ export default function CalendarPage() {
     setView('day')
   }
 
+  const handleViewDay = (day: Date) => {
+    setCurrent(day)
+    setView('day')
+  }
+
   return (
     <div>
       <PageHeader title="Calendar" />
@@ -474,7 +482,7 @@ export default function CalendarPage() {
               selectedDay={selectedDay}
               onDayClick={setSelectedDay}
             />
-            <SelectedDayPanel day={selectedDay} />
+            <SelectedDayPanel day={selectedDay} onViewDay={handleViewDay} />
           </>
         )}
         {view === 'week' && <WeekView current={current} onDaySelect={handleDaySelect} />}
