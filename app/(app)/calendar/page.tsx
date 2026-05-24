@@ -116,7 +116,12 @@ function SelectedDayPanel({ day }: { day: Date }) {
         {workoutLog && (
           <div className="flex items-center gap-2.5 py-1.5 px-3 rounded-xl bg-orange-50">
             <Dumbbell size={14} className="text-orange-500 flex-shrink-0" />
-            <span className="text-sm font-sans text-orange-700">Workout logged</span>
+            <span className="text-sm font-sans text-orange-700 flex-1 truncate">{workoutLog.templateName}</span>
+            {workoutLog.totalVolume != null && (
+              <span className="text-xs font-sans text-orange-400 flex-shrink-0">
+                {workoutLog.totalVolume.toLocaleString()} kg
+              </span>
+            )}
           </div>
         )}
 
@@ -274,14 +279,14 @@ function WeekView({ current, onDaySelect }: { current: Date; onDaySelect: (d: Da
 function DayView({ current }: { current: Date }) {
   const ds = toDateString(current)
   const holiday = getHoliday(ds)
-  const { events, workoutDates } = useCalendarData(current, current)
+  const { events } = useCalendarData(current, current)
 
   const diaryEntry = useLiveQuery(() => db.diaryEntries.where('date').equals(ds).first(), [ds])
+  const workoutLog = useLiveQuery(() => db.workoutLogs.where('date').equals(ds).filter(l => !!l.completedAt).first(), [ds])
   const habits = useLiveQuery(() => db.habits.filter(h => !!h.active).toArray())
   const habitLogs = useLiveQuery(() => db.habitLogs.where('date').equals(ds).toArray(), [ds])
 
   const dayEvents = events.filter(e => e.startDate === ds)
-  const hasWorkout = workoutDates.includes(ds)
 
   const timedEvents = dayEvents.filter(e => !e.allDay && e.startTime).sort((a, b) => (a.startTime ?? '').localeCompare(b.startTime ?? ''))
   const allDayEvents = dayEvents.filter(e => e.allDay || !e.startTime)
@@ -327,10 +332,15 @@ function DayView({ current }: { current: Date }) {
         </Link>
       )}
 
-      {hasWorkout && (
+      {workoutLog && (
         <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-orange-50 border border-orange-200">
           <Dumbbell size={16} className="text-orange-500 flex-shrink-0" />
-          <p className="text-sm font-sans text-orange-700 font-medium">Workout logged</p>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-sans text-orange-700 font-medium truncate">{workoutLog.templateName}</p>
+            {workoutLog.totalVolume != null && (
+              <p className="text-xs font-sans text-orange-400">{workoutLog.totalVolume.toLocaleString()} kg total volume</p>
+            )}
+          </div>
         </div>
       )}
 
@@ -371,7 +381,7 @@ function DayView({ current }: { current: Date }) {
         </div>
       )}
 
-      {dayEvents.length === 0 && !diaryEntry && !hasWorkout && !holiday && (
+      {dayEvents.length === 0 && !diaryEntry && !workoutLog && !holiday && (
         <div className="text-center py-8">
           <p className="text-ink-300 font-sans text-sm">Nothing scheduled</p>
         </div>
