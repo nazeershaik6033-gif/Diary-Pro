@@ -53,6 +53,7 @@ export interface DiaryEntry {
   colorTone?: string      // theme key like 'warm','ocean','forest','dark','midnight'
   latestContentId?: number
   plainText?: string
+  reminderAt?: number   // Unix timestamp for a scheduled reminder notification
   createdAt: number
   updatedAt: number
 }

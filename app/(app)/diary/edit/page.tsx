@@ -16,6 +16,7 @@ import { useToast } from '@/app/contexts/ToastContext'
 import { Spinner } from '@/components/ui/Spinner'
 import { formatDisplay, formatDay } from '@/lib/utils/date'
 import { cn } from '@/lib/utils/cn'
+import { Bell } from 'lucide-react'
 
 interface FormValues {
   title: string
@@ -27,8 +28,24 @@ interface FormValues {
   photos: { data: string; mimeType: string }[]
 }
 
-const TABS = ['Write', 'Mood', 'Gratitude', 'Learnings', 'Photos'] as const
+const TABS = ['Write', 'Mood', 'Gratitude', 'Learnings', 'Photos', 'Reminder'] as const
 type Tab = typeof TABS[number]
+
+async function scheduleReminder(reminderAt: number, title: string) {
+  if (reminderAt <= Date.now()) return
+  if (typeof Notification === 'undefined') return
+  if (Notification.permission !== 'granted') {
+    const perm = await Notification.requestPermission()
+    if (perm !== 'granted') return
+  }
+  const delay = reminderAt - Date.now()
+  setTimeout(() => {
+    new Notification('My Journal reminder', {
+      body: title || 'You have a diary reminder',
+      icon: '/logo.svg',
+    })
+  }, delay)
+}
 
 function EditDiaryContent() {
   const searchParams = useSearchParams()
@@ -39,6 +56,7 @@ function EditDiaryContent() {
   const [entryId, setEntryId] = useState<number | null>(null)
   const [ready, setReady] = useState(false)
   const [activeTab, setActiveTab] = useState<Tab>('Write')
+  const [reminderDatetime, setReminderDatetime] = useState('')  // 'YYYY-MM-DDTHH:mm'
 
   const { control, handleSubmit, setValue, watch, reset } = useForm<FormValues>({
     defaultValues: {
@@ -86,6 +104,12 @@ function EditDiaryContent() {
         ...assets.map(a => ({ data: a.data, mimeType: a.mimeType })),
       ]
 
+      if (entry.reminderAt && entry.reminderAt > Date.now()) {
+        const d = new Date(entry.reminderAt)
+        const pad = (n: number) => String(n).padStart(2, '0')
+        setReminderDatetime(`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`)
+      }
+
       reset({
         title: entry.title ?? '',
         content,
@@ -106,6 +130,8 @@ function EditDiaryContent() {
     try {
       const now = Date.now()
 
+      const reminderAt = reminderDatetime ? new Date(reminderDatetime).getTime() : undefined
+
       await updateDiaryEntry(entryId, {
         title: data.title,
         content: data.content,
@@ -113,8 +139,13 @@ function EditDiaryContent() {
         gratitude: data.gratitude,
         tagIds: data.tagIds,
         hasPhotos: data.photos.length > 0,
+        reminderAt,
         updatedAt: now,
       })
+
+      if (reminderAt && reminderAt > Date.now()) {
+        await scheduleReminder(reminderAt, data.title)
+      }
 
       const existing = await db.entryStickers.where('entryId').equals(entryId).toArray()
       for (const s of existing) {
@@ -237,6 +268,32 @@ function EditDiaryContent() {
 
         {activeTab === 'Photos' && (
           <PhotoAttachment photos={photos} onChange={v => setValue('photos', v)} />
+        )}
+
+        {activeTab === 'Reminder' && (
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 mb-1">
+              <Bell size={16} className="text-amber-warm" />
+              <p className="text-sm font-sans font-semibold text-ink">Set a reminder</p>
+            </div>
+            <p className="text-xs font-sans text-ink-300">You'll get a notification at the chosen time.</p>
+            <input
+              type="datetime-local"
+              value={reminderDatetime}
+              onChange={e => setReminderDatetime(e.target.value)}
+              min={new Date().toISOString().slice(0, 16)}
+              className="w-full rounded-xl border border-paper-400 px-3 py-2.5 text-sm font-sans text-ink focus:outline-none focus:ring-2 focus:ring-amber-warm bg-white"
+            />
+            {reminderDatetime && (
+              <button
+                type="button"
+                onClick={() => setReminderDatetime('')}
+                className="text-xs font-sans text-red-400 hover:underline"
+              >
+                Clear reminder
+              </button>
+            )}
+          </div>
         )}
       </div>
     </div>
