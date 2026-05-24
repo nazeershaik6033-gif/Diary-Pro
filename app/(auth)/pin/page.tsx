@@ -6,7 +6,6 @@ import { db } from '@/lib/db'
 import { useAuth } from '@/app/contexts/AuthContext'
 import { PINPad } from '@/components/shared/PINPad'
 import { verifyPIN } from '@/lib/utils/hash'
-import { Lock } from 'lucide-react'
 
 export default function PinPage() {
   const router = useRouter()
@@ -36,18 +35,20 @@ export default function PinPage() {
   }
 
   return (
-    <div className="min-h-screen bg-paper flex flex-col items-center justify-center px-6 pt-safe pb-safe">
-      <div className="mb-10 text-center">
-        <div className="w-16 h-16 rounded-full bg-amber-faint flex items-center justify-center mx-auto mb-4">
-          <Lock size={28} className="text-amber-warm" />
+    <div
+      className="min-h-screen flex flex-col items-center justify-center px-8 pt-safe pb-safe"
+      style={{ background: 'linear-gradient(160deg, #1a1a2e 0%, #16213e 50%, #0f0f1a 100%)' }}
+    >
+      <div className="flex flex-col items-center gap-10 w-full max-w-xs">
+        <div className="text-center space-y-2">
+          <p className="text-white text-2xl font-light tracking-wide">Enter Passcode</p>
+          {attempts >= 3 && (
+            <p className="text-red-400 text-sm font-sans">Incorrect PIN — try again</p>
+          )}
         </div>
-        <h1 className="text-2xl font-serif font-bold text-ink">Diary Pro</h1>
-        <p className="text-sm font-sans text-ink-300 mt-1">Enter your PIN to continue</p>
-        {attempts >= 3 && (
-          <p className="text-xs text-red-400 mt-2">Incorrect PIN. Try again.</p>
-        )}
+
+        <PINPad variant="lock" onComplete={handlePIN} error={error} />
       </div>
-      <PINPad onComplete={handlePIN} error={error} />
     </div>
   )
 }

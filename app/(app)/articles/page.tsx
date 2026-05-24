@@ -52,19 +52,16 @@ function domain(url: string) {
 }
 
 // ---------------------------------------------------------------------------
-// Article card with Manage Collections option
+// Article card
 // ---------------------------------------------------------------------------
-function ArticleCard({ article, onMove, onDelete, onManageCollections, collectionMode, position, onRemoveFromCollection, href }: {
+function ArticleCard({ article, onShowMenu, collectionMode, position, onRemoveFromCollection, href }: {
   article: Article
-  onMove?: (id: number, f: ArticleFolder) => void
-  onDelete?: (id: number) => void
-  onManageCollections?: (article: Article) => void
+  onShowMenu?: () => void
   collectionMode?: boolean
   position?: number
   onRemoveFromCollection?: (id: number) => void
   href: string
 }) {
-  const [menuOpen, setMenuOpen] = useState(false)
   const isPdf = article.type === 'pdf'
 
   return (
@@ -119,46 +116,69 @@ function ArticleCard({ article, onMove, onDelete, onManageCollections, collectio
             <X size={12} /> Remove
           </button>
         )}
-        {!collectionMode && (
-          <div className="relative">
-            <button onClick={() => setMenuOpen(v => !v)} className="p-1.5 rounded-lg hover:bg-paper-300 text-ink-300">
-              <MoreVertical size={14} />
-            </button>
-            <AnimatePresence>
-              {menuOpen && (
-                <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-                  className="absolute right-0 bottom-8 bg-white rounded-xl shadow-lg border border-paper-300 py-1 z-10 min-w-[170px]">
-                  {onManageCollections && (
-                    <>
-                      <button onClick={() => { onManageCollections(article); setMenuOpen(false) }}
-                        className="flex items-center gap-2 w-full px-3 py-2 text-sm font-sans text-ink hover:bg-paper-200">
-                        <Layers size={14} className="text-violet-400" /> Manage Collections
-                      </button>
-                      <div className="border-t border-paper-200 my-1" />
-                    </>
-                  )}
-                  {onMove && FOLDERS.filter(f => f.key !== article.folder).map(f => (
-                    <button key={f.key} onClick={() => { onMove(article.id!, f.key); setMenuOpen(false) }}
-                      className="flex items-center gap-2 w-full px-3 py-2 text-sm font-sans text-ink hover:bg-paper-200">
-                      <f.icon size={14} className="text-ink-300" /> Move to {f.label}
-                    </button>
-                  ))}
-                  {onDelete && (
-                    <>
-                      <div className="border-t border-paper-200 my-1" />
-                      <button onClick={() => { onDelete(article.id!); setMenuOpen(false) }}
-                        className="flex items-center gap-2 w-full px-3 py-2 text-sm font-sans text-red-500 hover:bg-red-50">
-                        <Trash2 size={14} /> Delete
-                      </button>
-                    </>
-                  )}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+        {!collectionMode && onShowMenu && (
+          <button onClick={onShowMenu} className="p-1.5 rounded-lg hover:bg-paper-300 text-ink-300">
+            <MoreVertical size={14} />
+          </button>
         )}
       </div>
     </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Article action bottom sheet (replaces floating dropdown)
+// ---------------------------------------------------------------------------
+function ArticleMenuSheet({ article, onClose, showToast, onManageCollections }: {
+  article: Article
+  onClose: () => void
+  showToast: (msg: string, type: 'success' | 'error') => void
+  onManageCollections?: (a: Article) => void
+}) {
+  async function handleMove(folder: ArticleFolder) {
+    await moveArticle(article.id!, folder)
+    showToast(`Moved to ${FOLDERS.find(f => f.key === folder)?.label}`, 'success')
+    onClose()
+  }
+
+  async function handleDelete() {
+    await deleteArticle(article.id!)
+    showToast('Deleted', 'success')
+    onClose()
+  }
+
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 bg-black/40 flex items-end" onClick={onClose}>
+      <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
+        transition={{ type: 'spring', damping: 30, stiffness: 400 }}
+        className="w-full bg-white rounded-t-3xl pb-safe"
+        onClick={e => e.stopPropagation()}>
+        <div className="w-10 h-1 bg-paper-400 rounded-full mx-auto mt-3 mb-1" />
+        <p className="px-6 py-3 font-sans font-semibold text-ink text-sm truncate border-b border-paper-200">
+          {article.title}
+        </p>
+        <div className="py-2">
+          {onManageCollections && (
+            <button onClick={() => { onManageCollections(article); onClose() }}
+              className="flex items-center gap-3 w-full px-6 py-3.5 text-sm font-sans text-ink hover:bg-paper-200 active:bg-paper-300">
+              <Layers size={18} className="text-violet-400 flex-shrink-0" /> Manage Collections
+            </button>
+          )}
+          {FOLDERS.filter(f => f.key !== article.folder).map(f => (
+            <button key={f.key} onClick={() => handleMove(f.key)}
+              className="flex items-center gap-3 w-full px-6 py-3.5 text-sm font-sans text-ink hover:bg-paper-200 active:bg-paper-300">
+              <f.icon size={18} className="text-ink-300 flex-shrink-0" /> Move to {f.label}
+            </button>
+          ))}
+          <div className="border-t border-paper-200 mx-6 my-1" />
+          <button onClick={handleDelete}
+            className="flex items-center gap-3 w-full px-6 py-3.5 text-sm font-sans text-red-500 hover:bg-red-50 active:bg-red-100">
+            <Trash2 size={18} className="flex-shrink-0" /> Delete
+          </button>
+        </div>
+      </motion.div>
+    </motion.div>
   )
 }
 
@@ -255,7 +275,11 @@ function CollectionDetail({ collection, onBack, showToast }: {
   }
 
   const filtered = addSearch.trim()
-    ? allArticles.filter(a => a.title.toLowerCase().includes(addSearch.toLowerCase()))
+    ? allArticles.filter(a => {
+        const q = addSearch.toLowerCase()
+        return a.title.toLowerCase().includes(q)
+          || (a.siteName || domain(a.url)).toLowerCase().includes(q)
+      })
     : allArticles
 
   return (
@@ -642,6 +666,7 @@ export default function ArticlesPage() {
   const [step, setStep] = useState<ModalStep>('closed')
   const [selectedCollection, setSelectedCollection] = useState<ArticleCollection | null>(null)
   const [managingArticle, setManagingArticle] = useState<Article | null>(null)
+  const [menuArticle, setMenuArticle] = useState<Article | null>(null)
 
   const [formSection, setFormSection] = useState<ArticleSection>('business')
   const [formTags, setFormTags] = useState('')
@@ -834,9 +859,7 @@ export default function ArticlesPage() {
                   <ArticleCard
                     article={a}
                     href={`/articles/reader?id=${a.id}`}
-                    onMove={async (id, f) => { await moveArticle(id, f); showToast(`Moved to ${FOLDERS.find(x => x.key === f)?.label}`, 'success') }}
-                    onDelete={async id => { await deleteArticle(id); showToast('Deleted', 'success') }}
-                    onManageCollections={setManagingArticle}
+                    onShowMenu={() => setMenuArticle(a)}
                   />
                 </motion.div>
               ))}
@@ -844,6 +867,18 @@ export default function ArticlesPage() {
           </>
         )}
       </div>
+
+      {/* Article action sheet */}
+      <AnimatePresence>
+        {menuArticle && (
+          <ArticleMenuSheet
+            article={menuArticle}
+            onClose={() => setMenuArticle(null)}
+            showToast={showToast}
+            onManageCollections={a => { setManagingArticle(a); setMenuArticle(null) }}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Manage collections sheet */}
       <AnimatePresence>
