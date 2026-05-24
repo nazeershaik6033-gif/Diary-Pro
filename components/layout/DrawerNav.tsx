@@ -29,8 +29,8 @@ const NAV_ITEMS = [
 ]
 
 const BOTTOM_ITEMS = [
-  { href: '/diary/search', label: 'Search',   icon: Search,   color: 'text-ink-300' },
-  { href: '/settings',     label: 'Settings', icon: Settings, color: 'text-ink-300' },
+  { href: '/diary/search', label: 'Search',   icon: Search,   color: 'text-sky-500' },
+  { href: '/settings',     label: 'Settings', icon: Settings, color: 'text-slate-500' },
 ]
 
 interface DrawerNavProps {
@@ -94,7 +94,7 @@ export function DrawerNav({ open, onClose }: DrawerNavProps) {
           })}
         </div>
 
-        {/* Bottom items */}
+        {/* Bottom items — same style as nav items */}
         <div className="border-t border-paper-300 py-2 flex-shrink-0">
           {BOTTOM_ITEMS.map(item => {
             const active = pathname === item.href || pathname.startsWith(item.href + '/')

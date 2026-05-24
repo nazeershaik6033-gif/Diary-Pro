@@ -3,9 +3,14 @@ import { useState } from 'react'
 import { Plus } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { QuickCaptureModal } from '@/components/shared/QuickCaptureModal'
+import { usePathname } from 'next/navigation'
 
 export function FloatingActionButton() {
   const [open, setOpen] = useState(false)
+  const pathname = usePathname()
+
+  // Article reader has its own add flow in the header — hide global FAB there
+  if (pathname.startsWith('/articles')) return null
 
   return (
     <>
