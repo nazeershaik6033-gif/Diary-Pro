@@ -17,6 +17,7 @@ import { Spinner } from '@/components/ui/Spinner'
 import { formatDisplay, formatDay } from '@/lib/utils/date'
 import { cn } from '@/lib/utils/cn'
 import { Bell } from 'lucide-react'
+import { TasksTab, type TodoItem } from '@/components/diary/TasksTab'
 
 interface FormValues {
   title: string
@@ -28,7 +29,7 @@ interface FormValues {
   photos: { data: string; mimeType: string }[]
 }
 
-const TABS = ['Write', 'Mood', 'Gratitude', 'Learnings', 'Photos', 'Reminder'] as const
+const TABS = ['Write', 'Tasks', 'Mood', 'Gratitude', 'Learnings', 'Photos', 'Reminder'] as const
 type Tab = typeof TABS[number]
 
 async function scheduleReminder(reminderAt: number, title: string) {
@@ -57,6 +58,7 @@ function EditDiaryContent() {
   const [ready, setReady] = useState(false)
   const [activeTab, setActiveTab] = useState<Tab>('Write')
   const [reminderDatetime, setReminderDatetime] = useState('')  // 'YYYY-MM-DDTHH:mm'
+  const [todos, setTodos] = useState<TodoItem[]>([])
 
   const { control, handleSubmit, setValue, watch, reset } = useForm<FormValues>({
     defaultValues: {
@@ -104,6 +106,10 @@ function EditDiaryContent() {
         ...assets.map(a => ({ data: a.data, mimeType: a.mimeType })),
       ]
 
+      if (entry.todos && entry.todos.length > 0) {
+        setTodos(entry.todos)
+      }
+
       if (entry.reminderAt && entry.reminderAt > Date.now()) {
         const d = new Date(entry.reminderAt)
         const pad = (n: number) => String(n).padStart(2, '0')
@@ -139,6 +145,7 @@ function EditDiaryContent() {
         gratitude: data.gratitude,
         tagIds: data.tagIds,
         hasPhotos: data.photos.length > 0,
+        todos: todos.length > 0 ? todos : undefined,
         reminderAt,
         updatedAt: now,
       })
@@ -221,6 +228,9 @@ function EditDiaryContent() {
               {tab === 'Photos' && photos.length > 0 && (
                 <span className="ml-1 text-xs bg-amber-warm text-white rounded-full px-1.5">{photos.length}</span>
               )}
+              {tab === 'Tasks' && todos.length > 0 && (
+                <span className="ml-1 text-xs bg-amber-warm text-white rounded-full px-1.5">{todos.length}</span>
+              )}
             </button>
           ))}
         </div>
@@ -233,6 +243,10 @@ function EditDiaryContent() {
               <RichTextEditor value={field.value} onChange={field.onChange} placeholder="Write your thoughts…" />
             )}
           />
+        )}
+
+        {activeTab === 'Tasks' && (
+          <TasksTab todos={todos} onChange={setTodos} />
         )}
 
         {activeTab === 'Mood' && (
