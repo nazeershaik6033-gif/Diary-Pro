@@ -54,6 +54,7 @@ export interface DiaryEntry {
   latestContentId?: number
   plainText?: string
   reminderAt?: number   // Unix timestamp for a scheduled reminder notification
+  todos?: { text: string; done: boolean }[]
   createdAt: number
   updatedAt: number
 }

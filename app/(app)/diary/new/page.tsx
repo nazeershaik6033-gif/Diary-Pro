@@ -10,6 +10,7 @@ import { GratitudeSection } from '@/components/diary/GratitudeSection'
 import { TypedTagPicker } from '@/components/diary/TypedTagPicker'
 import { RichTextEditor } from '@/components/diary/RichTextEditor'
 import { PhotoAttachment } from '@/components/diary/PhotoAttachment'
+import { TasksTab, type TodoItem } from '@/components/diary/TasksTab'
 import { createDiaryEntry, addDiaryAsset, addEntrySticker } from '@/lib/db/diary'
 import { useToast } from '@/app/contexts/ToastContext'
 import { toDateString } from '@/lib/utils/date'
@@ -26,7 +27,7 @@ interface FormValues {
   photos: { data: string; mimeType: string }[]
 }
 
-const TABS = ['Write', 'Mood', 'Gratitude', 'Learnings', 'Photos'] as const
+const TABS = ['Write', 'Tasks', 'Mood', 'Gratitude', 'Learnings', 'Photos'] as const
 type Tab = typeof TABS[number]
 
 export default function NewDiaryEntryPage() {
@@ -34,6 +35,7 @@ export default function NewDiaryEntryPage() {
   const { showToast } = useToast()
   const [loading, setLoading] = useState(false)
   const [activeTab, setActiveTab] = useState<Tab>('Write')
+  const [todos, setTodos] = useState<TodoItem[]>([])
 
   const { control, handleSubmit, setValue, watch } = useForm<FormValues>({
     defaultValues: {
@@ -65,6 +67,7 @@ export default function NewDiaryEntryPage() {
         gratitude: data.gratitude,
         tagIds: data.tagIds,
         hasPhotos: data.photos.length > 0,
+        todos: todos.length > 0 ? todos : undefined,
         starred: false,
         pinned: false,
         createdAt: now,
@@ -144,6 +147,9 @@ export default function NewDiaryEntryPage() {
               {tab === 'Photos' && photos.length > 0 && (
                 <span className="ml-1 text-xs bg-amber-warm text-white rounded-full px-1.5">{photos.length}</span>
               )}
+              {tab === 'Tasks' && todos.length > 0 && (
+                <span className="ml-1 text-xs bg-amber-warm text-white rounded-full px-1.5">{todos.length}</span>
+              )}
             </button>
           ))}
         </div>
@@ -157,6 +163,10 @@ export default function NewDiaryEntryPage() {
               <RichTextEditor value={field.value} onChange={field.onChange} placeholder="Write your thoughts…" />
             )}
           />
+        )}
+
+        {activeTab === 'Tasks' && (
+          <TasksTab todos={todos} onChange={setTodos} showCarryForward />
         )}
 
         {activeTab === 'Mood' && (
