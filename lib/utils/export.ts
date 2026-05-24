@@ -6,6 +6,9 @@ export interface ExportData {
   version: number
   exportedAt: number
   diaryEntries: unknown[]
+  entryContents: unknown[]
+  entryStickers: unknown[]
+  tags: unknown[]
   diaryPhotos: unknown[]
   workEntries: unknown[]
   gtdInbox: unknown[]
@@ -33,6 +36,9 @@ export interface ExportData {
   dailyAffirmations: unknown[]
   events: unknown[]
   decisions: unknown[]
+  nutritionLogs?: unknown[]
+  foodLibrary?: unknown[]
+  nutritionGoals?: unknown[]
   articles?: unknown[]
   articleHighlights?: unknown[]
   articleCollections?: unknown[]
@@ -44,6 +50,9 @@ export async function exportAll(): Promise<void> {
     version: 2,
     exportedAt: Date.now(),
     diaryEntries: await db.diaryEntries.toArray(),
+    entryContents: await db.entryContents.toArray(),
+    entryStickers: await db.entryStickers.toArray(),
+    tags: await db.tags.toArray(),
     diaryPhotos: await db.diaryPhotos.toArray(),
     workEntries: await db.workEntries.toArray(),
     gtdInbox: await db.gtdInbox.toArray(),
@@ -71,6 +80,9 @@ export async function exportAll(): Promise<void> {
     dailyAffirmations: await db.dailyAffirmations.toArray(),
     events: await db.events.toArray(),
     decisions: await db.decisions.toArray(),
+    nutritionLogs: await db.nutritionLogs.toArray(),
+    foodLibrary: await db.foodLibrary.toArray(),
+    nutritionGoals: await db.nutritionGoals.toArray(),
     articles: (await db.articles.toArray()).map(a => { const { pdfBlob: _, ...rest } = a; return rest }),
     articleHighlights: await db.articleHighlights.toArray(),
     articleCollections: await db.articleCollections.toArray(),
@@ -99,7 +111,8 @@ export async function importAll(file: File): Promise<void> {
   }
 
   await db.transaction('rw', [
-    db.diaryEntries, db.diaryPhotos, db.workEntries,
+    db.diaryEntries, db.entryContents, db.entryStickers, db.tags,
+    db.diaryPhotos, db.workEntries,
     db.gtdInbox, db.gtdProjects, db.gtdNextActions, db.gtdWaitingFor,
     db.gtdSomedayMaybe, db.gtdWeeklyReviews,
     db.exercises, db.workoutTemplates, db.workoutLogs, db.workoutSets,
@@ -107,9 +120,14 @@ export async function importAll(file: File): Promise<void> {
     db.habits, db.habitLogs,
     db.healthLogs, db.sleepLogs, db.waterLogs, db.supplements, db.supplementLogs,
     db.goals, db.goalMilestones, db.dailyAffirmations,
+    db.events, db.decisions,
+    db.nutritionLogs, db.foodLibrary, db.nutritionGoals,
     db.articles, db.articleHighlights, db.articleCollections, db.articleCollectionItems,
   ], async () => {
     await db.diaryEntries.clear(); await db.diaryEntries.bulkAdd(data.diaryEntries as never[])
+    if (data.entryContents?.length) { await db.entryContents.clear(); await db.entryContents.bulkAdd(data.entryContents as never[]) }
+    if (data.entryStickers?.length) { await db.entryStickers.clear(); await db.entryStickers.bulkAdd(data.entryStickers as never[]) }
+    if (data.tags?.length) { await db.tags.clear(); await db.tags.bulkAdd(data.tags as never[]) }
     await db.diaryPhotos.clear(); await db.diaryPhotos.bulkAdd(data.diaryPhotos as never[])
     await db.workEntries.clear(); await db.workEntries.bulkAdd(data.workEntries as never[])
     await db.gtdInbox.clear(); await db.gtdInbox.bulkAdd(data.gtdInbox as never[])
@@ -137,6 +155,9 @@ export async function importAll(file: File): Promise<void> {
     if (data.dailyAffirmations) { await db.dailyAffirmations.clear(); await db.dailyAffirmations.bulkAdd(data.dailyAffirmations as never[]) }
     if (data.events) { await db.events.clear(); await db.events.bulkAdd(data.events as never[]) }
     if (data.decisions) { await db.decisions.clear(); await db.decisions.bulkAdd(data.decisions as never[]) }
+    if (data.nutritionLogs) { await db.nutritionLogs.clear(); await db.nutritionLogs.bulkAdd(data.nutritionLogs as never[]) }
+    if (data.foodLibrary) { await db.foodLibrary.clear(); await db.foodLibrary.bulkAdd(data.foodLibrary as never[]) }
+    if (data.nutritionGoals) { await db.nutritionGoals.clear(); await db.nutritionGoals.bulkAdd(data.nutritionGoals as never[]) }
     if (data.articles) { await db.articles.clear(); await db.articles.bulkAdd(data.articles as never[]) }
     if (data.articleHighlights) { await db.articleHighlights.clear(); await db.articleHighlights.bulkAdd(data.articleHighlights as never[]) }
     if (data.articleCollections) { await db.articleCollections.clear(); await db.articleCollections.bulkAdd(data.articleCollections as never[]) }
@@ -178,7 +199,8 @@ export async function exportByDuration(duration: ExportDuration, fmt: 'json' | '
     })
 
   const [
-    diaryEntries, workEntries, workoutLogs, habitLogs,
+    diaryEntries, entryContents, entryStickers, tags,
+    workEntries, workoutLogs, habitLogs,
     healthLogs, sleepLogs, waterLogs, supplementLogs, events,
     habits, exercises, workoutTemplates, supplements,
     goals, goalMilestones, decisions,
@@ -188,6 +210,9 @@ export async function exportByDuration(duration: ExportDuration, fmt: 'json' | '
     dailyAffirmations, settings,
   ] = await Promise.all([
     db.diaryEntries.toArray().then(a => filterByDate(a)),
+    db.entryContents.toArray(),
+    db.entryStickers.toArray(),
+    db.tags.toArray(),
     db.workEntries.toArray().then(a => filterByDate(a)),
     db.workoutLogs.toArray().then(a => filterByDate(a)),
     db.habitLogs.toArray().then(a => filterByDate(a)),
@@ -224,7 +249,8 @@ export async function exportByDuration(duration: ExportDuration, fmt: 'json' | '
     const data: ExportData = {
       version: 2,
       exportedAt: Date.now(),
-      diaryEntries, diaryPhotos, workEntries,
+      diaryEntries, entryContents, entryStickers, tags,
+      diaryPhotos, workEntries,
       gtdInbox, gtdProjects, gtdNextActions, gtdWaitingFor,
       gtdSomedayMaybe, gtdWeeklyReviews,
       exercises, workoutTemplates, workoutLogs, workoutSets,
