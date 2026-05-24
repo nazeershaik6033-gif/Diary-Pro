@@ -33,8 +33,10 @@ jobs:
         env:
           NEXT_PUBLIC_BASE_PATH: /Diary-Pro
 
-      - name: Add .nojekyll
-        run: touch out/.nojekyll
+      - name: Add .nojekyll and 404 fallback
+        run: |
+          touch out/.nojekyll
+          cp out/index.html out/404.html
 
       - uses: actions/upload-pages-artifact@v3
         with:
