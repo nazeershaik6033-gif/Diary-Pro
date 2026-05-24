@@ -5,9 +5,110 @@ import { db } from '@/lib/db'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { format } from 'date-fns'
 import Link from 'next/link'
-import { Image as ImageIcon, Mic, Play, Pause } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { Image as ImageIcon, Mic, Play, Pause, X } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 import type { DiaryAsset, DiaryEntry } from '@/types'
+
+// ─── Fullscreen photo viewer with pinch/double-tap zoom ───────────────────────
+function PhotoViewer({ asset, onClose }: { asset: DiaryAsset; onClose: () => void }) {
+  const entry = useLiveQuery<DiaryEntry | undefined>(
+    () => db.diaryEntries.get(asset.entryId),
+    [asset.entryId]
+  )
+  const [scale, setScale] = useState(1)
+  const lastTapRef = useRef(0)
+  const lastDistRef = useRef<number | null>(null)
+  const imgRef = useRef<HTMLImageElement>(null)
+
+  function handleTouchStart(e: React.TouchEvent) {
+    if (e.touches.length === 2) {
+      const dx = e.touches[1].clientX - e.touches[0].clientX
+      const dy = e.touches[1].clientY - e.touches[0].clientY
+      lastDistRef.current = Math.hypot(dx, dy)
+    } else if (e.touches.length === 1) {
+      const now = Date.now()
+      if (now - lastTapRef.current < 280) {
+        // Double-tap: toggle zoom
+        setScale(s => (s > 1 ? 1 : 2.5))
+      }
+      lastTapRef.current = now
+    }
+  }
+
+  function handleTouchMove(e: React.TouchEvent) {
+    if (e.touches.length !== 2 || lastDistRef.current == null) return
+    e.preventDefault()
+    const dx = e.touches[1].clientX - e.touches[0].clientX
+    const dy = e.touches[1].clientY - e.touches[0].clientY
+    const dist = Math.hypot(dx, dy)
+    const delta = dist / lastDistRef.current
+    setScale(s => Math.min(5, Math.max(1, s * delta)))
+    lastDistRef.current = dist
+  }
+
+  function handleTouchEnd(e: React.TouchEvent) {
+    if (e.touches.length < 2) lastDistRef.current = null
+    if (scale < 1.1) setScale(1)
+  }
+
+  const dateLabel = entry
+    ? format(new Date(entry.date + 'T00:00:00'), 'MMMM d, yyyy')
+    : null
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 bg-black flex flex-col"
+    >
+      {/* Close */}
+      <button
+        onClick={onClose}
+        className="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-black/50 flex items-center justify-center"
+      >
+        <X size={20} className="text-white" />
+      </button>
+
+      {/* Image area */}
+      <div
+        className="flex-1 flex items-center justify-center overflow-hidden"
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
+        <img
+          ref={imgRef}
+          src={asset.data}
+          alt={dateLabel ?? ''}
+          draggable={false}
+          className="max-w-full max-h-full object-contain select-none"
+          style={{
+            transform: `scale(${scale})`,
+            transition: scale === 1 ? 'transform 0.25s ease' : 'none',
+            touchAction: scale > 1 ? 'none' : 'pan-y',
+          }}
+        />
+      </div>
+
+      {/* Bottom bar */}
+      <div className="px-5 pt-3 pb-8 bg-gradient-to-t from-black/70 to-transparent">
+        {dateLabel && (
+          <p className="text-white/60 text-xs font-sans mb-2">{dateLabel}</p>
+        )}
+        {entry && (
+          <Link
+            href={`/diary/entry?date=${entry.date}`}
+            onClick={onClose}
+            className="inline-flex items-center gap-1.5 text-amber-400 text-sm font-sans font-medium"
+          >
+            View diary entry →
+          </Link>
+        )}
+      </div>
+    </motion.div>
+  )
+}
 
 // ─── Duration formatter MM:SS ─────────────────────────────────────────────────
 function formatDuration(seconds: number): string {
@@ -16,38 +117,19 @@ function formatDuration(seconds: number): string {
   return `${m}:${s.toString().padStart(2, '0')}`
 }
 
-// ─── Photo tile: loads its own entry ─────────────────────────────────────────
-function PhotoTile({ asset }: { asset: DiaryAsset }) {
-  const entry = useLiveQuery<DiaryEntry | undefined>(
-    () => db.diaryEntries.get(asset.entryId),
-    [asset.entryId]
+// ─── Photo tile: tapping opens the fullscreen viewer ─────────────────────────
+function PhotoTile({ asset, onOpen }: { asset: DiaryAsset; onOpen: () => void }) {
+  return (
+    <button onClick={onOpen} className="block w-full text-left">
+      <div className="aspect-square relative rounded-xl overflow-hidden bg-paper-300">
+        <img
+          src={asset.data}
+          alt=""
+          className="w-full h-full object-cover"
+        />
+      </div>
+    </button>
   )
-
-  const content = (
-    <div className="aspect-square relative rounded-xl overflow-hidden bg-paper-300 group">
-      <img
-        src={asset.data}
-        alt={entry ? format(new Date(entry.date + 'T00:00:00'), 'MMM d, yyyy') : ''}
-        className="w-full h-full object-cover"
-      />
-      {entry && (
-        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent px-2 py-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-          <p className="text-white text-[11px] font-sans leading-tight">
-            {format(new Date(entry.date + 'T00:00:00'), 'MMM d, yyyy')}
-          </p>
-        </div>
-      )}
-    </div>
-  )
-
-  if (entry) {
-    return (
-      <Link href={`/diary/entry?date=${entry.date}`} className="block">
-        {content}
-      </Link>
-    )
-  }
-  return content
 }
 
 // ─── Audio card: uses HTML5 <audio> ──────────────────────────────────────────
@@ -145,6 +227,7 @@ function TabBar({ active, onChange }: { active: Tab; onChange: (t: Tab) => void 
 // ─── Main content ─────────────────────────────────────────────────────────────
 function LibraryContent() {
   const [activeTab, setActiveTab] = useState<Tab>('photos')
+  const [viewingAsset, setViewingAsset] = useState<DiaryAsset | null>(null)
 
   const assets = useLiveQuery(() =>
     db.diaryAssets.orderBy('createdAt').reverse().toArray()
@@ -190,7 +273,7 @@ function LibraryContent() {
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: i * 0.03 }}
                   >
-                    <PhotoTile asset={asset} />
+                    <PhotoTile asset={asset} onOpen={() => setViewingAsset(asset)} />
                   </motion.div>
                 ))}
               </div>
@@ -223,6 +306,13 @@ function LibraryContent() {
           </>
         )}
       </div>
+
+      {/* Fullscreen photo viewer */}
+      <AnimatePresence>
+        {viewingAsset && (
+          <PhotoViewer asset={viewingAsset} onClose={() => setViewingAsset(null)} />
+        )}
+      </AnimatePresence>
     </div>
   )
 }
