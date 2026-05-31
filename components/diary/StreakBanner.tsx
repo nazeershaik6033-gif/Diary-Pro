@@ -6,9 +6,11 @@ export function StreakBanner() {
   if (streak === 0) return null
 
   return (
-    <div className="flex items-center gap-2 bg-orange-50 border border-orange-200 rounded-xl px-4 py-2.5 mx-4 mb-3">
-      <Flame size={18} className="text-orange-400" />
-      <span className="text-sm font-sans font-medium text-orange-700">
+    <div className="flex items-center gap-3 neu-card rounded-2xl px-4 py-3 mb-3">
+      <div className="neu-icon-pit w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0">
+        <Flame size={18} className="text-[#6b82c8]" />
+      </div>
+      <span className="text-sm font-sans font-medium text-slate-200">
         {streak} day{streak !== 1 ? 's' : ''} in a row — keep it going!
       </span>
     </div>
