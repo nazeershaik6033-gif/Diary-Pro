@@ -4,6 +4,7 @@ import './globals.css'
 import { AuthProvider } from '@/app/contexts/AuthContext'
 import { ToastProvider } from '@/app/contexts/ToastContext'
 import { ToastContainer } from '@/components/ui/Toast'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
 
 const playfair = Playfair_Display({
   subsets: ['latin'],
@@ -62,12 +63,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="mobile-web-app-capable" content="yes" />
       </head>
       <body>
-        <ToastProvider>
-          <AuthProvider>
-            {children}
-            <ToastContainer />
-          </AuthProvider>
-        </ToastProvider>
+        <ErrorBoundary>
+          <ToastProvider>
+            <AuthProvider>
+              {children}
+              <ToastContainer />
+            </AuthProvider>
+          </ToastProvider>
+        </ErrorBoundary>
       </body>
     </html>
   )

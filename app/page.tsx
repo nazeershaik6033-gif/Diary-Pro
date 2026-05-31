@@ -4,16 +4,23 @@ import { useRouter } from 'next/navigation'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '@/lib/db'
 import { useAuth } from '@/app/contexts/AuthContext'
-import { Spinner } from '@/components/ui/Spinner'
 
 export default function RootPage() {
   const router = useRouter()
   const { isVerified, pinEnabled } = useAuth()
   const settings = useLiveQuery(() => db.settings.get('singleton'))
 
+  // Clear stale page caches so old broken SW cache never blocks fresh HTML
+  useEffect(() => {
+    if ('caches' in window) {
+      caches.keys().then(names => {
+        names.filter(n => n === 'pages' || n === 'start-url').forEach(n => caches.delete(n))
+      })
+    }
+  }, [])
+
   useEffect(() => {
     if (settings === undefined) return
-    // settings === null means new user (no record yet) → go to diary
     if (pinEnabled && !isVerified) {
       router.replace('/pin')
     } else {
