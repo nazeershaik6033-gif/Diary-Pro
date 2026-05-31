@@ -24,8 +24,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
   const [forceShow, setForceShow] = useState(false)
 
   useEffect(() => {
-    // Failsafe: if DB hasn't loaded in 2s, show the app anyway
-    const t = setTimeout(() => setForceShow(true), 2000)
+    const t = setTimeout(() => setForceShow(true), 500)
     return () => clearTimeout(t)
   }, [])
 
