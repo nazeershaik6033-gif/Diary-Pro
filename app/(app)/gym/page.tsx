@@ -65,7 +65,7 @@ export default function GymPage() {
       {/* Calories today card */}
       <Link href="/gym/calories">
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-          className="mb-6 flex items-center gap-3 bg-white rounded-2xl shadow-warm-sm border border-paper-300 p-4 hover:shadow-warm-md transition-shadow">
+          className="mb-6 flex items-center gap-3 bg-paper-300 rounded-2xl shadow-warm-sm border border-paper-300 p-4 hover:shadow-warm-md transition-shadow">
           <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center flex-shrink-0">
             <Flame size={18} className="text-orange-500" />
           </div>

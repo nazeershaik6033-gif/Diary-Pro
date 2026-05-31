@@ -106,7 +106,7 @@ export function TypedTagPicker({ selectedTagIds, onChange }: TypedTagPickerProps
 
       {/* Chips + input row */}
       <div
-        className="flex flex-wrap gap-2 p-3 rounded-xl border border-paper-400 bg-white min-h-[44px] cursor-text"
+        className="flex flex-wrap gap-2 p-3 rounded-xl border border-paper-400 bg-paper-300 min-h-[44px] cursor-text"
         onClick={() => inputRef.current?.focus()}
       >
         {selectedTags.map(tag => (
@@ -142,7 +142,7 @@ export function TypedTagPicker({ selectedTagIds, onChange }: TypedTagPickerProps
 
       {/* Dropdown: matching existing tags */}
       {isOpen && filteredTags.length > 0 && (
-        <div className="rounded-xl border border-paper-300 bg-white shadow-warm-sm overflow-hidden">
+        <div className="rounded-xl border border-paper-300 bg-paper-300 shadow-warm-sm overflow-hidden">
           {filteredTags.slice(0, 8).map(tag => (
             <button
               key={tag.id}
@@ -162,7 +162,7 @@ export function TypedTagPicker({ selectedTagIds, onChange }: TypedTagPickerProps
 
       {/* Dropdown: no matches — show "create" prompt */}
       {isOpen && filteredTags.length === 0 && input.trim().length > 0 && (
-        <div className="rounded-xl border border-paper-300 bg-white shadow-warm-sm overflow-hidden">
+        <div className="rounded-xl border border-paper-300 bg-paper-300 shadow-warm-sm overflow-hidden">
           <button
             type="button"
             onMouseDown={e => {

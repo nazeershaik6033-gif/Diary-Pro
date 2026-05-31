@@ -27,7 +27,7 @@ export function SupplementChecklist() {
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-warm-sm border border-paper-300 p-4">
+    <div className="bg-paper-300 rounded-2xl shadow-warm-sm border border-paper-300 p-4">
       <div className="flex items-center justify-between mb-3">
         <span className="font-sans font-semibold text-ink">Supplements</span>
         <button onClick={() => setAddOpen(true)} className="w-7 h-7 rounded-lg bg-paper-300 flex items-center justify-center">

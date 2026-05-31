@@ -47,7 +47,7 @@ export function HabitCard({ habit }: HabitCardProps) {
   return (
     <motion.div
       layout
-      className={cn('bg-white rounded-2xl shadow-warm-sm border border-paper-300 p-4 flex items-center gap-4', done && 'bg-opacity-80')}
+      className={cn('bg-paper-300 rounded-2xl shadow-warm-sm border border-paper-300 p-4 flex items-center gap-4', done && 'bg-opacity-80')}
     >
       <HabitRing color={habit.color} progress={progress} size={56}>
         {done

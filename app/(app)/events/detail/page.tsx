@@ -33,7 +33,7 @@ function EventDetailContent() {
     <div>
       <PageHeader title="Event" showBack />
       <div className="px-4 space-y-4 pb-8">
-        <div className="bg-white rounded-2xl shadow-warm border border-paper-300 p-5 space-y-4">
+        <div className="bg-paper-300 rounded-2xl shadow-warm border border-paper-300 p-5 space-y-4">
           <div className="flex items-start justify-between gap-3">
             <h2 className="text-xl font-serif font-bold text-ink">{event.title}</h2>
             <span className={cn('text-xs font-sans px-2.5 py-1 rounded-full flex-shrink-0', cat.badge)}>{cat.label}</span>

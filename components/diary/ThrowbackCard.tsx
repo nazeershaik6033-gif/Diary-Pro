@@ -63,7 +63,7 @@ export function ThrowbackCard({ entry, content, stickers }: ThrowbackCardProps) 
   return (
     <div
       className={cn(
-        'rounded-2xl bg-white shadow-warm-sm border border-paper-300 overflow-hidden',
+        'rounded-2xl bg-paper-300 shadow-warm-sm border border-paper-300 overflow-hidden',
         hasTone && 'border-l-4',
         hasTone && borderClass
       )}

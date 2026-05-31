@@ -44,7 +44,7 @@ function TemplateCard({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.96 }}
       transition={{ delay: index * 0.04 }}
-      className="bg-white rounded-2xl shadow-warm-sm border border-paper-300 p-4 relative"
+      className="bg-paper-300 rounded-2xl shadow-warm-sm border border-paper-300 p-4 relative"
     >
       {/* Delete button for user-created templates */}
       {onDelete && (
@@ -142,7 +142,7 @@ function TemplatesContent() {
                 <motion.div
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="flex flex-col items-center justify-center py-10 text-center bg-white rounded-2xl border border-paper-300"
+                  className="flex flex-col items-center justify-center py-10 text-center bg-paper-300 rounded-2xl border border-paper-300"
                 >
                   <FileText size={36} className="text-ink-200 mb-3" />
                   <p className="text-sm font-sans text-ink-300 max-w-[220px]">

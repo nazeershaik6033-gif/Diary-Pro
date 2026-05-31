@@ -73,12 +73,12 @@ export default function NewEventPage() {
           {...register('title', { required: true })}
           placeholder="Event title"
           className={cn(
-            'w-full rounded-xl border px-4 py-3 text-[16px] font-sans text-ink bg-white focus:outline-none focus:ring-2 focus:ring-amber-warm',
+            'w-full rounded-xl border px-4 py-3 text-[16px] font-sans text-ink bg-paper-300 focus:outline-none focus:ring-2 focus:ring-amber-warm',
             errors.title ? 'border-red-400' : 'border-paper-400'
           )}
         />
 
-        <div className="bg-white rounded-2xl border border-paper-300 shadow-warm-sm p-4 space-y-3">
+        <div className="bg-paper-300 rounded-2xl border border-paper-300 shadow-warm-sm p-4 space-y-3">
           <p className="text-xs font-sans font-semibold text-ink-300 uppercase tracking-wider">Category</p>
           <div className="flex gap-2 flex-wrap">
             {categories.map(cat => {
@@ -97,7 +97,7 @@ export default function NewEventPage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl border border-paper-300 shadow-warm-sm p-4 space-y-3">
+        <div className="bg-paper-300 rounded-2xl border border-paper-300 shadow-warm-sm p-4 space-y-3">
           <p className="text-xs font-sans font-semibold text-ink-300 uppercase tracking-wider">Date & Time</p>
           <label className="flex items-center gap-3">
             <input type="checkbox" {...register('allDay')} className="w-4 h-4 accent-amber-warm" />
@@ -131,7 +131,7 @@ export default function NewEventPage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl border border-paper-300 shadow-warm-sm p-4 space-y-3">
+        <div className="bg-paper-300 rounded-2xl border border-paper-300 shadow-warm-sm p-4 space-y-3">
           <p className="text-xs font-sans font-semibold text-ink-300 uppercase tracking-wider">Details</p>
           <input {...register('location')} placeholder="Location (optional)"
             className="w-full rounded-xl border border-paper-400 px-4 py-2.5 text-[16px] font-sans text-ink bg-paper-50 focus:outline-none focus:ring-2 focus:ring-amber-warm" />
@@ -139,7 +139,7 @@ export default function NewEventPage() {
             className="w-full rounded-xl border border-paper-400 px-4 py-2.5 text-[16px] font-sans text-ink bg-paper-50 focus:outline-none focus:ring-2 focus:ring-amber-warm resize-none" />
         </div>
 
-        <div className="bg-white rounded-2xl border border-paper-300 shadow-warm-sm p-4 space-y-3">
+        <div className="bg-paper-300 rounded-2xl border border-paper-300 shadow-warm-sm p-4 space-y-3">
           <p className="text-xs font-sans font-semibold text-ink-300 uppercase tracking-wider">RSVP</p>
           <div className="grid grid-cols-4 gap-2">
             {(['pending', 'yes', 'maybe', 'no'] as EventRSVP[]).map(r => (
@@ -155,7 +155,7 @@ export default function NewEventPage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl border border-paper-300 shadow-warm-sm p-4 space-y-3">
+        <div className="bg-paper-300 rounded-2xl border border-paper-300 shadow-warm-sm p-4 space-y-3">
           <p className="text-xs font-sans font-semibold text-ink-300 uppercase tracking-wider">Recurring</p>
           <select {...register('recurring')}
             className="w-full rounded-xl border border-paper-400 px-4 py-2.5 text-[16px] font-sans text-ink bg-paper-50 focus:outline-none focus:ring-2 focus:ring-amber-warm">

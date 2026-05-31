@@ -57,7 +57,7 @@ function ProsConsView({ decision }: { decision: Decision }) {
       </div>
 
       {(['pros', 'cons'] as const).map(side => (
-        <div key={side} className="bg-white rounded-2xl border border-paper-300 shadow-warm-sm p-4 space-y-3">
+        <div key={side} className="bg-paper-300 rounded-2xl border border-paper-300 shadow-warm-sm p-4 space-y-3">
           <p className={cn('text-xs font-sans font-semibold uppercase tracking-wider', side === 'pros' ? 'text-green-600' : 'text-red-500')}>
             {side === 'pros' ? `✓ Pros (${totalPros} pts)` : `✕ Cons (${totalCons} pts)`}
           </p>
@@ -109,7 +109,7 @@ function JournalView({ decision }: { decision: Decision }) {
   return (
     <div className="space-y-4">
       {fields.map(f => (
-        <div key={f.key} className="bg-white rounded-2xl border border-paper-300 shadow-warm-sm p-4 space-y-2">
+        <div key={f.key} className="bg-paper-300 rounded-2xl border border-paper-300 shadow-warm-sm p-4 space-y-2">
           <p className="text-xs font-sans font-semibold text-ink-300 uppercase tracking-wider">{f.label}</p>
           <textarea
             value={(form[f.key] as string) ?? ''}
@@ -128,7 +128,7 @@ function JournalView({ decision }: { decision: Decision }) {
             { key: 'actualOutcome' as const,   label: 'Actual Outcome',   placeholder: 'What actually happened…' },
             { key: 'lessonsLearned' as const,   label: 'Lessons Learned',  placeholder: 'What would you do differently…' },
           ].map(f => (
-            <div key={f.key} className="bg-white rounded-2xl border border-paper-300 shadow-warm-sm p-4 space-y-2">
+            <div key={f.key} className="bg-paper-300 rounded-2xl border border-paper-300 shadow-warm-sm p-4 space-y-2">
               <p className="text-xs font-sans font-semibold text-ink-300 uppercase tracking-wider">{f.label}</p>
               <textarea
                 value={(form[f.key] as string) ?? ''}
@@ -187,7 +187,7 @@ function MatrixView({ decision }: { decision: Decision }) {
   return (
     <div className="space-y-4">
       {totals.length > 0 && maxScore > 0 && (
-        <div className="bg-white rounded-2xl border border-paper-300 shadow-warm-sm p-4 space-y-3">
+        <div className="bg-paper-300 rounded-2xl border border-paper-300 shadow-warm-sm p-4 space-y-3">
           <p className="text-xs font-sans font-semibold text-ink-300 uppercase tracking-wider">Ranking</p>
           {totals.map(({ opt, score }, i) => (
             <div key={opt} className="flex items-center gap-3">
@@ -207,7 +207,7 @@ function MatrixView({ decision }: { decision: Decision }) {
         </div>
       )}
 
-      <div className="bg-white rounded-2xl border border-paper-300 shadow-warm-sm p-4 space-y-2">
+      <div className="bg-paper-300 rounded-2xl border border-paper-300 shadow-warm-sm p-4 space-y-2">
         <p className="text-xs font-sans font-semibold text-ink-300 uppercase tracking-wider">Options to compare</p>
         {data.options.map(opt => <p key={opt} className="text-sm font-sans text-ink py-0.5">• {opt}</p>)}
         <div className="flex gap-2 mt-1">
@@ -219,7 +219,7 @@ function MatrixView({ decision }: { decision: Decision }) {
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl border border-paper-300 shadow-warm-sm p-4 space-y-3">
+      <div className="bg-paper-300 rounded-2xl border border-paper-300 shadow-warm-sm p-4 space-y-3">
         <p className="text-xs font-sans font-semibold text-ink-300 uppercase tracking-wider">Criteria & Scores</p>
         {data.criteria.map(c => (
           <div key={c.id} className="space-y-2 pb-3 border-b border-paper-300 last:border-0 last:pb-0">
@@ -305,7 +305,7 @@ function DecisionDetailContent() {
               <input
                 placeholder="What did you decide?"
                 onBlur={e => { if (e.target.value) db.decisions.update(decision.id!, { chosenOption: e.target.value, updatedAt: Date.now() }) }}
-                className="flex-1 rounded-xl border border-green-200 px-3 py-2 text-[16px] font-sans text-ink bg-white focus:outline-none focus:ring-2 focus:ring-green-400"
+                className="flex-1 rounded-xl border border-green-200 px-3 py-2 text-[16px] font-sans text-ink bg-paper-300 focus:outline-none focus:ring-2 focus:ring-green-400"
               />
               <CheckCircle size={20} className="text-green-400 my-auto flex-shrink-0" />
             </div>

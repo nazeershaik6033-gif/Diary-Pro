@@ -53,7 +53,7 @@ export function ExerciseSetRow({ setNumber, reps: defaultReps, weight: defaultWe
             value={weight}
             onChange={e => handleKgChange(e.target.value)}
             placeholder="0"
-            className="w-[52px] text-center rounded-l-lg border border-paper-400 border-r-0 py-1.5 text-[15px] font-sans text-ink focus:outline-none focus:z-10 focus:ring-2 focus:ring-amber-warm bg-white"
+            className="w-[52px] text-center rounded-l-lg border border-paper-400 border-r-0 py-1.5 text-[15px] font-sans text-ink focus:outline-none focus:z-10 focus:ring-2 focus:ring-amber-warm bg-paper-300"
             inputMode="decimal"
           />
           <span className="absolute bottom-0.5 left-0 right-0 text-center text-[8px] font-sans text-ink-300 pointer-events-none">kg</span>
@@ -64,7 +64,7 @@ export function ExerciseSetRow({ setNumber, reps: defaultReps, weight: defaultWe
             value={weightLbs}
             onChange={e => handleLbsChange(e.target.value)}
             placeholder="0"
-            className="w-[52px] text-center rounded-r-lg border border-paper-400 py-1.5 text-[15px] font-sans text-ink focus:outline-none focus:z-10 focus:ring-2 focus:ring-amber-warm bg-white"
+            className="w-[52px] text-center rounded-r-lg border border-paper-400 py-1.5 text-[15px] font-sans text-ink focus:outline-none focus:z-10 focus:ring-2 focus:ring-amber-warm bg-paper-300"
             inputMode="decimal"
           />
           <span className="absolute bottom-0.5 left-0 right-0 text-center text-[8px] font-sans text-ink-300 pointer-events-none">lbs</span>
@@ -77,7 +77,7 @@ export function ExerciseSetRow({ setNumber, reps: defaultReps, weight: defaultWe
         value={reps}
         onChange={e => setReps(e.target.value)}
         placeholder="reps"
-        className="w-14 text-center rounded-lg border border-paper-400 py-1.5 text-[16px] font-sans text-ink focus:outline-none focus:ring-2 focus:ring-amber-warm bg-white flex-shrink-0"
+        className="w-14 text-center rounded-lg border border-paper-400 py-1.5 text-[16px] font-sans text-ink focus:outline-none focus:ring-2 focus:ring-amber-warm bg-paper-300 flex-shrink-0"
         inputMode="numeric"
       />
       <button

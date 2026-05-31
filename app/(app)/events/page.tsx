@@ -16,7 +16,7 @@ function EventCard({ event }: { event: CalendarEvent }) {
 
   return (
     <Link href={`/events/detail?id=${event.id}`}>
-      <div className={cn('bg-white rounded-2xl shadow-warm-sm border border-paper-300 p-4 space-y-2', past && 'opacity-60')}>
+      <div className={cn('bg-paper-300 rounded-2xl shadow-warm-sm border border-paper-300 p-4 space-y-2', past && 'opacity-60')}>
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-2 flex-1 min-w-0">
             <div className={cn('w-2.5 h-2.5 rounded-full flex-shrink-0', cat.dot)} />

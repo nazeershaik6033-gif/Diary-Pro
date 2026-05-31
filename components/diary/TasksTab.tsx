@@ -87,7 +87,7 @@ export function TasksTab({
           onChange={e => setNewText(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && addTask()}
           placeholder="Add a task…"
-          className="flex-1 px-4 py-2.5 rounded-xl border border-paper-400 text-sm font-sans text-ink focus:outline-none focus:ring-2 focus:ring-amber-warm bg-white"
+          className="flex-1 px-4 py-2.5 rounded-xl border border-paper-400 text-sm font-sans text-ink focus:outline-none focus:ring-2 focus:ring-amber-warm bg-paper-300"
         />
         <button
           type="button"
@@ -105,7 +105,7 @@ export function TasksTab({
           {undone.map((task, i) => {
             const realIdx = todos.indexOf(task)
             return (
-              <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-white border border-paper-300">
+              <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-paper-300 border border-paper-300">
                 <button type="button" onClick={() => toggle(realIdx)}
                   className="w-5 h-5 rounded-full border-2 border-ink-300 flex-shrink-0 hover:border-amber-warm transition-colors" />
                 <span className="flex-1 text-sm font-sans text-ink">{task.text}</span>
@@ -129,7 +129,7 @@ export function TasksTab({
               <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-paper-200 border border-paper-300">
                 <button type="button" onClick={() => toggle(realIdx)}
                   className="w-5 h-5 rounded-full border-2 border-amber-warm bg-amber-warm flex-shrink-0 flex items-center justify-center">
-                  <div className="w-2 h-2 rounded-full bg-white" />
+                  <div className="w-2 h-2 rounded-full bg-paper-300" />
                 </button>
                 <span className="flex-1 text-sm font-sans text-ink-300 line-through">{task.text}</span>
                 <button type="button" onClick={() => remove(realIdx)}

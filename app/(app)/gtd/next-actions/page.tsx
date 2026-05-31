@@ -77,7 +77,7 @@ export default function NextActionsPage() {
           <select
             value={context}
             onChange={e => setContext(e.target.value as GTDContext)}
-            className="w-full rounded-xl border border-paper-400 px-4 py-3 text-[16px] font-sans text-ink bg-white focus:outline-none focus:ring-2 focus:ring-amber-warm"
+            className="w-full rounded-xl border border-paper-400 px-4 py-3 text-[16px] font-sans text-ink bg-paper-300 focus:outline-none focus:ring-2 focus:ring-amber-warm"
           >
             {GTD_CONTEXTS.map(ctx => <option key={ctx} value={ctx}>{ctx}</option>)}
           </select>

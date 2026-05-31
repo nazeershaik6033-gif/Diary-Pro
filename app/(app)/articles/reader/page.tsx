@@ -51,7 +51,7 @@ function PdfViewer({ article }: { article: import('@/types').Article }) {
       {src ? (
         <>
           <embed src={src} type="application/pdf" className="flex-1 w-full" />
-          <div className="px-4 py-2 border-t border-paper-200 bg-white flex items-center gap-3">
+          <div className="px-4 py-2 border-t border-paper-200 bg-paper-300 flex items-center gap-3">
             <FileText size={14} className="text-red-400 flex-shrink-0" />
             <p className="text-xs font-sans text-ink-300 truncate flex-1">{article.title}</p>
             {article.url && (
@@ -211,7 +211,7 @@ function ReaderInner() {
       </div>
 
       {/* Folder action bar */}
-      <div className="flex gap-2 px-4 py-2 overflow-x-auto scrollbar-hide border-b border-paper-200 bg-white">
+      <div className="flex gap-2 px-4 py-2 overflow-x-auto scrollbar-hide border-b border-paper-200 bg-paper-300">
         {FOLDER_ACTIONS.map(a => (
           <button
             key={a.key}
@@ -220,7 +220,7 @@ function ReaderInner() {
               'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-sans font-medium flex-shrink-0 transition-colors border',
               article.folder === a.key
                 ? 'bg-amber-warm border-amber-warm text-white'
-                : 'bg-white border-paper-300 text-ink-300 hover:border-amber-warm hover:text-amber-dark',
+                : 'bg-paper-300 border-paper-300 text-ink-300 hover:border-amber-warm hover:text-amber-dark',
             )}
           >
             <a.icon size={12} />
@@ -332,8 +332,8 @@ function ReaderInner() {
 
       {/* Highlights panel */}
       {highlightPanel && (
-        <div className="fixed bottom-0 left-0 right-0 md:left-[220px] bg-white border-t border-paper-300 z-30 max-h-80 overflow-y-auto">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-paper-200 sticky top-0 bg-white">
+        <div className="fixed bottom-0 left-0 right-0 md:left-[220px] bg-paper-300 border-t border-paper-300 z-30 max-h-80 overflow-y-auto">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-paper-200 sticky top-0 bg-paper-300">
             <p className="font-sans font-semibold text-sm text-ink flex items-center gap-2">
               <Highlighter size={15} className="text-yellow-500" />
               Highlights ({highlights.length})
@@ -400,7 +400,7 @@ function ReaderInner() {
 
       {/* Notes panel */}
       {notesOpen && (
-        <div className="fixed bottom-0 left-0 right-0 md:left-[220px] bg-white border-t border-paper-300 z-30">
+        <div className="fixed bottom-0 left-0 right-0 md:left-[220px] bg-paper-300 border-t border-paper-300 z-30">
           <div className="flex items-center justify-between px-4 py-3 border-b border-paper-200">
             <p className="font-sans font-semibold text-sm text-ink flex items-center gap-2">
               <StickyNote size={15} className="text-amber-dark" />

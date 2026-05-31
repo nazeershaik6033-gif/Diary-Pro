@@ -70,7 +70,7 @@ function ApiKeySection() {
             value={keyInput}
             onChange={e => setKeyInput(e.target.value)}
             placeholder={currentKey ? 'Replace API key…' : 'sk-ant-api…'}
-            className="w-full px-3 pr-9 py-2 rounded-xl border border-paper-400 bg-white text-sm font-sans text-ink focus:outline-none focus:border-amber-warm"
+            className="w-full px-3 pr-9 py-2 rounded-xl border border-paper-400 bg-paper-300 text-sm font-sans text-ink focus:outline-none focus:border-amber-warm"
             style={{ fontSize: 16 }}
           />
           <button

@@ -37,7 +37,7 @@ export function MilestoneList({ goalId }: MilestoneListProps) {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, x: -20 }}
-            className="flex items-center gap-3 p-3 bg-white rounded-xl border border-paper-300"
+            className="flex items-center gap-3 p-3 bg-paper-300 rounded-xl border border-paper-300"
           >
             <button onClick={() => !ms.completed && ms.id && completeMilestone(ms.id)}>
               {ms.completed

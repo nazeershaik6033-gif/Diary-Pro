@@ -39,7 +39,7 @@ function TrashCard({ entry, index }: { entry: DiaryEntry; index: number }) {
       exit={{ opacity: 0, x: -16, scale: 0.97 }}
       transition={{ delay: index * 0.04 }}
     >
-      <div className="bg-white rounded-2xl shadow-warm-sm border border-paper-300 p-4">
+      <div className="bg-paper-300 rounded-2xl shadow-warm-sm border border-paper-300 p-4">
         <div className="flex items-start gap-3">
           <div className="flex-1 min-w-0">
             <h3 className="font-serif font-semibold text-ink text-base leading-snug truncate">

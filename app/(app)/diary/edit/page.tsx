@@ -296,7 +296,7 @@ function EditDiaryContent() {
               value={reminderDatetime}
               onChange={e => setReminderDatetime(e.target.value)}
               min={new Date().toISOString().slice(0, 16)}
-              className="w-full rounded-xl border border-paper-400 px-3 py-2.5 text-sm font-sans text-ink focus:outline-none focus:ring-2 focus:ring-amber-warm bg-white"
+              className="w-full rounded-xl border border-paper-400 px-3 py-2.5 text-sm font-sans text-ink focus:outline-none focus:ring-2 focus:ring-amber-warm bg-paper-300"
             />
             {reminderDatetime && (
               <button

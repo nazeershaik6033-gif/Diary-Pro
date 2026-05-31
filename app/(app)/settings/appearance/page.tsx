@@ -70,7 +70,7 @@ export default function AppearancePage() {
               <button key={f.id} onClick={() => update({ fontStyle: f.id })}
                 className={cn(
                   'flex flex-col items-center gap-2 p-4 rounded-2xl border transition-colors',
-                  fontStyle === f.id ? 'border-amber-warm bg-amber-faint' : 'border-paper-300 bg-white'
+                  fontStyle === f.id ? 'border-amber-warm bg-amber-faint' : 'border-paper-300 bg-paper-300'
                 )}>
                 <span className={cn('text-2xl font-bold leading-none', f.className,
                   fontStyle === f.id ? 'text-amber-dark' : 'text-ink-300'
@@ -88,7 +88,7 @@ export default function AppearancePage() {
               <button key={s.id} onClick={() => update({ fontSize: s.id })}
                 className={cn(
                   'py-3 rounded-2xl border text-center transition-colors font-sans',
-                  fontSize === s.id ? 'border-amber-warm bg-amber-faint text-amber-dark font-semibold' : 'border-paper-300 bg-white text-ink-300',
+                  fontSize === s.id ? 'border-amber-warm bg-amber-faint text-amber-dark font-semibold' : 'border-paper-300 bg-paper-300 text-ink-300',
                   s.textClass
                 )}>{s.label}</button>
             ))}

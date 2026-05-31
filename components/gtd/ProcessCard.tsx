@@ -80,7 +80,7 @@ export function ProcessCard({ item, onDone }: ProcessCardProps) {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-3xl shadow-warm-md border border-paper-300 p-5"
+      className="bg-paper-300 rounded-3xl shadow-warm-md border border-paper-300 p-5"
     >
       <div className="bg-amber-faint rounded-xl p-3 mb-4">
         <p className="font-sans text-ink leading-relaxed">{item.content}</p>
@@ -121,7 +121,7 @@ export function ProcessCard({ item, onDone }: ProcessCardProps) {
             <select
               value={context}
               onChange={e => setContext(e.target.value as GTDContext)}
-              className="w-full rounded-xl border border-paper-400 px-4 py-3 text-[16px] font-sans text-ink bg-white focus:outline-none focus:ring-2 focus:ring-amber-warm"
+              className="w-full rounded-xl border border-paper-400 px-4 py-3 text-[16px] font-sans text-ink bg-paper-300 focus:outline-none focus:ring-2 focus:ring-amber-warm"
             >
               {GTD_CONTEXTS.map(ctx => <option key={ctx} value={ctx}>{ctx}</option>)}
             </select>

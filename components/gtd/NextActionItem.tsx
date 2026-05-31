@@ -21,7 +21,7 @@ export function NextActionItem({ action }: NextActionItemProps) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, x: -100 }}
       className={cn(
-        'bg-white rounded-2xl shadow-warm-sm border border-paper-300 p-4 flex items-start gap-3',
+        'bg-paper-300 rounded-2xl shadow-warm-sm border border-paper-300 p-4 flex items-start gap-3',
         action.completed && 'opacity-50'
       )}
     >

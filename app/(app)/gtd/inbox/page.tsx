@@ -39,7 +39,7 @@ function InboxCard({ item, onProcess }: { item: GTDInboxItem; onProcess: (item: 
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         exit={{ opacity: 0, x: 20 }}
-        className="bg-white rounded-2xl shadow-warm-sm border border-paper-300 p-4"
+        className="bg-paper-300 rounded-2xl shadow-warm-sm border border-paper-300 p-4"
       >
         {editing ? (
           <div className="space-y-2">

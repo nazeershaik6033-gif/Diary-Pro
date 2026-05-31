@@ -48,7 +48,7 @@ function ExercisePicker({ onPick, onClose }: {
       className="fixed inset-0 z-[60] bg-black/50 flex items-end" onClick={onClose}>
       <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
         transition={{ type: 'spring', damping: 30, stiffness: 400 }}
-        className="w-full bg-white rounded-t-3xl max-h-[80vh] flex flex-col"
+        className="w-full bg-paper-300 rounded-t-3xl max-h-[80vh] flex flex-col"
         onClick={e => e.stopPropagation()}>
 
         <div className="w-10 h-1 bg-paper-400 rounded-full mx-auto mt-3 mb-2 flex-shrink-0" />
@@ -211,7 +211,7 @@ export function TemplateEditorSheet({ template, onClose, showToast }: TemplateEd
         className="fixed inset-0 z-50 bg-black/40 flex items-end" onClick={onClose}>
         <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
           transition={{ type: 'spring', damping: 30, stiffness: 400 }}
-          className="w-full bg-white rounded-t-3xl max-h-[92vh] flex flex-col"
+          className="w-full bg-paper-300 rounded-t-3xl max-h-[92vh] flex flex-col"
           onClick={e => e.stopPropagation()}>
 
           <div className="w-10 h-1 bg-paper-400 rounded-full mx-auto mt-3 flex-shrink-0" />
@@ -299,7 +299,7 @@ export function TemplateEditorSheet({ template, onClose, showToast }: TemplateEd
                             type="number" min="1" max="20"
                             value={ex.sets}
                             onChange={e => updateRow(ex.key, { sets: Number(e.target.value) || 1 })}
-                            className="w-full px-2 py-1.5 rounded-xl bg-white text-sm font-sans text-center outline-none border border-paper-300 focus:border-amber-warm"
+                            className="w-full px-2 py-1.5 rounded-xl bg-paper-300 text-sm font-sans text-center outline-none border border-paper-300 focus:border-amber-warm"
                           />
                         </div>
                         <div className="flex-1 text-center">
@@ -309,7 +309,7 @@ export function TemplateEditorSheet({ template, onClose, showToast }: TemplateEd
                             value={ex.repsTarget}
                             onChange={e => updateRow(ex.key, { repsTarget: e.target.value })}
                             placeholder="—"
-                            className="w-full px-2 py-1.5 rounded-xl bg-white text-sm font-sans text-center outline-none border border-paper-300 focus:border-amber-warm"
+                            className="w-full px-2 py-1.5 rounded-xl bg-paper-300 text-sm font-sans text-center outline-none border border-paper-300 focus:border-amber-warm"
                           />
                         </div>
                         <div className="flex-1 text-center">
@@ -319,7 +319,7 @@ export function TemplateEditorSheet({ template, onClose, showToast }: TemplateEd
                             value={ex.weightTarget}
                             onChange={e => updateRow(ex.key, { weightTarget: e.target.value })}
                             placeholder="—"
-                            className="w-full px-2 py-1.5 rounded-xl bg-white text-sm font-sans text-center outline-none border border-paper-300 focus:border-amber-warm"
+                            className="w-full px-2 py-1.5 rounded-xl bg-paper-300 text-sm font-sans text-center outline-none border border-paper-300 focus:border-amber-warm"
                           />
                         </div>
                       </div>

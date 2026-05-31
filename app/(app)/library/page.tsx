@@ -164,7 +164,7 @@ function AudioCard({ asset, index }: { asset: DiaryAsset; index: number }) {
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.04 }}
-      className="bg-white rounded-2xl shadow-warm-sm border border-paper-300 p-4 flex items-center gap-4"
+      className="bg-paper-300 rounded-2xl shadow-warm-sm border border-paper-300 p-4 flex items-center gap-4"
     >
       <button
         onClick={togglePlay}
@@ -212,7 +212,7 @@ function TabBar({ active, onChange }: { active: Tab; onChange: (t: Tab) => void 
           className={[
             'flex-1 flex items-center justify-center gap-2 py-2 rounded-xl text-sm font-sans font-medium transition-all duration-150',
             active === tab
-              ? 'bg-white text-ink shadow-warm-sm'
+              ? 'bg-paper-300 text-ink shadow-warm-sm'
               : 'text-ink-300 hover:text-ink',
           ].join(' ')}
         >

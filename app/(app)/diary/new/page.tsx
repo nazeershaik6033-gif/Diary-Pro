@@ -115,7 +115,7 @@ export default function NewDiaryEntryPage() {
             <input
               type="date"
               {...field}
-              className="w-full rounded-xl border border-paper-400 bg-white px-4 py-2.5 text-[16px] font-sans text-ink focus:outline-none focus:ring-2 focus:ring-amber-warm"
+              className="w-full rounded-xl border border-paper-400 bg-paper-300 px-4 py-2.5 text-[16px] font-sans text-ink focus:outline-none focus:ring-2 focus:ring-amber-warm"
             />
           )}
         />

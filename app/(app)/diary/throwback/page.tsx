@@ -66,7 +66,7 @@ function ThrowbackCard({ entry, index }: { entry: DiaryEntry; index: number }) {
       <Link href={`/diary/entry?date=${entry.date}`} className="block">
         <div
           className={[
-            'bg-white rounded-2xl shadow-warm-sm border border-paper-300 p-4',
+            'bg-paper-300 rounded-2xl shadow-warm-sm border border-paper-300 p-4',
             'active:scale-[0.98] transition-transform',
             borderClass ? `border-l-4 ${borderClass}` : '',
           ].join(' ')}

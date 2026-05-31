@@ -65,7 +65,7 @@ function ArticleCard({ article, onShowMenu, collectionMode, position, onRemoveFr
   const isPdf = article.type === 'pdf'
 
   return (
-    <div className="bg-white rounded-2xl shadow-warm-sm border border-paper-300 overflow-hidden">
+    <div className="bg-paper-300 rounded-2xl shadow-warm-sm border border-paper-300 overflow-hidden">
       <Link href={href} className="block p-4">
         <div className="flex gap-3">
           {collectionMode && position !== undefined && (
@@ -152,7 +152,7 @@ function ArticleMenuSheet({ article, onClose, showToast, onManageCollections }: 
       className="fixed inset-0 z-50 bg-black/40 flex items-end" onClick={onClose}>
       <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
         transition={{ type: 'spring', damping: 30, stiffness: 400 }}
-        className="w-full bg-white rounded-t-3xl pb-safe"
+        className="w-full bg-paper-300 rounded-t-3xl pb-safe"
         onClick={e => e.stopPropagation()}>
         <div className="w-10 h-1 bg-paper-400 rounded-full mx-auto mt-3 mb-1" />
         <p className="px-6 py-3 font-sans font-semibold text-ink text-sm truncate border-b border-paper-200">
@@ -484,7 +484,7 @@ function CollectionsGrid({ onOpen, showToast }: {
                       <AnimatePresence>
                         {menuOpenId === c.id && (
                           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-                            className="absolute right-0 top-8 bg-white rounded-xl shadow-lg border border-paper-300 py-1 z-10 min-w-[140px]">
+                            className="absolute right-0 top-8 bg-paper-300 rounded-xl shadow-lg border border-paper-300 py-1 z-10 min-w-[140px]">
                             <button onClick={() => { setEditingId(c.id!); setEditName(c.name); setMenuOpenId(null) }}
                               className="flex items-center gap-2 w-full px-3 py-2 text-sm font-sans text-ink hover:bg-paper-200">
                               <Edit2 size={13} /> Rename
@@ -523,12 +523,12 @@ function CollectionsGrid({ onOpen, showToast }: {
                 <label className="text-xs font-sans font-semibold text-ink-300 uppercase tracking-wider">Name *</label>
                 <input value={newName} onChange={e => setNewName(e.target.value)} placeholder="e.g. WWDC 2025 Coverage"
                   autoFocus
-                  className="mt-1 w-full px-4 py-3 rounded-xl border border-paper-300 bg-white text-sm font-sans outline-none focus:border-amber-warm" />
+                  className="mt-1 w-full px-4 py-3 rounded-xl border border-paper-300 bg-paper-300 text-sm font-sans outline-none focus:border-amber-warm" />
               </div>
               <div>
                 <label className="text-xs font-sans font-semibold text-ink-300 uppercase tracking-wider">Description</label>
                 <input value={newDesc} onChange={e => setNewDesc(e.target.value)} placeholder="Optional"
-                  className="mt-1 w-full px-4 py-3 rounded-xl border border-paper-300 bg-white text-sm font-sans outline-none focus:border-amber-warm" />
+                  className="mt-1 w-full px-4 py-3 rounded-xl border border-paper-300 bg-paper-300 text-sm font-sans outline-none focus:border-amber-warm" />
               </div>
               <div>
                 <label className="text-xs font-sans font-semibold text-ink-300 uppercase tracking-wider mb-2 block">Color</label>
@@ -947,7 +947,7 @@ export default function ArticlesPage() {
                     <label className="text-xs font-sans font-semibold text-ink-300 uppercase tracking-wider">Article URL</label>
                     <input value={inputUrl} onChange={e => setInputUrl(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleFetchUrl()}
                       placeholder="https://example.com/article" autoFocus
-                      className="mt-1 w-full px-4 py-3 rounded-xl border border-paper-300 bg-white text-sm font-sans outline-none focus:border-amber-warm" />
+                      className="mt-1 w-full px-4 py-3 rounded-xl border border-paper-300 bg-paper-300 text-sm font-sans outline-none focus:border-amber-warm" />
                   </div>
                   <button onClick={handleFetchUrl} disabled={step === 'url-fetching' || !inputUrl.trim()}
                     className="w-full py-3 rounded-2xl bg-amber-warm text-white font-sans font-semibold text-sm disabled:opacity-50 flex items-center justify-center gap-2">
@@ -974,7 +974,7 @@ export default function ArticlesPage() {
                       <div key={f.label}>
                         <label className="text-xs font-sans font-semibold text-ink-300 uppercase tracking-wider">{f.label}</label>
                         <input value={f.val} onChange={e => f.set(e.target.value)} placeholder={f.placeholder}
-                          className="mt-1 w-full px-4 py-2.5 rounded-xl border border-paper-300 bg-white text-sm font-sans outline-none focus:border-amber-warm" />
+                          className="mt-1 w-full px-4 py-2.5 rounded-xl border border-paper-300 bg-paper-300 text-sm font-sans outline-none focus:border-amber-warm" />
                       </div>
                     ))}
                   </div>
@@ -992,7 +992,7 @@ export default function ArticlesPage() {
                     {(['file', 'url'] as const).map(t => (
                       <button key={t} onClick={() => setPdfInputType(t)}
                         className={cn('flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-sans font-medium transition-colors',
-                          pdfInputType === t ? 'bg-white text-ink shadow-sm' : 'text-ink-300')}>
+                          pdfInputType === t ? 'bg-paper-400 text-ink shadow-sm' : 'text-ink-300')}>
                         {t === 'file' ? <><FileText size={14} /> Upload File</> : <><Link2 size={14} /> PDF URL</>}
                       </button>
                     ))}
@@ -1014,19 +1014,19 @@ export default function ArticlesPage() {
                     <div>
                       <label className="text-xs font-sans font-semibold text-ink-300 uppercase tracking-wider">PDF URL</label>
                       <input value={pdfUrl} onChange={e => setPdfUrl(e.target.value)} placeholder="https://example.com/doc.pdf"
-                        className="mt-1 w-full px-4 py-3 rounded-xl border border-paper-300 bg-white text-sm font-sans outline-none focus:border-amber-warm" />
+                        className="mt-1 w-full px-4 py-3 rounded-xl border border-paper-300 bg-paper-300 text-sm font-sans outline-none focus:border-amber-warm" />
                     </div>
                   )}
 
                   <div>
                     <label className="text-xs font-sans font-semibold text-ink-300 uppercase tracking-wider">Title *</label>
                     <input value={pdfTitle} onChange={e => setPdfTitle(e.target.value)} placeholder="Document title"
-                      className="mt-1 w-full px-4 py-2.5 rounded-xl border border-paper-300 bg-white text-sm font-sans outline-none focus:border-amber-warm" />
+                      className="mt-1 w-full px-4 py-2.5 rounded-xl border border-paper-300 bg-paper-300 text-sm font-sans outline-none focus:border-amber-warm" />
                   </div>
                   <div>
                     <label className="text-xs font-sans font-semibold text-ink-300 uppercase tracking-wider">Tags</label>
                     <input value={formTags} onChange={e => setFormTags(e.target.value)} placeholder="finance, report  (comma-separated)"
-                      className="mt-1 w-full px-4 py-2.5 rounded-xl border border-paper-300 bg-white text-sm font-sans outline-none focus:border-amber-warm" />
+                      className="mt-1 w-full px-4 py-2.5 rounded-xl border border-paper-300 bg-paper-300 text-sm font-sans outline-none focus:border-amber-warm" />
                   </div>
 
                   <div className="flex gap-2">

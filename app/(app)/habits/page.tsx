@@ -65,7 +65,7 @@ export default function HabitsPage() {
       </div>
 
       {habits && habits.length > 0 && (
-        <div className="bg-white rounded-2xl shadow-warm-sm border border-paper-300 p-4 mb-4 flex items-center justify-between">
+        <div className="bg-paper-300 rounded-2xl shadow-warm-sm border border-paper-300 p-4 mb-4 flex items-center justify-between">
           <div>
             <p className="font-sans text-ink-300 text-sm">Today's progress</p>
             <p className="text-2xl font-serif font-bold text-amber-warm">

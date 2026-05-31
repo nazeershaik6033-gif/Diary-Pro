@@ -37,7 +37,7 @@ export function TagInput({ value, onChange }: TagInputProps) {
         <Tag size={14} className="text-ink-300" />
         <span className="text-sm font-medium font-sans text-ink-400">Tags</span>
       </div>
-      <div className="flex flex-wrap gap-2 p-3 rounded-xl border border-paper-400 bg-white min-h-[44px]">
+      <div className="flex flex-wrap gap-2 p-3 rounded-xl border border-paper-400 bg-paper-300 min-h-[44px]">
         {value.map(tag => (
           <span key={tag} className="flex items-center gap-1 bg-amber-faint text-amber-dark text-xs font-sans px-2 py-1 rounded-full">
             #{tag}

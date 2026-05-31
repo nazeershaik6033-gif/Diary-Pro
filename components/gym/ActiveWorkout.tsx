@@ -52,7 +52,7 @@ export function ActiveWorkout({ exercises }: ActiveWorkoutProps) {
         const totalSets = ex.sets
 
         return (
-          <div key={ex.exerciseId} className="bg-white rounded-2xl shadow-warm-sm border border-paper-300 overflow-hidden">
+          <div key={ex.exerciseId} className="bg-paper-300 rounded-2xl shadow-warm-sm border border-paper-300 overflow-hidden">
             <button
               className="w-full flex items-center gap-3 p-4"
               onClick={() => setExpandedExercise(expanded ? -1 : idx)}

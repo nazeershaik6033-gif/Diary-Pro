@@ -27,7 +27,7 @@ function DecisionCard({ d }: { d: Decision }) {
   const Icon = cfg.icon
   return (
     <Link href={`/decisions/detail?id=${d.id}`}>
-      <div className="bg-white rounded-2xl shadow-warm-sm border border-paper-300 p-4">
+      <div className="bg-paper-300 rounded-2xl shadow-warm-sm border border-paper-300 p-4">
         <div className="flex items-start gap-3">
           <div className="w-9 h-9 rounded-xl bg-paper-300 flex items-center justify-center flex-shrink-0">
             <Icon size={16} className={cfg.color} />

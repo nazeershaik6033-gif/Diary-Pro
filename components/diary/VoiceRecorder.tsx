@@ -168,7 +168,7 @@ export function VoiceRecorder({ onRecorded }: VoiceRecorderProps) {
 
       {/* DONE */}
       {state === 'done' && audioSrc && (
-        <div className="flex flex-col gap-2 p-3 rounded-xl border border-paper-300 bg-white shadow-warm-sm">
+        <div className="flex flex-col gap-2 p-3 rounded-xl border border-paper-300 bg-paper-300 shadow-warm-sm">
           {/* Playback row */}
           <div className="flex items-center gap-3">
             <Mic size={16} className="text-amber-warm flex-shrink-0" />

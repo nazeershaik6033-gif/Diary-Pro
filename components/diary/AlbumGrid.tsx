@@ -42,7 +42,7 @@ function AudioCard({
   }
 
   return (
-    <div className="relative flex-shrink-0 flex items-center gap-3 bg-white border border-paper-300 rounded-2xl shadow-warm-sm px-4 py-3 min-w-[180px]">
+    <div className="relative flex-shrink-0 flex items-center gap-3 bg-paper-300 border border-paper-300 rounded-2xl shadow-warm-sm px-4 py-3 min-w-[180px]">
       {/* Waveform icon */}
       <Mic size={18} className="text-amber-warm flex-shrink-0" />
 

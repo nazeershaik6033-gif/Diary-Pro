@@ -73,7 +73,7 @@ export function BodyMetricsForm({ onDone }: BodyMetricsFormProps) {
               onChange={e => handleKgChange(e.target.value)}
               placeholder="e.g. 70"
               inputMode="decimal"
-              className="w-full px-3 py-2.5 rounded-xl border border-paper-400 text-sm font-sans text-ink focus:outline-none focus:ring-2 focus:ring-amber-warm bg-white pr-10"
+              className="w-full px-3 py-2.5 rounded-xl border border-paper-400 text-sm font-sans text-ink focus:outline-none focus:ring-2 focus:ring-amber-warm bg-paper-300 pr-10"
             />
             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-sans font-semibold text-amber-warm pointer-events-none">kg</span>
           </div>
@@ -84,7 +84,7 @@ export function BodyMetricsForm({ onDone }: BodyMetricsFormProps) {
               onChange={e => handleLbsChange(e.target.value)}
               placeholder="e.g. 154"
               inputMode="decimal"
-              className="w-full px-3 py-2.5 rounded-xl border border-paper-400 text-sm font-sans text-ink focus:outline-none focus:ring-2 focus:ring-amber-warm bg-white pr-10"
+              className="w-full px-3 py-2.5 rounded-xl border border-paper-400 text-sm font-sans text-ink focus:outline-none focus:ring-2 focus:ring-amber-warm bg-paper-300 pr-10"
             />
             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-sans font-semibold text-amber-warm pointer-events-none">lbs</span>
           </div>

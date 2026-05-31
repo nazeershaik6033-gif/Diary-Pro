@@ -19,7 +19,7 @@ function ToggleRow({
   onTimeChange: (t: string) => void
 }) {
   return (
-    <div className="bg-white rounded-2xl shadow-warm-sm border border-paper-300 p-4 space-y-3">
+    <div className="bg-paper-300 rounded-2xl shadow-warm-sm border border-paper-300 p-4 space-y-3">
       <div className="flex items-center justify-between">
         <div>
           <p className="font-sans font-medium text-ink">{label}</p>
@@ -29,7 +29,7 @@ function ToggleRow({
           onClick={() => onToggle(!enabled)}
           className={`w-12 h-6 rounded-full transition-colors ${enabled ? 'bg-amber-warm' : 'bg-paper-400'}`}
         >
-          <div className={`w-5 h-5 rounded-full bg-white shadow transition-transform mx-0.5 ${enabled ? 'translate-x-6' : 'translate-x-0'}`} />
+          <div className={`w-5 h-5 rounded-full bg-paper-300 shadow transition-transform mx-0.5 ${enabled ? 'translate-x-6' : 'translate-x-0'}`} />
         </button>
       </div>
       {enabled && (

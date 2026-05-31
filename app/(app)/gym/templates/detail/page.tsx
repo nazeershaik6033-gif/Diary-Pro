@@ -36,7 +36,7 @@ function TemplateDetailContent() {
     <div>
       <PageHeader title={template.name} showBack />
       <div className="px-4 space-y-4 pb-8">
-        <div className="bg-white rounded-2xl shadow-warm border border-paper-300 p-5">
+        <div className="bg-paper-300 rounded-2xl shadow-warm border border-paper-300 p-5">
           <div className="flex items-center gap-2 mb-4">
             <span className={`text-xs font-sans px-2 py-0.5 rounded-full ${typeConfig.color}`}>{typeConfig.label}</span>
             <span className="text-xs font-sans text-ink-300">{template.exercises.length} exercises</span>

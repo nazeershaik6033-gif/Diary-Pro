@@ -31,7 +31,7 @@ export interface AppSettings {
 export const DEFAULT_SETTINGS: AppSettings = {
   id: 'singleton',
   pinEnabled: false,
-  theme: 'warm',
+  theme: 'dark',
   fontStyle: 'sans',
   fontSize: 'md',
   notifications: {

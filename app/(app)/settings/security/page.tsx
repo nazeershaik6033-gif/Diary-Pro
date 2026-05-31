@@ -151,7 +151,7 @@ export default function SecurityPage() {
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -8 }}
-                    className="bg-white rounded-2xl shadow-warm-sm border border-paper-300 p-4 space-y-4"
+                    className="bg-paper-300 rounded-2xl shadow-warm-sm border border-paper-300 p-4 space-y-4"
                   >
                     <div className="flex items-center gap-2">
                       <HelpCircle size={18} className="text-amber-warm shrink-0" />

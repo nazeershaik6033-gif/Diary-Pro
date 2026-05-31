@@ -125,7 +125,7 @@ function AddMealSheet({ mealType, date, onClose, showToast }: {
       className="fixed inset-0 z-50 bg-black/40 flex items-end" onClick={onClose}>
       <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
         transition={{ type: 'spring', damping: 30, stiffness: 400 }}
-        className="w-full bg-white rounded-t-3xl max-h-[92vh] flex flex-col"
+        className="w-full bg-paper-300 rounded-t-3xl max-h-[92vh] flex flex-col"
         onClick={e => e.stopPropagation()}>
 
         <div className="w-10 h-1 bg-paper-400 rounded-full mx-auto mt-3 flex-shrink-0" />
@@ -262,7 +262,7 @@ function GoalsSheet({ goals, onClose, showToast }: {
       className="fixed inset-0 z-50 bg-black/40 flex items-end" onClick={onClose}>
       <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
         transition={{ type: 'spring', damping: 30, stiffness: 400 }}
-        className="w-full bg-white rounded-t-3xl pb-8"
+        className="w-full bg-paper-300 rounded-t-3xl pb-8"
         onClick={e => e.stopPropagation()}>
 
         <div className="w-10 h-1 bg-paper-400 rounded-full mx-auto mt-3" />
@@ -371,7 +371,7 @@ export default function CaloriesPage() {
         </div>
 
         {/* Calorie summary card */}
-        <div className="bg-white rounded-2xl shadow-warm-sm border border-paper-300 p-4 space-y-3">
+        <div className="bg-paper-300 rounded-2xl shadow-warm-sm border border-paper-300 p-4 space-y-3">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs font-sans text-ink-300 uppercase tracking-wider">Calories</p>
@@ -420,7 +420,7 @@ export default function CaloriesPage() {
           const mealCal = mealLogs.reduce((s, l) => s + l.calories, 0)
           const cfg = MEAL_TYPE_CONFIG[mealType]
           return (
-            <div key={mealType} className="bg-white rounded-2xl shadow-warm-sm border border-paper-300 overflow-hidden">
+            <div key={mealType} className="bg-paper-300 rounded-2xl shadow-warm-sm border border-paper-300 overflow-hidden">
               {/* Section header */}
               <div className={cn('flex items-center justify-between px-4 py-3 border-b border-paper-200', cfg.bg)}>
                 <div>

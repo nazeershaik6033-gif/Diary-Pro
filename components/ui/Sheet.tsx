@@ -30,7 +30,7 @@ export function Sheet({ open, onClose, title, children, className }: SheetProps)
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
             className={cn(
-              'fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-warm-lg z-50',
+              'fixed bottom-0 left-0 right-0 bg-paper-300 rounded-t-3xl shadow-[0_-8px_32px_rgba(0,0,0,0.6)] z-50',
               'pb-safe',
               className
             )}

@@ -35,7 +35,7 @@ export function CalendarView() {
   const todayStr = toDateString()
 
   return (
-    <div className="bg-white rounded-2xl shadow-warm-sm p-4">
+    <div className="bg-paper-300 rounded-2xl shadow-warm-sm p-4">
       <div className="flex items-center justify-between mb-4">
         <button onClick={prevMonth} className="p-1.5 rounded-lg hover:bg-paper-300 transition-colors">
           <ChevronLeft size={18} className="text-ink" />

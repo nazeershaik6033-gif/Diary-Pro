@@ -9,7 +9,7 @@ export function Card({ className, variant = 'default', ...props }: CardProps) {
   return (
     <div
       className={cn(
-        'rounded-2xl bg-white',
+        'rounded-2xl bg-paper-300',
         variant === 'default' && 'shadow-warm-sm border border-paper-300',
         variant === 'elevated' && 'shadow-warm-md',
         className

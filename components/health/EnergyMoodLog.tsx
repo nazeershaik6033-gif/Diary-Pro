@@ -30,7 +30,7 @@ export function EnergyMoodLog() {
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-warm-sm border border-paper-300 p-4">
+    <div className="bg-paper-300 rounded-2xl shadow-warm-sm border border-paper-300 p-4">
       <p className="font-sans font-semibold text-ink mb-3">Energy Level</p>
       <div className="flex gap-2 justify-between mb-4">
         {(Object.entries(ENERGY_CONFIG) as [string, typeof ENERGY_CONFIG[EnergyLevel]][]).map(([level, cfg]) => {

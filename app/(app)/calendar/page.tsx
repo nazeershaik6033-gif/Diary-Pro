@@ -60,7 +60,7 @@ function SelectedDayPanel({ day, onViewDay }: { day: Date; onViewDay: (d: Date) 
   const hasAnything = holiday || (events && events.length > 0) || diaryEntry || workoutLog
 
   return (
-    <div className="mt-4 rounded-2xl border border-paper-400 bg-white overflow-hidden">
+    <div className="mt-4 rounded-2xl border border-paper-400 bg-paper-300 overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-paper-300 bg-paper-200">
         <div>
@@ -263,7 +263,7 @@ function WeekView({ current, onDaySelect }: { current: Date; onDaySelect: (d: Da
               )}
               {dayEvents.map(e => (
                 <Link key={e.id} href={`/events/detail?id=${e.id}`}>
-                  <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white border border-paper-300 mb-1">
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-paper-300 border border-paper-300 mb-1">
                     <div className={cn('w-2 h-2 rounded-full flex-shrink-0', EVENT_CATEGORY_CONFIG[e.category].dot)} />
                     <span className="text-sm font-sans text-ink truncate">{e.title}</span>
                     {e.startTime && <span className="text-xs font-sans text-ink-300 ml-auto">{e.startTime}</span>}
@@ -352,7 +352,7 @@ function DayView({ current }: { current: Date }) {
           <p className="text-xs font-sans font-semibold text-ink-300 uppercase tracking-wider">Schedule</p>
           {timedEvents.map(e => (
             <Link key={e.id} href={`/events/detail?id=${e.id}`}>
-              <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white border border-paper-300">
+              <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-paper-300 border border-paper-300">
                 <div className={cn('w-2 min-h-[20px] rounded-full flex-shrink-0', EVENT_CATEGORY_CONFIG[e.category].dot)} />
                 <div className="flex-1">
                   <p className="text-sm font-sans text-ink font-medium">{e.title}</p>
@@ -437,7 +437,7 @@ export default function CalendarPage() {
           {(['month', 'week', 'day'] as View[]).map(v => (
             <button key={v} type="button" onClick={() => setView(v)}
               className={cn('flex-1 py-1.5 rounded-lg text-sm font-sans font-medium capitalize transition-colors',
-                view === v ? 'bg-white text-ink shadow-warm-sm' : 'text-ink-300'
+                view === v ? 'bg-paper-300 text-ink shadow-warm-sm' : 'text-ink-300'
               )}>{v}</button>
           ))}
         </div>

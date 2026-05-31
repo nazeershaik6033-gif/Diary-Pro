@@ -148,7 +148,7 @@ export function WeeklyReviewWizard() {
                     setPriorities(next)
                   }}
                   placeholder={`Priority ${i + 1}…`}
-                  className="w-full rounded-xl border border-paper-400 bg-white px-4 py-3 text-[16px] font-sans text-ink placeholder:text-ink-200 focus:outline-none focus:ring-2 focus:ring-amber-warm"
+                  className="w-full rounded-xl border border-paper-400 bg-paper-300 px-4 py-3 text-[16px] font-sans text-ink placeholder:text-ink-200 focus:outline-none focus:ring-2 focus:ring-amber-warm"
                 />
               ))}
             </div>

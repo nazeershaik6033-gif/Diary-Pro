@@ -133,7 +133,7 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
   const currentFontSize = editor.getAttributes('textStyle').fontSize ?? '16'
 
   return (
-    <div className="rounded-xl border border-paper-400 bg-white overflow-hidden">
+    <div className="rounded-xl border border-paper-400 bg-paper-300 overflow-hidden">
       {/* Toolbar */}
       <div className="flex flex-wrap gap-0.5 px-2 py-1.5 border-b border-paper-400 bg-paper-50">
 
@@ -158,7 +158,7 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
             <ChevronDown size={10} />
           </button>
           {fontFamilyOpen && (
-            <div className="absolute top-8 left-0 z-50 bg-white border border-paper-400 rounded-xl shadow-warm-md min-w-[120px]">
+            <div className="absolute top-8 left-0 z-50 bg-paper-300 border border-paper-400 rounded-xl shadow-warm-md min-w-[120px]">
               {FONT_FAMILIES.map(f => (
                 <button
                   key={f.value}
@@ -191,7 +191,7 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
             <ChevronDown size={10} />
           </button>
           {fontSizeOpen && (
-            <div className="absolute top-8 left-0 z-50 bg-white border border-paper-400 rounded-xl shadow-warm-md min-w-[60px] max-h-48 overflow-y-auto">
+            <div className="absolute top-8 left-0 z-50 bg-paper-300 border border-paper-400 rounded-xl shadow-warm-md min-w-[60px] max-h-48 overflow-y-auto">
               {FONT_SIZES.map(sz => (
                 <button
                   key={sz}

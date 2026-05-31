@@ -135,7 +135,7 @@ export default function GTDLogsPage() {
                         initial={{ opacity: 0, x: -8 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: di * 0.04 + li * 0.03 }}
-                        className="flex items-start gap-3 bg-white rounded-xl border border-paper-300 p-3"
+                        className="flex items-start gap-3 bg-paper-300 rounded-xl border border-paper-300 p-3"
                       >
                         <div className={cn('w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5', areaCfg.bg)}>
                           <AreaIcon size={14} className={areaCfg.color} />

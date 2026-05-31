@@ -47,7 +47,7 @@ export default function NewDecisionPage() {
           {...register('title', { required: true })}
           placeholder="What are you deciding?"
           className={cn(
-            'w-full rounded-xl border px-4 py-3 text-[16px] font-sans text-ink bg-white focus:outline-none focus:ring-2 focus:ring-amber-warm',
+            'w-full rounded-xl border px-4 py-3 text-[16px] font-sans text-ink bg-paper-300 focus:outline-none focus:ring-2 focus:ring-amber-warm',
             errors.title ? 'border-red-400' : 'border-paper-400'
           )}
         />
@@ -61,7 +61,7 @@ export default function NewDecisionPage() {
                 <button key={opt.type} type="button" onClick={() => setSelectedType(opt.type)}
                   className={cn(
                     'w-full flex items-center gap-3 p-4 rounded-2xl border text-left transition-colors',
-                    selectedType === opt.type ? 'border-amber-warm bg-amber-faint' : 'border-paper-300 bg-white'
+                    selectedType === opt.type ? 'border-amber-warm bg-amber-faint' : 'border-paper-300 bg-paper-300'
                   )}>
                   <Icon size={20} className={selectedType === opt.type ? 'text-amber-warm' : 'text-ink-300'} />
                   <div>

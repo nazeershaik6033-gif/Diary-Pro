@@ -52,7 +52,7 @@ export function WorkEntryForm({ onDone, date }: WorkEntryFormProps) {
           <label className="text-sm font-medium font-sans text-ink-400 block mb-1">Category</label>
           <select
             {...register('category')}
-            className="w-full rounded-xl border border-paper-400 px-3 py-2.5 text-[16px] font-sans text-ink bg-white focus:outline-none focus:ring-2 focus:ring-amber-warm"
+            className="w-full rounded-xl border border-paper-400 px-3 py-2.5 text-[16px] font-sans text-ink bg-paper-300 focus:outline-none focus:ring-2 focus:ring-amber-warm"
           >
             <option value="task">Task</option>
             <option value="meeting">Meeting</option>
@@ -65,7 +65,7 @@ export function WorkEntryForm({ onDone, date }: WorkEntryFormProps) {
           <label className="text-sm font-medium font-sans text-ink-400 block mb-1">Priority</label>
           <select
             {...register('priority')}
-            className="w-full rounded-xl border border-paper-400 px-3 py-2.5 text-[16px] font-sans text-ink bg-white focus:outline-none focus:ring-2 focus:ring-amber-warm"
+            className="w-full rounded-xl border border-paper-400 px-3 py-2.5 text-[16px] font-sans text-ink bg-paper-300 focus:outline-none focus:ring-2 focus:ring-amber-warm"
           >
             <option value="low">Low</option>
             <option value="medium">Medium</option>
