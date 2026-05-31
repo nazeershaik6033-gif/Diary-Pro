@@ -26,7 +26,7 @@ const bp = process.env.NEXT_PUBLIC_BASE_PATH ?? ''
 export const metadata: Metadata = {
   title: 'My Journal',
   description: 'Your personal premium diary — journal, GTD, gym, and work log in one beautiful app.',
-  manifest: `${bp}/manifest.json`,
+  // manifest added manually in <head> to avoid crossOrigin="use-credentials" that blocks GitHub Pages
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
@@ -56,6 +56,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" data-theme="dark" className={`${playfair.variable} ${lato.variable}`}>
       <head>
         <meta name="mobile-web-app-capable" content="yes" />
+        <link rel="manifest" href={`${bp}/manifest.json`} />
         <script dangerouslySetInnerHTML={{ __html: `
           if('serviceWorker' in navigator){
             navigator.serviceWorker.getRegistrations().then(function(regs){
