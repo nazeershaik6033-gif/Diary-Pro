@@ -35,18 +35,18 @@
 }
 
 [data-theme="dark"] {
-  --paper:      26 26 46;
-  --paper-50:   13 13 26;
-  --paper-100:  20 20 38;
-  --paper-300:  35 35 60;
-  --paper-400:  45 45 77;
+  --paper:      14 14 14;
+  --paper-50:   8 8 8;
+  --paper-100:  12 12 12;
+  --paper-300:  24 24 24;
+  --paper-400:  34 34 34;
   --ink:        230 220 210;
-  --ink-300:    160 140 128;
-  --ink-400:    190 170 158;
-  --amber-warm: 230 168 74;
-  --amber-light:245 185 95;
-  --amber-dark: 196 135 42;
-  --amber-faint:50 40 26;
+  --ink-300:    130 120 110;
+  --ink-400:    170 155 140;
+  --amber-warm: 196 147 63;
+  --amber-light:212 168 79;
+  --amber-dark: 163 116 48;
+  --amber-faint:30 22 10;
   --sage:       107 158 112;
   --sage-light: 140 190 145;
   --sage-dark:  76 118 80;
@@ -256,26 +256,26 @@ html[data-fontsize="xl"] { font-size: 20px; }
 
 /* ── Neumorphic dark homescreen ── */
 .neu-surface {
-  background-color: #1a1a2e;
+  background-color: #0e0e0e;
 }
 .neu-card {
-  background: #1c1c32;
-  box-shadow: 6px 6px 14px #0d0d1a, -6px -6px 14px #272742;
+  background: #1a1a1a;
+  box-shadow: 6px 6px 14px #080808, -6px -6px 14px #242424;
   border: none !important;
 }
 .neu-btn-blue {
-  background: linear-gradient(145deg, #6676b8, #505ea0);
-  box-shadow: 4px 4px 10px #0d0d1a, -2px -2px 6px rgba(100, 116, 184, 0.25);
+  background: linear-gradient(145deg, #c4933f, #a87832);
+  box-shadow: 4px 4px 10px #080808, -2px -2px 6px rgba(196, 147, 63, 0.2);
   transition: box-shadow 0.12s ease, transform 0.1s ease;
   color: #fff;
 }
 .neu-btn-blue:active {
-  box-shadow: inset 3px 3px 7px #0d0d1a, inset -2px -2px 5px rgba(100, 116, 184, 0.2);
+  box-shadow: inset 3px 3px 7px #080808, inset -2px -2px 5px rgba(196, 147, 63, 0.15);
   transform: scale(0.97);
 }
 .neu-icon-pit {
-  background: #1a1a2e;
-  box-shadow: inset 4px 4px 8px #0d0d1a, inset -4px -4px 8px #272742;
+  background: #0e0e0e;
+  box-shadow: inset 4px 4px 8px #080808, inset -4px -4px 8px #242424;
 }
 
 /* Smooth page transitions */

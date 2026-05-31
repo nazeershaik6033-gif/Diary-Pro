@@ -5,7 +5,7 @@ import { useAuth } from '@/app/contexts/AuthContext'
 import { HeaderProvider, useHeader } from '@/app/contexts/HeaderContext'
 import { ActiveWorkoutProvider } from '@/app/contexts/ActiveWorkoutContext'
 import { DrawerNav } from '@/components/layout/DrawerNav'
-import { FloatingActionButton } from '@/components/layout/FloatingActionButton'
+import { BottomNav } from '@/components/layout/BottomNav'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import { useEffect } from 'react'
 import { useTheme } from '@/lib/hooks/useTheme'
@@ -96,12 +96,12 @@ function AppShell({ children }: { children: React.ReactNode }) {
           {rightSlot}
         </header>
 
-        <main className="pb-fab flex-1">
+        <main className="pb-28 md:pb-fab flex-1">
           {children}
         </main>
       </div>
 
-      <FloatingActionButton />
+      <BottomNav />
     </div>
   )
 }

@@ -8,7 +8,7 @@ export function useTheme() {
 
   useEffect(() => {
     const html = document.documentElement
-    html.setAttribute('data-theme', settings?.theme ?? 'warm')
+    html.setAttribute('data-theme', settings?.theme ?? 'dark')
     html.setAttribute('data-font', settings?.fontStyle ?? 'sans')
     html.setAttribute('data-fontsize', settings?.fontSize ?? 'md')
   }, [settings?.theme, settings?.fontStyle, settings?.fontSize])
