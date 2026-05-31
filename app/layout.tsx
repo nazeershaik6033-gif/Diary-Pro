@@ -61,6 +61,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={`${playfair.variable} ${lato.variable}`}>
       <head>
         <meta name="mobile-web-app-capable" content="yes" />
+        <script dangerouslySetInnerHTML={{ __html: `
+          if('serviceWorker' in navigator){
+            navigator.serviceWorker.getRegistrations().then(function(regs){
+              regs.forEach(function(r){r.unregister()});
+            });
+            caches.keys().then(function(names){
+              names.forEach(function(n){caches.delete(n)});
+            });
+          }
+        `}} />
       </head>
       <body>
         <ErrorBoundary>
