@@ -29,13 +29,8 @@ export const metadata: Metadata = {
   manifest: `${bp}/manifest.json`,
   appleWebApp: {
     capable: true,
-    statusBarStyle: 'default',
+    statusBarStyle: 'black-translucent',
     title: 'My Journal',
-    startupImage: [
-      { url: `${bp}/splash/splash-1170x2532.png`, media: '(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)' },
-      { url: `${bp}/splash/splash-1125x2436.png`, media: '(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)' },
-      { url: `${bp}/splash/splash-750x1334.png`, media: '(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)' },
-    ],
   },
   icons: {
     apple: [
@@ -72,7 +67,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }
         `}} />
       </head>
-      <body>
+      <body style={{ backgroundColor: '#0e0e0e', margin: 0 }}>
         <ErrorBoundary>
           <ToastProvider>
             <AuthProvider>
