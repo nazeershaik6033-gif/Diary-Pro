@@ -1,30 +1,20 @@
 'use client'
-import { useEditor, EditorContent } from '@tiptap/react'
+import { useEditor, EditorContent, BubbleMenu } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
 import Underline from '@tiptap/extension-underline'
 import TextAlign from '@tiptap/extension-text-align'
 import TextStyle from '@tiptap/extension-text-style'
-import Color from '@tiptap/extension-color'
 import FontFamily from '@tiptap/extension-font-family'
-import Table from '@tiptap/extension-table'
-import TableRow from '@tiptap/extension-table-row'
-import TableCell from '@tiptap/extension-table-cell'
-import TableHeader from '@tiptap/extension-table-header'
 import { Extension } from '@tiptap/core'
-import TaskList from '@tiptap/extension-task-list'
-import TaskItem from '@tiptap/extension-task-item'
 import {
   Bold, Italic, Underline as UnderlineIcon, Strikethrough, Code,
   List, ListOrdered, AlignLeft, AlignCenter, AlignRight,
-  Heading1, Heading2, Heading3, Table as TableIcon,
-  Indent, Outdent, RotateCcw, RotateCw,
-  Type, ChevronDown, CheckSquare,
+  RotateCcw, RotateCw, ChevronDown,
 } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import { useEffect, useState, useRef } from 'react'
 
-// ── Custom FontSize extension ────────────────────────────────────────────────
 const FontSize = Extension.create({
   name: 'fontSize',
   addGlobalAttributes() {
@@ -55,19 +45,20 @@ interface RichTextEditorProps {
   placeholder?: string
 }
 
-const FONT_SIZES = ['10', '12', '14', '16', '18', '20', '24', '28', '32', '36', '48']
-const FONT_FAMILIES = [
-  { label: 'Default', value: '' },
-  { label: 'Serif', value: 'Georgia, serif' },
-  { label: 'Sans', value: 'Arial, sans-serif' },
-  { label: 'Mono', value: 'monospace' },
-]
+const FONT_SIZES = ['12', '14', '16', '18', '20', '24', '28', '32', '36', '48']
+
+const HEADINGS = [
+  { label: 'Normal', level: 0 },
+  { label: 'H1', level: 1 },
+  { label: 'H2', level: 2 },
+  { label: 'H3', level: 3 },
+] as const
 
 export function RichTextEditor({ value, onChange, placeholder = 'Write your thoughts…' }: RichTextEditorProps) {
+  const [headingOpen, setHeadingOpen] = useState(false)
   const [fontSizeOpen, setFontSizeOpen] = useState(false)
-  const [fontFamilyOpen, setFontFamilyOpen] = useState(false)
+  const headingRef = useRef<HTMLDivElement>(null)
   const fontSizeRef = useRef<HTMLDivElement>(null)
-  const fontFamilyRef = useRef<HTMLDivElement>(null)
 
   const editor = useEditor({
     extensions: [
@@ -75,21 +66,14 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
       Placeholder.configure({ placeholder }),
       Underline,
       TextStyle,
-      Color,
       FontFamily,
       FontSize,
       TextAlign.configure({ types: ['heading', 'paragraph'] }),
-      Table.configure({ resizable: true }),
-      TableRow,
-      TableCell,
-      TableHeader,
-      TaskList,
-      TaskItem.configure({ nested: true }),
     ],
     content: value,
     onUpdate: ({ editor }) => onChange(editor.getHTML()),
     editorProps: {
-      attributes: { class: 'focus:outline-none prose prose-sm max-w-none' },
+      attributes: { class: 'focus:outline-none' },
     },
   })
 
@@ -99,11 +83,10 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
     }
   }, [])
 
-  // Close dropdowns on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
+      if (!headingRef.current?.contains(e.target as Node)) setHeadingOpen(false)
       if (!fontSizeRef.current?.contains(e.target as Node)) setFontSizeOpen(false)
-      if (!fontFamilyRef.current?.contains(e.target as Node)) setFontFamilyOpen(false)
     }
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
@@ -111,7 +94,29 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
 
   if (!editor) return null
 
-  const Btn = ({ onClick, active, title, children }: {
+  const currentFontSize = editor.getAttributes('textStyle').fontSize ?? '16'
+  const currentHeading = editor.isActive('heading', { level: 1 }) ? 'H1'
+    : editor.isActive('heading', { level: 2 }) ? 'H2'
+    : editor.isActive('heading', { level: 3 }) ? 'H3'
+    : 'Normal'
+
+  const BubbleBtn = ({ onClick, active, title, children }: {
+    onClick: () => void; active?: boolean; title: string; children: React.ReactNode
+  }) => (
+    <button
+      type="button"
+      onMouseDown={e => { e.preventDefault(); onClick() }}
+      title={title}
+      className={cn(
+        'w-8 h-8 flex items-center justify-center rounded-lg transition-colors flex-shrink-0',
+        active ? 'bg-amber-warm text-white' : 'text-[#ccc] hover:bg-[#333]'
+      )}
+    >
+      {children}
+    </button>
+  )
+
+  const ToolbarBtn = ({ onClick, active, title, children }: {
     onClick: () => void; active?: boolean; title: string; children: React.ReactNode
   }) => (
     <button
@@ -119,7 +124,7 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
       onClick={onClick}
       title={title}
       className={cn(
-        'w-7 h-7 flex items-center justify-center rounded transition-colors flex-shrink-0',
+        'w-8 h-8 flex items-center justify-center rounded-lg transition-colors flex-shrink-0',
         active ? 'bg-amber-warm text-white' : 'text-[#888] hover:bg-[#252525]'
       )}
     >
@@ -127,71 +132,109 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
     </button>
   )
 
-  const Divider = () => <div className="w-px h-5 bg-[#2a2a2a] mx-0.5 flex-shrink-0" />
-
-  // Detect current font size from selection
-  const currentFontSize = editor.getAttributes('textStyle').fontSize ?? '16'
-
   return (
     <div className="rounded-xl overflow-hidden" style={{ border: '1px solid #2a2a2a', background: '#111' }}>
-      {/* Toolbar */}
-      <div className="flex flex-wrap gap-0.5 px-2 py-1.5" style={{ borderBottom: '1px solid #2a2a2a', background: '#1a1a1a' }}>
+
+      {/* Floating bubble menu on text selection */}
+      <BubbleMenu
+        editor={editor}
+        tippyOptions={{ duration: 100, placement: 'top' }}
+        shouldShow={({ editor, state }) => {
+          const { from, to } = state.selection
+          return from !== to
+        }}
+      >
+        <div
+          className="flex items-center gap-0.5 px-1.5 py-1 rounded-xl"
+          style={{ background: '#1e1e1e', border: '1px solid #333', boxShadow: '0 4px 20px rgba(0,0,0,0.6)' }}
+        >
+          <BubbleBtn onClick={() => editor.chain().focus().toggleBold().run()} active={editor.isActive('bold')} title="Bold">
+            <Bold size={14} />
+          </BubbleBtn>
+          <BubbleBtn onClick={() => editor.chain().focus().toggleItalic().run()} active={editor.isActive('italic')} title="Italic">
+            <Italic size={14} />
+          </BubbleBtn>
+          <BubbleBtn onClick={() => editor.chain().focus().toggleUnderline().run()} active={editor.isActive('underline')} title="Underline">
+            <UnderlineIcon size={14} />
+          </BubbleBtn>
+          <BubbleBtn onClick={() => editor.chain().focus().toggleStrike().run()} active={editor.isActive('strike')} title="Strike">
+            <Strikethrough size={14} />
+          </BubbleBtn>
+          <div className="w-px h-5 bg-[#333] mx-0.5" />
+          <BubbleBtn onClick={() => editor.chain().focus().toggleCode().run()} active={editor.isActive('code')} title="Code">
+            <Code size={14} />
+          </BubbleBtn>
+          <div className="w-px h-5 bg-[#333] mx-0.5" />
+          <BubbleBtn onClick={() => editor.chain().focus().setTextAlign('left').run()} active={editor.isActive({ textAlign: 'left' })} title="Left">
+            <AlignLeft size={14} />
+          </BubbleBtn>
+          <BubbleBtn onClick={() => editor.chain().focus().setTextAlign('center').run()} active={editor.isActive({ textAlign: 'center' })} title="Center">
+            <AlignCenter size={14} />
+          </BubbleBtn>
+          <BubbleBtn onClick={() => editor.chain().focus().setTextAlign('right').run()} active={editor.isActive({ textAlign: 'right' })} title="Right">
+            <AlignRight size={14} />
+          </BubbleBtn>
+        </div>
+      </BubbleMenu>
+
+      {/* Static minimal toolbar */}
+      <div className="flex items-center gap-1 px-2 py-1.5 overflow-x-auto" style={{ borderBottom: '1px solid #2a2a2a', background: '#1a1a1a' }}>
 
         {/* Undo / Redo */}
-        <Btn onClick={() => editor.chain().focus().undo().run()} title="Undo" active={false}>
-          <RotateCcw size={13} />
-        </Btn>
-        <Btn onClick={() => editor.chain().focus().redo().run()} title="Redo" active={false}>
-          <RotateCw size={13} />
-        </Btn>
-        <Divider />
+        <ToolbarBtn onClick={() => editor.chain().focus().undo().run()} title="Undo" active={false}>
+          <RotateCcw size={14} />
+        </ToolbarBtn>
+        <ToolbarBtn onClick={() => editor.chain().focus().redo().run()} title="Redo" active={false}>
+          <RotateCw size={14} />
+        </ToolbarBtn>
 
-        {/* Font family */}
-        <div ref={fontFamilyRef} className="relative">
+        <div className="w-px h-5 bg-[#2a2a2a] mx-0.5 flex-shrink-0" />
+
+        {/* Heading picker */}
+        <div ref={headingRef} className="relative flex-shrink-0">
           <button
             type="button"
-            onClick={() => { setFontFamilyOpen(v => !v); setFontSizeOpen(false) }}
-            className="flex items-center gap-0.5 h-7 px-1.5 rounded text-[#888] hover:bg-[#252525] text-xs font-sans"
-            title="Font family"
+            onClick={() => { setHeadingOpen(v => !v); setFontSizeOpen(false) }}
+            className="flex items-center gap-1 h-8 px-2 rounded-lg text-[#aaa] hover:bg-[#252525] text-xs font-sans font-medium min-w-[64px]"
           >
-            <Type size={12} />
+            <span>{currentHeading}</span>
             <ChevronDown size={10} />
           </button>
-          {fontFamilyOpen && (
-            <div className="absolute top-8 left-0 z-50 rounded-xl min-w-[120px]" style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', boxShadow: '0 4px 16px rgba(0,0,0,0.5)' }}>
-              {FONT_FAMILIES.map(f => (
+          {headingOpen && (
+            <div className="absolute top-9 left-0 z-50 rounded-xl overflow-hidden" style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', boxShadow: '0 4px 16px rgba(0,0,0,0.6)', minWidth: 90 }}>
+              {HEADINGS.map(h => (
                 <button
-                  key={f.value}
+                  key={h.level}
                   type="button"
                   onClick={() => {
-                    f.value
-                      ? (editor.chain().focus() as any).setFontFamily(f.value).run()
-                      : (editor.chain().focus() as any).unsetFontFamily().run()
-                    setFontFamilyOpen(false)
+                    if (h.level === 0) editor.chain().focus().setParagraph().run()
+                    else editor.chain().focus().toggleHeading({ level: h.level as 1|2|3 }).run()
+                    setHeadingOpen(false)
                   }}
-                  className="block w-full text-left px-3 py-2 text-sm text-[#ccc] hover:bg-[#252525]"
-                  style={{ fontFamily: f.value || undefined }}
+                  className={cn(
+                    'block w-full text-left px-3 py-2 text-sm hover:bg-[#252525] transition-colors',
+                    h.level === 0 ? 'text-[#aaa]' : h.level === 1 ? 'text-lg font-bold text-white' : h.level === 2 ? 'text-base font-semibold text-[#ddd]' : 'text-sm font-medium text-[#ccc]'
+                  )}
                 >
-                  {f.label}
+                  {h.label}
                 </button>
               ))}
             </div>
           )}
         </div>
 
-        {/* Font size */}
-        <div ref={fontSizeRef} className="relative">
+        {/* Font size picker */}
+        <div ref={fontSizeRef} className="relative flex-shrink-0">
           <button
             type="button"
-            onClick={() => { setFontSizeOpen(v => !v); setFontFamilyOpen(false) }}
-            className="flex items-center gap-0.5 h-7 px-1.5 rounded text-ink-400 hover:bg-paper-300 text-xs font-sans min-w-[36px]"
-            title="Font size"
+            onClick={() => { setFontSizeOpen(v => !v); setHeadingOpen(false) }}
+            className="flex items-center gap-1 h-8 px-2 rounded-lg text-[#aaa] hover:bg-[#252525] text-xs font-sans min-w-[44px]"
           >
-            {currentFontSize}
+            <span>{currentFontSize}</span>
             <ChevronDown size={10} />
           </button>
           {fontSizeOpen && (
-            <div className="absolute top-8 left-0 z-50 rounded-xl min-w-[60px] max-h-48 overflow-y-auto" style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', boxShadow: '0 4px 16px rgba(0,0,0,0.5)' }}>
+            <div className="absolute top-9 left-0 z-50 rounded-xl overflow-hidden max-h-48 overflow-y-auto" style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', boxShadow: '0 4px 16px rgba(0,0,0,0.6)', minWidth: 60 }}>
               {FONT_SIZES.map(sz => (
                 <button
                   key={sz}
@@ -211,102 +254,36 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
             </div>
           )}
         </div>
-        <Divider />
 
-        {/* Headings */}
-        <Btn onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-          active={editor.isActive('heading', { level: 1 })} title="Heading 1">
-          <Heading1 size={13} />
-        </Btn>
-        <Btn onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-          active={editor.isActive('heading', { level: 2 })} title="Heading 2">
-          <Heading2 size={13} />
-        </Btn>
-        <Btn onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-          active={editor.isActive('heading', { level: 3 })} title="Heading 3">
-          <Heading3 size={13} />
-        </Btn>
-        <Divider />
-
-        {/* Text formatting */}
-        <Btn onClick={() => editor.chain().focus().toggleBold().run()} active={editor.isActive('bold')} title="Bold">
-          <Bold size={13} />
-        </Btn>
-        <Btn onClick={() => editor.chain().focus().toggleItalic().run()} active={editor.isActive('italic')} title="Italic">
-          <Italic size={13} />
-        </Btn>
-        <Btn onClick={() => editor.chain().focus().toggleUnderline().run()} active={editor.isActive('underline')} title="Underline">
-          <UnderlineIcon size={13} />
-        </Btn>
-        <Btn onClick={() => editor.chain().focus().toggleStrike().run()} active={editor.isActive('strike')} title="Strikethrough">
-          <Strikethrough size={13} />
-        </Btn>
-        <Btn onClick={() => editor.chain().focus().toggleCode().run()} active={editor.isActive('code')} title="Inline code">
-          <Code size={13} />
-        </Btn>
-        <Divider />
+        <div className="w-px h-5 bg-[#2a2a2a] mx-0.5 flex-shrink-0" />
 
         {/* Lists */}
-        <Btn onClick={() => editor.chain().focus().toggleBulletList().run()} active={editor.isActive('bulletList')} title="Bullet list">
-          <List size={13} />
-        </Btn>
-        <Btn onClick={() => editor.chain().focus().toggleOrderedList().run()} active={editor.isActive('orderedList')} title="Numbered list">
-          <ListOrdered size={13} />
-        </Btn>
-        <Btn onClick={() => editor.chain().focus().sinkListItem('listItem').run()} title="Indent" active={false}>
-          <Indent size={13} />
-        </Btn>
-        <Btn onClick={() => editor.chain().focus().liftListItem('listItem').run()} title="Outdent" active={false}>
-          <Outdent size={13} />
-        </Btn>
-        <Divider />
-
-        {/* Alignment */}
-        <Btn onClick={() => editor.chain().focus().setTextAlign('left').run()} active={editor.isActive({ textAlign: 'left' })} title="Align left">
-          <AlignLeft size={13} />
-        </Btn>
-        <Btn onClick={() => editor.chain().focus().setTextAlign('center').run()} active={editor.isActive({ textAlign: 'center' })} title="Align center">
-          <AlignCenter size={13} />
-        </Btn>
-        <Btn onClick={() => editor.chain().focus().setTextAlign('right').run()} active={editor.isActive({ textAlign: 'right' })} title="Align right">
-          <AlignRight size={13} />
-        </Btn>
-        <Divider />
-
-        {/* Table */}
-        <Btn
-          onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()}
-          title="Insert table"
-          active={editor.isActive('table')}
-        >
-          <TableIcon size={13} />
-        </Btn>
-
-        {/* Checklist / Task list */}
-        <Btn
-          onClick={() => editor.chain().focus().toggleTaskList().run()}
-          title="Checklist"
-          active={editor.isActive('taskList')}
-        >
-          <CheckSquare size={13} />
-        </Btn>
+        <ToolbarBtn onClick={() => editor.chain().focus().toggleBulletList().run()} active={editor.isActive('bulletList')} title="Bullet list">
+          <List size={14} />
+        </ToolbarBtn>
+        <ToolbarBtn onClick={() => editor.chain().focus().toggleOrderedList().run()} active={editor.isActive('orderedList')} title="Numbered list">
+          <ListOrdered size={14} />
+        </ToolbarBtn>
 
       </div>
 
       {/* Editor area */}
-      <div className="px-4 py-3 min-h-[120px] text-white">
+      <div className="px-4 py-3 min-h-[150px]">
         <EditorContent editor={editor} />
       </div>
 
       <style>{`
-        .ProseMirror { color: #e0e0e0; }
-        .ProseMirror table { border-collapse: collapse; width: 100%; margin: 0.5em 0; }
-        .ProseMirror td, .ProseMirror th { border: 1px solid #2a2a2a; padding: 4px 8px; min-width: 60px; }
-        .ProseMirror th { background: #1a1a1a; font-weight: 600; }
+        .ProseMirror { color: #e0e0e0; outline: none; line-height: 1.7; }
+        .ProseMirror h1 { font-size: 1.6em; font-weight: 700; margin: 0.5em 0 0.25em; color: #fff; }
+        .ProseMirror h2 { font-size: 1.3em; font-weight: 600; margin: 0.5em 0 0.25em; color: #f0f0f0; }
+        .ProseMirror h3 { font-size: 1.1em; font-weight: 600; margin: 0.5em 0 0.25em; color: #e0e0e0; }
+        .ProseMirror p { margin: 0.25em 0; }
+        .ProseMirror ul, .ProseMirror ol { padding-left: 1.5em; margin: 0.25em 0; }
+        .ProseMirror li { margin: 0.15em 0; }
+        .ProseMirror ul ul, .ProseMirror ol ol, .ProseMirror ul ol, .ProseMirror ol ul { padding-left: 1.5em; }
+        .ProseMirror code { background: #252525; border-radius: 4px; padding: 2px 5px; font-size: 0.88em; color: #e0b47a; }
+        .ProseMirror blockquote { border-left: 3px solid #c4933f; padding-left: 1em; color: #aaa; margin: 0.5em 0; }
         .ProseMirror p.is-editor-empty:first-child::before { color: #555; content: attr(data-placeholder); float: left; height: 0; pointer-events: none; }
-        .ProseMirror ul[data-type="taskList"] li { display: flex; align-items: flex-start; gap: 0.5rem; }
-        .ProseMirror ul[data-type="taskList"] li > label { margin-top: 2px; }
-        .ProseMirror ul[data-type="taskList"] li > div { flex: 1; }
       `}</style>
     </div>
   )
