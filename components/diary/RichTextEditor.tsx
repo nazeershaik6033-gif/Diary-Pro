@@ -159,7 +159,7 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
   )
 
   const TB = ({ onClick, active, title, children }: { onClick: () => void; active?: boolean; title: string; children: React.ReactNode }) => (
-    <button type="button" onClick={onClick} title={title}
+    <button type="button" onMouseDown={e => { e.preventDefault(); onClick() }} title={title}
       className={cn('w-8 h-8 flex items-center justify-center rounded-lg transition-colors flex-shrink-0',
         active ? 'bg-amber-warm text-white' : 'text-[#888] hover:bg-[#252525]')}>
       {children}
@@ -201,7 +201,7 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
 
           {/* Heading */}
           <div ref={headingRef} className="relative flex-shrink-0">
-            <button type="button" onClick={() => { closeAll(); setHeadingOpen(v => !v) }}
+            <button type="button" onMouseDown={e => { e.preventDefault(); closeAll(); setHeadingOpen(v => !v) }}
               className="flex items-center gap-1 h-8 px-2 rounded-lg text-[#aaa] hover:bg-[#252525] text-xs font-sans font-medium min-w-[72px]">
               <span>{currentHeading}</span><ChevronDown size={10} />
             </button>
@@ -221,13 +221,13 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
 
           {/* Font size ±/picker */}
           <div ref={fontSizeRef} className="relative flex items-center flex-shrink-0">
-            <button type="button" onClick={() => adjustSize(-1)}
+            <button type="button" onMouseDown={e => { e.preventDefault(); adjustSize(-1) }}
               className="w-7 h-8 flex items-center justify-center rounded-l-lg text-[#888] hover:bg-[#252525] transition-colors"><Minus size={11} /></button>
-            <button type="button" onClick={() => { closeAll(); setFontSizeOpen(v => !v) }}
+            <button type="button" onMouseDown={e => { e.preventDefault(); closeAll(); setFontSizeOpen(v => !v) }}
               className="h-8 px-1 text-xs font-sans text-[#aaa] hover:bg-[#252525] min-w-[30px] text-center leading-8 transition-colors">
               {currentFontSize}
             </button>
-            <button type="button" onClick={() => adjustSize(1)}
+            <button type="button" onMouseDown={e => { e.preventDefault(); adjustSize(1) }}
               className="w-7 h-8 flex items-center justify-center rounded-r-lg text-[#888] hover:bg-[#252525] transition-colors"><Plus size={11} /></button>
             {fontSizeOpen && (
               <div className="absolute top-9 left-0 z-50 rounded-xl overflow-hidden overflow-y-auto max-h-48" style={{ ...dropdownStyle, minWidth: 60 }}>
@@ -260,7 +260,7 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
 
           {/* Font family */}
           <div ref={fontFamilyRef} className="relative flex-shrink-0">
-            <button type="button" onClick={() => { closeAll(); setFontFamilyOpen(v => !v) }}
+            <button type="button" onMouseDown={e => { e.preventDefault(); closeAll(); setFontFamilyOpen(v => !v) }}
               className="flex items-center gap-1 h-8 px-2 rounded-lg text-[#aaa] hover:bg-[#252525] text-xs font-sans min-w-[72px]">
               <span className="truncate max-w-[60px]">{currentFontLabel}</span><ChevronDown size={10} className="flex-shrink-0" />
             </button>
@@ -282,7 +282,7 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
 
           {/* Table insert dialog */}
           <div ref={tableRef} className="relative flex-shrink-0">
-            <TB onClick={() => { closeAll(); setTableOpen(v => !v) }} title="Insert table" active={editor.isActive('table') || tableOpen}>
+            <TB onClick={() => { closeAll(); setTableOpen(v => !v) }} title="Insert table" active={tableOpen}>
               <TableIcon size={14} />
             </TB>
             {tableOpen && (
