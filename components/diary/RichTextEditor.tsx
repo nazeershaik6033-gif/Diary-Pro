@@ -120,22 +120,22 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
       title={title}
       className={cn(
         'w-7 h-7 flex items-center justify-center rounded transition-colors flex-shrink-0',
-        active ? 'bg-amber-warm text-white' : 'text-ink-400 hover:bg-paper-300'
+        active ? 'bg-amber-warm text-white' : 'text-[#888] hover:bg-[#252525]'
       )}
     >
       {children}
     </button>
   )
 
-  const Divider = () => <div className="w-px h-5 bg-paper-400 mx-0.5 flex-shrink-0" />
+  const Divider = () => <div className="w-px h-5 bg-[#2a2a2a] mx-0.5 flex-shrink-0" />
 
   // Detect current font size from selection
   const currentFontSize = editor.getAttributes('textStyle').fontSize ?? '16'
 
   return (
-    <div className="rounded-xl border border-paper-400 bg-paper-300 overflow-hidden">
+    <div className="rounded-xl overflow-hidden" style={{ border: '1px solid #2a2a2a', background: '#111' }}>
       {/* Toolbar */}
-      <div className="flex flex-wrap gap-0.5 px-2 py-1.5 border-b border-paper-400 bg-paper-50">
+      <div className="flex flex-wrap gap-0.5 px-2 py-1.5" style={{ borderBottom: '1px solid #2a2a2a', background: '#1a1a1a' }}>
 
         {/* Undo / Redo */}
         <Btn onClick={() => editor.chain().focus().undo().run()} title="Undo" active={false}>
@@ -151,14 +151,14 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
           <button
             type="button"
             onClick={() => { setFontFamilyOpen(v => !v); setFontSizeOpen(false) }}
-            className="flex items-center gap-0.5 h-7 px-1.5 rounded text-ink-400 hover:bg-paper-300 text-xs font-sans"
+            className="flex items-center gap-0.5 h-7 px-1.5 rounded text-[#888] hover:bg-[#252525] text-xs font-sans"
             title="Font family"
           >
             <Type size={12} />
             <ChevronDown size={10} />
           </button>
           {fontFamilyOpen && (
-            <div className="absolute top-8 left-0 z-50 bg-paper-300 border border-paper-400 rounded-xl shadow-warm-md min-w-[120px]">
+            <div className="absolute top-8 left-0 z-50 rounded-xl min-w-[120px]" style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', boxShadow: '0 4px 16px rgba(0,0,0,0.5)' }}>
               {FONT_FAMILIES.map(f => (
                 <button
                   key={f.value}
@@ -169,7 +169,7 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
                       : (editor.chain().focus() as any).unsetFontFamily().run()
                     setFontFamilyOpen(false)
                   }}
-                  className="block w-full text-left px-3 py-2 text-sm hover:bg-paper-300"
+                  className="block w-full text-left px-3 py-2 text-sm text-[#ccc] hover:bg-[#252525]"
                   style={{ fontFamily: f.value || undefined }}
                 >
                   {f.label}
@@ -191,7 +191,7 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
             <ChevronDown size={10} />
           </button>
           {fontSizeOpen && (
-            <div className="absolute top-8 left-0 z-50 bg-paper-300 border border-paper-400 rounded-xl shadow-warm-md min-w-[60px] max-h-48 overflow-y-auto">
+            <div className="absolute top-8 left-0 z-50 rounded-xl min-w-[60px] max-h-48 overflow-y-auto" style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', boxShadow: '0 4px 16px rgba(0,0,0,0.5)' }}>
               {FONT_SIZES.map(sz => (
                 <button
                   key={sz}
@@ -201,7 +201,7 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
                     setFontSizeOpen(false)
                   }}
                   className={cn(
-                    'block w-full text-left px-3 py-1.5 text-sm hover:bg-paper-300',
+                    'block w-full text-left px-3 py-1.5 text-sm text-[#ccc] hover:bg-[#252525]',
                     currentFontSize === sz && 'font-bold text-amber-warm'
                   )}
                 >
@@ -294,15 +294,19 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
       </div>
 
       {/* Editor area */}
-      <div className="px-4 py-3 min-h-[120px]">
+      <div className="px-4 py-3 min-h-[120px] text-white">
         <EditorContent editor={editor} />
       </div>
 
       <style>{`
+        .ProseMirror { color: #e0e0e0; }
         .ProseMirror table { border-collapse: collapse; width: 100%; margin: 0.5em 0; }
-        .ProseMirror td, .ProseMirror th { border: 1px solid #d4c9b0; padding: 4px 8px; min-width: 60px; }
-        .ProseMirror th { background: #f5f0e8; font-weight: 600; }
-        .ProseMirror p.is-editor-empty:first-child::before { color: #aaa; content: attr(data-placeholder); float: left; height: 0; pointer-events: none; }
+        .ProseMirror td, .ProseMirror th { border: 1px solid #2a2a2a; padding: 4px 8px; min-width: 60px; }
+        .ProseMirror th { background: #1a1a1a; font-weight: 600; }
+        .ProseMirror p.is-editor-empty:first-child::before { color: #555; content: attr(data-placeholder); float: left; height: 0; pointer-events: none; }
+        .ProseMirror ul[data-type="taskList"] li { display: flex; align-items: flex-start; gap: 0.5rem; }
+        .ProseMirror ul[data-type="taskList"] li > label { margin-top: 2px; }
+        .ProseMirror ul[data-type="taskList"] li > div { flex: 1; }
       `}</style>
     </div>
   )

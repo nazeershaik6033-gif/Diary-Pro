@@ -94,7 +94,7 @@ export function DrawerNav({ open, onClose }: DrawerNavProps) {
 
       <aside
         className={cn(
-          'fixed top-0 left-0 bottom-0 w-[220px] bg-paper border-r border-paper-300 z-30 flex flex-col',
+          'fixed top-0 left-0 bottom-0 w-[220px] bg-[#0e0e0e] border-r border-[#222] z-30 flex flex-col',
           'transition-transform duration-200',
           open ? 'translate-x-0' : '-translate-x-full',
           'md:translate-x-0',
@@ -105,7 +105,7 @@ export function DrawerNav({ open, onClose }: DrawerNavProps) {
         }}
       >
         {/* Sidebar header */}
-        <div className="flex items-center gap-2.5 px-4 border-b border-paper-300 flex-shrink-0 h-14">
+        <div className="flex items-center gap-2.5 px-4 border-b border-[#222] flex-shrink-0 h-14">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={`${basePath}/logo.svg`} alt="" className="w-7 h-7 flex-shrink-0 object-contain" />
           <div className="min-w-0 flex-1 overflow-hidden">
@@ -121,14 +121,14 @@ export function DrawerNav({ open, onClose }: DrawerNavProps) {
             <div className="flex items-center gap-1 flex-shrink-0">
               <button
                 onClick={saveOrder}
-                className="text-[10px] font-sans font-semibold text-amber-warm px-2 py-1 rounded-lg hover:bg-paper-300"
+                className="text-[10px] font-sans font-semibold text-amber-warm px-2 py-1 rounded-lg hover:bg-[#1a1a1a]"
                 aria-label="Save order"
               >
                 Done
               </button>
               <button
                 onClick={cancelEditing}
-                className="p-1 rounded-lg hover:bg-paper-300 text-ink-300"
+                className="p-1 rounded-lg hover:bg-[#1a1a1a] text-[#888]"
                 aria-label="Cancel editing"
               >
                 <X size={14} />
@@ -137,7 +137,7 @@ export function DrawerNav({ open, onClose }: DrawerNavProps) {
           ) : (
             <button
               onClick={startEditing}
-              className="flex-shrink-0 p-1.5 rounded-lg hover:bg-paper-300 text-ink-300"
+              className="flex-shrink-0 p-1.5 rounded-lg hover:bg-[#1a1a1a] text-[#888]"
               aria-label="Reorder sidebar"
             >
               <Pencil size={13} />
@@ -179,7 +179,7 @@ function ReorderNavItem({ item }: { item: typeof DEFAULT_NAV_ITEMS[number] }) {
   const Icon = item.icon
   return (
     <Reorder.Item value={item.href} dragListener={false} dragControls={controls}>
-      <div className="mx-2 my-0.5 flex items-center gap-1 px-3 py-2.5 rounded-xl bg-paper-300/40">
+      <div className="mx-2 my-0.5 flex items-center gap-1 px-3 py-2.5 rounded-xl bg-[#1a1a1a]">
         <div
           className="touch-none cursor-grab active:cursor-grabbing text-ink-200 flex-shrink-0"
           onPointerDown={e => controls.start(e)}
@@ -207,7 +207,7 @@ function NavItem({
         onClick={onClose}
         className={cn(
           'flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors',
-          active ? 'bg-amber-warm' : 'hover:bg-paper-300'
+          active ? 'bg-amber-warm' : 'hover:bg-[#1a1a1a]'
         )}
       >
         <Icon size={18} className={cn('flex-shrink-0', active ? 'text-white' : color)} />

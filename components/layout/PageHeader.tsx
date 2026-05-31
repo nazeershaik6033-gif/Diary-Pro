@@ -17,7 +17,7 @@ export function PageHeader({ title, showBack = true, onBack, rightAction, classN
   const handleBack = onBack ?? (() => router.back())
 
   return (
-    <header className={cn('flex items-center gap-3 px-4 py-4 sticky top-0 bg-paper z-10', className)}>
+    <header className={cn('flex items-center gap-3 px-4 py-4 sticky top-0 bg-[#0e0e0e] border-b border-[#222] z-10', className)}>
       {showBack && (
         <button
           onClick={handleBack}

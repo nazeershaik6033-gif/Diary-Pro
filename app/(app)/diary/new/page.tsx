@@ -115,7 +115,8 @@ export default function NewDiaryEntryPage() {
             <input
               type="date"
               {...field}
-              className="w-full rounded-xl border border-paper-400 bg-paper-300 px-4 py-2.5 text-[16px] font-sans text-ink focus:outline-none focus:ring-2 focus:ring-amber-warm"
+              className="w-full rounded-xl px-4 py-2.5 text-[16px] font-sans text-white focus:outline-none focus:ring-2 focus:ring-amber-warm"
+              style={{ background: '#1a1a1a', border: '1px solid #2a2a2a' }}
             />
           )}
         />
@@ -130,7 +131,7 @@ export default function NewDiaryEntryPage() {
         />
 
         {/* Tab bar */}
-        <div className="flex gap-1 border-b border-paper-400 overflow-x-auto">
+        <div className="flex gap-1 border-b border-[#2a2a2a] overflow-x-auto">
           {TABS.map(tab => (
             <button
               key={tab}
