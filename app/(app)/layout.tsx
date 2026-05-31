@@ -55,7 +55,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
       <div className="md:ml-[220px] flex flex-col min-h-screen">
         <header
           className="flex items-center gap-2 px-3 sticky top-0 bg-[#0e0e0e] z-10 border-b border-paper-400"
-          style={{ paddingTop: 'env(safe-area-inset-top)', height: 'calc(56px + env(safe-area-inset-top))' }}
+          style={{ paddingTop: 'env(safe-area-inset-top)', height: 'calc(44px + env(safe-area-inset-top))' }}
         >
           {/* Hamburger — mobile only */}
           <button
@@ -100,7 +100,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
           {rightSlot}
         </header>
 
-        <main className="pb-28 md:pb-fab flex-1">
+        <main className="pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-fab flex-1">
           {children}
         </main>
       </div>

@@ -168,13 +168,13 @@ html[data-fontsize="xl"] { font-size: 20px; }
   .top-safe-4 {
     top: calc(1rem + env(safe-area-inset-top));
   }
-  /* FAB-aware bottom padding — clears the floating action button on all devices */
+  /* Bottom padding that clears the flush bottom nav */
   .pb-fab {
-    padding-bottom: calc(6rem + env(safe-area-inset-bottom));
+    padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
   }
-  /* Toast container sits just above the FAB */
+  /* Toast container sits just above the nav */
   .bottom-toast {
-    bottom: calc(5.5rem + env(safe-area-inset-bottom));
+    bottom: calc(4.5rem + env(safe-area-inset-bottom));
   }
   .scrollbar-hide {
     -ms-overflow-style: none;

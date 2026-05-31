@@ -21,20 +21,20 @@ export function BottomNav() {
   return (
     <>
       <div
-        className="fixed bottom-0 left-0 right-0 md:hidden z-20"
+        className="fixed bottom-0 left-0 right-0 md:hidden z-20 bg-[#131313] border-t border-[#222] rounded-t-2xl"
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
-        <div className="mx-3 mb-3 rounded-[1.75rem] flex items-center justify-around px-2 py-2 bg-[#181818] shadow-[0_8px_32px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.04)]">
+        <div className="flex items-center justify-around px-2 pt-2 pb-1">
           {NAV_ITEMS.map((item, i) => {
             if (!item) {
               return (
                 <button
                   key="capture"
                   onClick={() => setCaptureOpen(true)}
-                  className="w-14 h-14 rounded-full bg-[#141414] flex items-center justify-center -mt-7 shadow-[0_4px_20px_rgba(196,147,63,0.35),0_2px_8px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.06)] border border-[#c4933f]/25 active:scale-90 transition-transform duration-100"
+                  className="w-12 h-12 rounded-full bg-[#0e0e0e] flex items-center justify-center -mt-5 shadow-[0_4px_20px_rgba(196,147,63,0.3),0_2px_8px_rgba(0,0,0,0.6)] border border-[#c4933f]/30 active:scale-90 transition-transform duration-100"
                   aria-label="Quick capture"
                 >
-                  <Plus size={26} className="text-[#c4933f]" />
+                  <Plus size={22} className="text-[#c4933f]" />
                 </button>
               )
             }
@@ -46,7 +46,7 @@ export function BottomNav() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="flex flex-col items-center gap-0.5 px-4 py-1 min-w-0"
+                className="flex flex-col items-center gap-0.5 px-3 py-1 min-w-0"
               >
                 <Icon
                   size={22}
