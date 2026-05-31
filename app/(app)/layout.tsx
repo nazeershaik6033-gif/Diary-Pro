@@ -21,16 +21,24 @@ function AppShell({ children }: { children: React.ReactNode }) {
   const { rightSlot } = useHeader()
   const router = useRouter()
   const pathname = usePathname()
+  const [forceShow, setForceShow] = useState(false)
 
   useEffect(() => {
-    if (!loaded) return // wait until DB settings are read
+    // Failsafe: if DB hasn't loaded in 2s, show the app anyway
+    const t = setTimeout(() => setForceShow(true), 2000)
+    return () => clearTimeout(t)
+  }, [])
+
+  useEffect(() => {
+    if (!loaded) return
     if (pinEnabled && !isVerified) {
       router.replace('/pin')
     }
   }, [pinEnabled, isVerified, router, loaded])
 
-  // Show nothing while DB loads — prevents flash of content before PIN redirect
-  if (!loaded) return null
+  if (!loaded && !forceShow) return (
+    <div className="min-h-screen bg-[#0e0e0e]" />
+  )
 
   const handleLogoClick = () => {
     // Dispatch reset event so DiaryPage clears its local state

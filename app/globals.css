@@ -2,6 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+html, body { background-color: #0e0e0e; }
+
 /* ── Theme color tokens (RGB triplets for Tailwind opacity support) ── */
 :root {
   --sat: env(safe-area-inset-top);
