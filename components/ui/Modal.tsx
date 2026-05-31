@@ -31,7 +31,7 @@ export function Modal({ open, onClose, title, children, className }: ModalProps)
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             className={cn(
-              'fixed left-4 right-4 top-1/2 -translate-y-1/2 bg-white rounded-3xl shadow-warm-lg z-50 p-6 mx-auto max-w-sm',
+              'fixed left-4 right-4 top-1/2 -translate-y-1/2 bg-paper-300 rounded-3xl shadow-[0_8px_32px_rgba(0,0,0,0.7)] border border-paper-400 z-50 p-6 mx-auto max-w-sm',
               className
             )}
           >
