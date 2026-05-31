@@ -13,8 +13,7 @@ export default function RootPage() {
 
   useEffect(() => {
     if (settings === undefined) return
-    if (!settings) return
-
+    // settings === null means new user (no record yet) → go to diary
     if (pinEnabled && !isVerified) {
       router.replace('/pin')
     } else {
@@ -23,8 +22,8 @@ export default function RootPage() {
   }, [settings, pinEnabled, isVerified, router])
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-paper">
-      <Spinner className="w-8 h-8" />
+    <div className="flex items-center justify-center min-h-screen bg-[#0e0e0e]">
+      <div className="w-8 h-8 rounded-full border-2 border-[#c4933f]/30 border-t-[#c4933f] animate-spin" />
     </div>
   )
 }
