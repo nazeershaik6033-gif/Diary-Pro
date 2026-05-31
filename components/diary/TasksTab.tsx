@@ -1,36 +1,22 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
-import { Plus, Trash2, RotateCcw, Pencil, Check } from 'lucide-react'
-import { db } from '@/lib/db'
-import { toDateString } from '@/lib/utils/date'
-import { subDays } from 'date-fns'
+import { Plus, Trash2, Pencil, Check } from 'lucide-react'
 
 export type TodoItem = { text: string; done: boolean }
 
 export function TasksTab({
   todos,
   onChange,
-  showCarryForward = false,
 }: {
   todos: TodoItem[]
   onChange: (t: TodoItem[]) => void
-  showCarryForward?: boolean
+  showCarryForward?: boolean  // kept for API compat, no longer used
 }) {
   const [newText, setNewText] = useState('')
-  const [carryForward, setCarryForward] = useState<TodoItem[]>([])
   const [editingIdx, setEditingIdx] = useState<number | null>(null)
   const [editText, setEditText] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
   const editRef = useRef<HTMLInputElement>(null)
-
-  useEffect(() => {
-    if (!showCarryForward) return
-    const yesterday = toDateString(subDays(new Date(), 1))
-    db.diaryEntries.where('date').equals(yesterday).first().then(entry => {
-      const incomplete = (entry?.todos ?? []).filter(t => !t.done)
-      setCarryForward(incomplete)
-    })
-  }, [showCarryForward])
 
   useEffect(() => {
     if (editingIdx !== null) editRef.current?.focus()
@@ -65,11 +51,6 @@ export function TasksTab({
       onChange(todos.map((t, i) => i === idx ? { ...t, text } : t))
     }
     setEditingIdx(null)
-  }
-
-  function adoptCarryForward(task: TodoItem) {
-    onChange([...todos, { text: task.text, done: false }])
-    setCarryForward(prev => prev.filter(t => t.text !== task.text))
   }
 
   const undone = todos.filter(t => !t.done)
@@ -117,25 +98,6 @@ export function TasksTab({
 
   return (
     <div className="space-y-4">
-      {carryForward.length > 0 && (
-        <div className="rounded-2xl p-4" style={{ border: '1px solid rgba(196,147,63,0.3)', background: 'rgba(196,147,63,0.08)' }}>
-          <p className="text-xs font-sans font-semibold text-amber-warm uppercase tracking-wider mb-2 flex items-center gap-1.5">
-            <RotateCcw size={11} /> Unfinished from yesterday
-          </p>
-          <div className="space-y-1.5">
-            {carryForward.map((t, i) => (
-              <div key={i} className="flex items-center gap-2">
-                <span className="flex-1 text-sm font-sans text-[#c4933f]">{t.text}</span>
-                <button type="button" onClick={() => adoptCarryForward(t)}
-                  className="text-xs font-sans text-amber-warm hover:underline flex-shrink-0">
-                  Add →
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
       <div className="flex gap-2">
         <input
           ref={inputRef}
@@ -169,7 +131,7 @@ export function TasksTab({
         </div>
       )}
 
-      {todos.length === 0 && carryForward.length === 0 && (
+      {todos.length === 0 && (
         <p className="text-center text-sm font-sans text-[#555] py-6">No tasks yet — add one above</p>
       )}
     </div>

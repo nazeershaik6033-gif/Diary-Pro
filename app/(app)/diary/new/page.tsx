@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm, Controller } from 'react-hook-form'
 import { PageHeader } from '@/components/layout/PageHeader'
@@ -14,6 +14,8 @@ import { TasksTab, type TodoItem } from '@/components/diary/TasksTab'
 import { createDiaryEntry, addDiaryAsset, addEntrySticker } from '@/lib/db/diary'
 import { useToast } from '@/app/contexts/ToastContext'
 import { toDateString } from '@/lib/utils/date'
+import { subDays } from 'date-fns'
+import { db } from '@/lib/db'
 import { cn } from '@/lib/utils/cn'
 
 interface FormValues {
@@ -36,6 +38,15 @@ export default function NewDiaryEntryPage() {
   const [loading, setLoading] = useState(false)
   const [activeTab, setActiveTab] = useState<Tab>('Write')
   const [todos, setTodos] = useState<TodoItem[]>([])
+
+  // Silently carry forward incomplete tasks from yesterday
+  useEffect(() => {
+    const yesterday = toDateString(subDays(new Date(), 1))
+    db.diaryEntries.where('date').equals(yesterday).filter(e => !e.deletedAt).first().then(entry => {
+      const incomplete = (entry?.todos ?? []).filter(t => !t.done)
+      if (incomplete.length > 0) setTodos(incomplete)
+    })
+  }, [])
 
   const { control, handleSubmit, setValue, watch } = useForm<FormValues>({
     defaultValues: {

@@ -146,13 +146,14 @@ export function DrawerNav({ open, onClose }: DrawerNavProps) {
         </div>
 
         {/* Nav items */}
-        <div className="flex-1 overflow-y-auto overflow-x-hidden py-2">
+        <div className="flex-1 overflow-y-auto py-2" style={{ overflowX: 'clip' }}>
           {editing ? (
             <Reorder.Group
               axis="y"
               values={localOrder}
               onReorder={setLocalOrder}
-              className="list-none p-0 m-0"
+              as="ul"
+              style={{ listStyle: 'none', padding: 0, margin: 0 }}
             >
               {displayItems.map(item => (
                 <ReorderNavItem key={item.href} item={item} />
@@ -178,19 +179,25 @@ function ReorderNavItem({ item }: { item: typeof DEFAULT_NAV_ITEMS[number] }) {
   const controls = useDragControls()
   const Icon = item.icon
   return (
-    <Reorder.Item value={item.href} dragListener={false} dragControls={controls}>
-      <div className="mx-2 my-0.5 flex items-center gap-1 px-3 py-2.5 rounded-xl bg-[#1a1a1a]">
-        <div
-          className="touch-none cursor-grab active:cursor-grabbing text-ink-200 flex-shrink-0"
-          onPointerDown={e => controls.start(e)}
-        >
-          <GripVertical size={15} />
-        </div>
-        <Icon size={18} className={cn('flex-shrink-0 ml-1', item.color)} />
-        <span className="font-sans font-medium text-[13px] whitespace-nowrap text-ink ml-1">
-          {item.label}
-        </span>
+    <Reorder.Item
+      value={item.href}
+      dragListener={false}
+      dragControls={controls}
+      as="li"
+      style={{ listStyle: 'none' }}
+      className="mx-2 my-0.5 flex items-center gap-1 px-3 py-2.5 rounded-xl bg-[#1a1a1a] select-none"
+    >
+      <div
+        style={{ touchAction: 'none', cursor: 'grab', flexShrink: 0 }}
+        className="text-[#555] active:cursor-grabbing"
+        onPointerDown={e => { e.preventDefault(); controls.start(e) }}
+      >
+        <GripVertical size={15} />
       </div>
+      <Icon size={18} className={cn('flex-shrink-0 ml-1', item.color)} />
+      <span className="font-sans font-medium text-[13px] whitespace-nowrap text-ink ml-1">
+        {item.label}
+      </span>
     </Reorder.Item>
   )
 }
