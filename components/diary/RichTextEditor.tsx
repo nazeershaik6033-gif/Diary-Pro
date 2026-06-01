@@ -15,10 +15,10 @@ import {
   Bold, Italic, Underline as UnderlineIcon, Strikethrough, Code,
   List, ListOrdered, AlignLeft, AlignCenter, AlignRight,
   RotateCcw, RotateCw, ChevronDown, Table as TableIcon,
-  Minus, Plus,
+  Minus, Plus, Mic, MicOff, Check, X,
 } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 
 const FontSize = Extension.create({
   name: 'fontSize',
@@ -74,6 +74,16 @@ const HEADINGS = [
   { label: 'H3 — Small',  level: 3 },
 ] as const
 
+// Extend window type for SpeechRecognition
+declare global {
+  interface Window {
+    SpeechRecognition: any
+    webkitSpeechRecognition: any
+  }
+}
+
+type DictateState = 'idle' | 'listening' | 'preview'
+
 export function RichTextEditor({ value, onChange, placeholder = 'Write your thoughts…' }: RichTextEditorProps) {
   const [headingOpen,    setHeadingOpen]    = useState(false)
   const [fontSizeOpen,   setFontSizeOpen]   = useState(false)
@@ -81,6 +91,12 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
   const [tableOpen,      setTableOpen]      = useState(false)
   const [tableRows,      setTableRows]      = useState('3')
   const [tableCols,      setTableCols]      = useState('3')
+
+  // Dictation state
+  const [dictateState,   setDictateState]   = useState<DictateState>('idle')
+  const [transcript,     setTranscript]     = useState('')
+  const [dictateError,   setDictateError]   = useState('')
+  const recognitionRef = useRef<any>(null)
 
   const headingRef    = useRef<HTMLDivElement>(null)
   const fontSizeRef   = useRef<HTMLDivElement>(null)
@@ -123,6 +139,77 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
     }
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
+  }, [])
+
+  // Stop recognition on unmount
+  useEffect(() => {
+    return () => { recognitionRef.current?.stop() }
+  }, [])
+
+  const startDictation = useCallback(() => {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition
+    if (!SR) {
+      setDictateError('Speech recognition is not supported in this browser.')
+      setDictateState('preview')
+      return
+    }
+    setDictateError('')
+    setTranscript('')
+
+    const rec = new SR()
+    recognitionRef.current = rec
+    rec.continuous = true
+    rec.interimResults = true
+    rec.lang = 'en-US'
+
+    let finalText = ''
+
+    rec.onresult = (e: any) => {
+      let interim = ''
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        const t = e.results[i][0].transcript
+        if (e.results[i].isFinal) finalText += t + ' '
+        else interim = t
+      }
+      setTranscript((finalText + interim).trim())
+    }
+
+    rec.onerror = (e: any) => {
+      if (e.error !== 'no-speech' && e.error !== 'aborted') {
+        setDictateError(`Mic error: ${e.error}`)
+      }
+      setDictateState('preview')
+    }
+
+    rec.onend = () => {
+      setTranscript(prev => {
+        const final = finalText.trim() || prev
+        if (final) setDictateState('preview')
+        else setDictateState('idle')
+        return final
+      })
+    }
+
+    rec.start()
+    setDictateState('listening')
+  }, [])
+
+  const stopDictation = useCallback(() => {
+    recognitionRef.current?.stop()
+    // onend handler will transition to preview
+  }, [])
+
+  const insertTranscript = useCallback(() => {
+    if (!editor || !transcript) return
+    editor.chain().focus().insertContent(transcript + ' ').run()
+    setTranscript('')
+    setDictateState('idle')
+  }, [editor, transcript])
+
+  const discardTranscript = useCallback(() => {
+    setTranscript('')
+    setDictateError('')
+    setDictateState('idle')
   }, [])
 
   if (!editor) return null
@@ -192,7 +279,7 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
           </div>
         </BubbleMenu>
 
-        {/* ── Row 1: Undo/Redo · Heading · Font size ±/picker · Lists ── */}
+        {/* ── Row 1: Undo/Redo · Heading · Font size ±/picker · Lists · Mic ── */}
         <div className="flex items-center gap-1 px-2 py-1.5 overflow-x-auto" style={{ borderBottom: '1px solid #2a2a2a', background: '#1a1a1a' }}>
 
           <TB onClick={() => editor.chain().focus().undo().run()} title="Undo" active={false}><RotateCcw size={14} /></TB>
@@ -246,6 +333,32 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
 
           <TB onClick={() => editor.chain().focus().toggleBulletList().run()}  active={editor.isActive('bulletList')}  title="Bullet list"><List        size={14} /></TB>
           <TB onClick={() => editor.chain().focus().toggleOrderedList().run()} active={editor.isActive('orderedList')} title="Numbered list"><ListOrdered size={14} /></TB>
+
+          {/* Spacer pushes mic to the right */}
+          <div className="flex-1" />
+
+          {/* Mic button */}
+          <button
+            type="button"
+            onPointerDown={e => {
+              e.preventDefault()
+              if (dictateState === 'listening') stopDictation()
+              else if (dictateState === 'idle') startDictation()
+            }}
+            title={dictateState === 'listening' ? 'Stop dictating' : 'Dictate'}
+            className={cn(
+              'flex items-center gap-1.5 h-8 px-2.5 rounded-lg text-xs font-sans font-medium transition-all flex-shrink-0',
+              dictateState === 'listening'
+                ? 'text-white'
+                : 'text-[#888] hover:bg-[#252525]'
+            )}
+            style={dictateState === 'listening' ? { background: '#c4933f', boxShadow: '0 0 0 3px rgba(196,147,63,0.25)' } : {}}
+          >
+            {dictateState === 'listening'
+              ? <><MicOff size={13} /><span>Stop</span></>
+              : <><Mic size={13} /><span>Dictate</span></>
+            }
+          </button>
         </div>
 
         {/* ── Row 2: B·I·U·S·Code · Font family · Table · Align ── */}
@@ -316,6 +429,62 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
           <TB onClick={() => editor.chain().focus().setTextAlign('center').run()} active={editor.isActive({ textAlign: 'center' })} title="Center"><AlignCenter size={14} /></TB>
           <TB onClick={() => editor.chain().focus().setTextAlign('right').run()}  active={editor.isActive({ textAlign: 'right' })}  title="Right"><AlignRight  size={14} /></TB>
         </div>
+
+        {/* ── Dictation preview panel ── */}
+        {(dictateState === 'listening' || dictateState === 'preview') && (
+          <div className="px-4 py-3" style={{ borderBottom: '1px solid #2a2a2a', background: '#0e0e0e' }}>
+            {/* Listening indicator */}
+            {dictateState === 'listening' && (
+              <div className="flex items-center gap-2 mb-2">
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ background: '#c4933f' }} />
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5" style={{ background: '#c4933f' }} />
+                </span>
+                <span className="text-xs text-[#888] font-sans">Listening… speak now</span>
+              </div>
+            )}
+
+            {/* Transcript text */}
+            {transcript ? (
+              <p className="text-sm text-[#e0e0e0] leading-relaxed mb-3 whitespace-pre-wrap">{transcript}</p>
+            ) : dictateState === 'preview' && dictateError ? (
+              <p className="text-sm text-red-400 mb-3">{dictateError}</p>
+            ) : dictateState === 'listening' ? (
+              <p className="text-sm text-[#444] italic">Start speaking…</p>
+            ) : null}
+
+            {/* Action buttons — only shown in preview state */}
+            {dictateState === 'preview' && (
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={insertTranscript}
+                  disabled={!transcript}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-sans font-medium text-white disabled:opacity-40 transition-opacity"
+                  style={{ background: '#c4933f' }}
+                >
+                  <Check size={12} /> Insert
+                </button>
+                <button
+                  type="button"
+                  onClick={discardTranscript}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-sans font-medium text-[#888] hover:bg-[#1a1a1a] transition-colors"
+                  style={{ border: '1px solid #2a2a2a' }}
+                >
+                  <X size={12} /> Discard
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setTranscript(''); setDictateError(''); startDictation() }}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-sans font-medium text-[#888] hover:bg-[#1a1a1a] transition-colors"
+                  style={{ border: '1px solid #2a2a2a' }}
+                >
+                  <Mic size={12} /> Redo
+                </button>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Editor area */}
         <div className="px-4 py-3 min-h-[150px]">
