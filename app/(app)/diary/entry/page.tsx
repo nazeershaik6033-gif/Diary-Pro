@@ -104,25 +104,28 @@ function DiaryEntryContent() {
         }
       />
 
-      <div className="px-4 space-y-5 pb-8">
-        {/* Title + stickers */}
-        <div className="flex items-start gap-3">
+      <div className="px-4 pb-8">
+      <div className="rounded-2xl space-y-4 px-4 py-4" style={{ background: '#141414', border: '1px solid #1e1e1e' }}>
+        {/* Date + stickers row */}
+        <div className="flex items-center gap-2 pt-1">
           {stickers && stickers.length > 0 && (
-            <span className="text-3xl leading-none mt-0.5">
+            <span className="text-2xl leading-none">
               {stickers.map(s => STICKER_MAP[s.stickerId]?.emoji ?? '').join('')}
             </span>
           )}
-          <div>
-            <p className="font-sans text-xs text-ink-300 mb-0.5">{formatDay(date)}</p>
-            <p className="font-serif font-bold text-ink text-xl leading-snug">
-              {entry.title || formatDisplay(date)}
-            </p>
-          </div>
+          <p className="font-sans text-xs text-[#666]">{formatDay(date)}</p>
+        </div>
+
+        {/* Title */}
+        <div style={{ borderBottom: '1px solid #1e1e1e', paddingBottom: 14 }}>
+          <h1 className="font-serif font-bold text-white text-2xl leading-snug">
+            {entry.title || formatDisplay(date)}
+          </h1>
         </div>
 
         {/* Tabs — only show if there are learnings */}
         {entry.learnings && (
-          <div className="flex gap-2 border-b border-paper-400">
+          <div className="flex gap-2 border-b border-[#222]">
             {TABS.map(tab => (
               <button
                 key={tab}
@@ -131,7 +134,7 @@ function DiaryEntryContent() {
                   'pb-2 px-1 text-sm font-sans font-medium border-b-2 transition-colors',
                   activeTab === tab
                     ? 'border-amber-warm text-amber-warm'
-                    : 'border-transparent text-ink-300'
+                    : 'border-transparent text-[#666]'
                 )}
               >
                 {tab}
@@ -142,25 +145,25 @@ function DiaryEntryContent() {
 
         {activeTab === 'Content' && htmlContent && (
           <div
-            className="prose prose-sm max-w-none font-sans text-ink leading-relaxed"
+            className="entry-prose"
             dangerouslySetInnerHTML={{ __html: htmlContent }}
           />
         )}
 
         {activeTab === 'Learnings' && entry.learnings && (
           <div
-            className="prose prose-sm max-w-none font-sans text-ink leading-relaxed"
+            className="entry-prose"
             dangerouslySetInnerHTML={{ __html: entry.learnings }}
           />
         )}
 
         {/* Gratitude */}
         {entry.gratitude.some(g => g) && (
-          <div className="bg-blush/10 rounded-2xl p-4 space-y-2">
-            <p className="text-sm font-medium font-sans text-blush-dark mb-2">Gratitude</p>
+          <div className="rounded-2xl p-4 space-y-2" style={{ background: '#1a1a1a', border: '1px solid #2a2a2a' }}>
+            <p className="text-sm font-medium font-sans text-[#c4933f] mb-2">Gratitude</p>
             {entry.gratitude.map((g, i) => g ? (
-              <p key={i} className="text-sm font-sans text-ink-400 flex gap-2">
-                <span className="text-blush">♥</span> {g}
+              <p key={i} className="text-sm font-sans text-[#ccc] flex gap-2">
+                <span className="text-[#c4933f]">♥</span> {g}
               </p>
             ) : null)}
           </div>
@@ -186,6 +189,30 @@ function DiaryEntryContent() {
           </div>
         )}
       </div>
+      </div>
+
+      <style>{`
+        .entry-prose { color: #d0d0d0; font-size: 15px; line-height: 1.8; }
+        .entry-prose h1 { font-size: 1.5em; font-weight: 700; color: #fff; margin: 1em 0 0.4em; }
+        .entry-prose h2 { font-size: 1.25em; font-weight: 600; color: #f0f0f0; margin: 0.9em 0 0.35em; }
+        .entry-prose h3 { font-size: 1.05em; font-weight: 600; color: #e0e0e0; margin: 0.8em 0 0.3em; }
+        .entry-prose p  { margin: 0.5em 0; }
+        .entry-prose ul { list-style-type: disc;    padding-left: 1.6em; margin: 0.5em 0; }
+        .entry-prose ol { list-style-type: decimal; padding-left: 1.6em; margin: 0.5em 0; }
+        .entry-prose li { margin: 0.3em 0; }
+        .entry-prose ul ul, .entry-prose ol ol,
+        .entry-prose ul ol, .entry-prose ol ul { padding-left: 1.6em; }
+        .entry-prose strong { color: #fff; font-weight: 600; }
+        .entry-prose em { color: #e0d0b0; font-style: italic; }
+        .entry-prose s  { color: #888; text-decoration: line-through; }
+        .entry-prose code { background: #252525; border-radius: 4px; padding: 2px 5px; font-size: 0.88em; color: #e0b47a; }
+        .entry-prose blockquote { border-left: 3px solid #c4933f; padding-left: 1em; color: #aaa; margin: 0.6em 0; }
+        .entry-prose table { border-collapse: collapse; width: 100%; margin: 0.75em 0; }
+        .entry-prose td, .entry-prose th { border: 1px solid #2a2a2a; padding: 6px 10px; vertical-align: top; }
+        .entry-prose th { background: #1a1a1a; font-weight: 600; color: #fff; }
+        .entry-prose [style*="text-align: center"] { text-align: center; }
+        .entry-prose [style*="text-align: right"]  { text-align: right; }
+      `}</style>
 
       <ConfirmDialog
         open={confirmDelete}
