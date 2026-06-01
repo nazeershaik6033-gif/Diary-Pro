@@ -225,7 +225,6 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
   function closeAll() { setHeadingOpen(false); setFontSizeOpen(false); setFontFamilyOpen(false); setTableOpen(false) }
 
   /* ── Reusable button components ── */
-  /* Uses onMouseDown+preventDefault on desktop to keep editor focus; onClick as fallback */
   const TB = ({ onPress, active, title, children, className }: {
     onPress: () => void; active?: boolean; title: string; children: React.ReactNode; className?: string
   }) => (
@@ -233,10 +232,9 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
       type="button"
       title={title}
       onMouseDown={e => { e.preventDefault(); onPress() }}
-      onClick={onPress}
       className={cn(
-        'flex items-center justify-center rounded-lg transition-colors flex-shrink-0',
-        active ? 'bg-amber-warm text-white' : 'text-[#888] hover:bg-[#252525] active:bg-[#252525]',
+        'flex items-center justify-center rounded-lg flex-shrink-0',
+        active ? 'bg-amber-warm text-white' : 'text-[#888]',
         className ?? 'w-8 h-8',
       )}
     >
@@ -247,9 +245,8 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
   const BubBtn = ({ onPress, active, title, children }: { onPress: () => void; active?: boolean; title: string; children: React.ReactNode }) => (
     <button type="button" title={title}
       onMouseDown={e => { e.preventDefault(); onPress() }}
-      onClick={onPress}
-      className={cn('w-8 h-8 flex items-center justify-center rounded-lg transition-colors',
-        active ? 'bg-amber-warm text-white' : 'text-[#ccc] hover:bg-[#333] active:bg-[#333]')}>
+      className={cn('w-8 h-8 flex items-center justify-center rounded-lg',
+        active ? 'bg-amber-warm text-white' : 'text-[#ccc]')}>
       {children}
     </button>
   )
@@ -292,8 +289,7 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
           <div ref={headingRef} className="relative flex-shrink-0">
             <button type="button"
               onMouseDown={e => { e.preventDefault(); closeAll(); setHeadingOpen(v => !v) }}
-              onClick={() => { closeAll(); setHeadingOpen(v => !v) }}
-              className="flex items-center gap-1 h-8 px-2 rounded-lg text-[#aaa] hover:bg-[#252525] active:bg-[#252525] text-xs font-sans font-medium min-w-[72px]">
+              className="flex items-center gap-1 h-8 px-2 rounded-lg text-[#aaa] text-xs font-sans font-medium min-w-[72px]">
               {curHeading}<ChevronDown size={10} />
             </button>
             {headingOpen && (
@@ -323,20 +319,17 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
           <div ref={fontSizeRef} className="relative flex items-center flex-shrink-0">
             <button type="button"
               onMouseDown={e => { e.preventDefault(); adjustSize(-1) }}
-              onClick={() => adjustSize(-1)}
-              className="w-7 h-8 flex items-center justify-center rounded-l-lg text-[#888] hover:bg-[#252525] active:bg-[#252525]">
+              className="w-7 h-8 flex items-center justify-center rounded-l-lg text-[#888]">
               <Minus size={11} />
             </button>
             <button type="button"
               onMouseDown={e => { e.preventDefault(); closeAll(); setFontSizeOpen(v => !v) }}
-              onClick={() => { closeAll(); setFontSizeOpen(v => !v) }}
-              className="h-8 px-1 text-xs font-sans text-[#aaa] hover:bg-[#252525] active:bg-[#252525] min-w-[30px] text-center">
+              className="h-8 px-1 text-xs font-sans text-[#aaa] min-w-[30px] text-center">
               {curFontSize}
             </button>
             <button type="button"
               onMouseDown={e => { e.preventDefault(); adjustSize(1) }}
-              onClick={() => adjustSize(1)}
-              className="w-7 h-8 flex items-center justify-center rounded-r-lg text-[#888] hover:bg-[#252525] active:bg-[#252525]">
+              className="w-7 h-8 flex items-center justify-center rounded-r-lg text-[#888]">
               <Plus size={11} />
             </button>
             {fontSizeOpen && (
@@ -391,8 +384,7 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
           <div ref={fontFamilyRef} className="relative flex-shrink-0">
             <button type="button"
               onMouseDown={e => { e.preventDefault(); closeAll(); setFontFamilyOpen(v => !v) }}
-              onClick={() => { closeAll(); setFontFamilyOpen(v => !v) }}
-              className="flex items-center gap-1 h-8 px-2 rounded-lg text-[#aaa] hover:bg-[#252525] active:bg-[#252525] text-xs font-sans min-w-[72px]">
+              className="flex items-center gap-1 h-8 px-2 rounded-lg text-[#aaa] text-xs font-sans min-w-[72px]">
               <span className="truncate max-w-[60px]">{curFontLabel}</span><ChevronDown size={10} className="flex-shrink-0" />
             </button>
             {fontFamilyOpen && (

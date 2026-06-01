@@ -149,6 +149,11 @@ html[data-fontsize="xl"] { font-size: 20px; }
     -webkit-tap-highlight-color: transparent;
   }
 
+  /* Eliminate 300ms tap delay on all interactive elements */
+  a, button, input, textarea, select, [role="button"], label {
+    touch-action: manipulation;
+  }
+
   input, textarea, select {
     font-size: max(1rem, 16px) !important;
   }
