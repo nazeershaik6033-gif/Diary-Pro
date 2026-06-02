@@ -16,10 +16,11 @@ import {
   List, ListOrdered, AlignLeft, AlignCenter, AlignRight,
   RotateCcw, RotateCw, ChevronDown, Table as TableIcon,
   Minus, Plus, Mic, Square, Check, X, Type,
-  Volume2, Globe, AlignJustify, ChevronUp,
+  Volume2, Globe, AlignJustify, ChevronUp, LayoutTemplate, Maximize2, Minimize2,
 } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import { useEffect, useState, useRef, useCallback } from 'react'
+import { ENTRY_TEMPLATES } from '@/lib/entryTemplates'
 
 /* ── FontSize extension ── */
 const FontSize = Extension.create({
@@ -79,17 +80,15 @@ const HEADINGS = [
 ] as const
 
 const LANGUAGES = [
-  { label: 'English (US)',  code: 'en-US' },
-  { label: 'English (UK)',  code: 'en-GB' },
-  { label: 'Hindi',         code: 'hi-IN' },
-  { label: 'Spanish',       code: 'es-ES' },
-  { label: 'French',        code: 'fr-FR' },
-  { label: 'German',        code: 'de-DE' },
-  { label: 'Arabic',        code: 'ar-SA' },
-  { label: 'Chinese',       code: 'zh-CN' },
-  { label: 'Japanese',      code: 'ja-JP' },
-  { label: 'Portuguese',    code: 'pt-BR' },
+  { label: 'English', code: 'en-US' },
+  { label: 'Telugu',  code: 'te-IN' },
+  { label: 'Hindi',   code: 'hi-IN' },
 ]
+
+function countWords(html: string): number {
+  const text = html.replace(/<[^>]*>/g, ' ').replace(/&[a-z]+;/gi, ' ')
+  return text.trim().split(/\s+/).filter(w => w.length > 0).length
+}
 
 export function RichTextEditor({ value, onChange, placeholder = 'Write your thoughts…' }: RichTextEditorProps) {
 
@@ -101,6 +100,11 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
   const [tableOpen,      setTableOpen]      = useState(false)
   const [tableRows,      setTableRows]      = useState('3')
   const [tableCols,      setTableCols]      = useState('3')
+
+  /* zen & templates */
+  const [zenMode,  setZenMode]  = useState(false)
+  const [tmplOpen, setTmplOpen] = useState(false)
+  const tmplRef = useRef<HTMLDivElement>(null)
 
   /* mic panel */
   const [micOpen,      setMicOpen]      = useState(false)
@@ -150,6 +154,7 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
       if (!fontFamilyRef.current?.contains(e.target as Node)) setFontFamilyOpen(false)
       if (!tableRef.current?.contains(e.target as Node))      setTableOpen(false)
       if (!langRef.current?.contains(e.target as Node))       setLangOpen(false)
+      if (!tmplRef.current?.contains(e.target as Node))       setTmplOpen(false)
     }
     document.addEventListener('mousedown', fn)
     return () => document.removeEventListener('mousedown', fn)
@@ -263,7 +268,7 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
   }
 
   function closeFormatDropdowns() {
-    setHeadingOpen(false); setFontSizeOpen(false); setFontFamilyOpen(false); setTableOpen(false)
+    setHeadingOpen(false); setFontSizeOpen(false); setFontFamilyOpen(false); setTableOpen(false); setTmplOpen(false)
   }
 
   /* ── Sub-components ── */
@@ -349,9 +354,29 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
 
           <div className="flex-1" />
 
+          {/* Templates */}
+          <div ref={tmplRef} className="relative flex-shrink-0">
+            <button type="button"
+              onMouseDown={e => { e.preventDefault(); setTmplOpen(v => !v); setFmtOpen(false); setMicOpen(false) }}
+              className={cn('w-8 h-8 flex items-center justify-center rounded-lg flex-shrink-0', tmplOpen ? 'bg-[#2a2a2a] text-white' : 'text-[#666]')}>
+              <LayoutTemplate size={13} />
+            </button>
+            {tmplOpen && (
+              <div className="absolute top-9 right-0 z-50 rounded-xl overflow-hidden" style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', boxShadow: '0 4px 16px rgba(0,0,0,0.6)', minWidth: 180 }}>
+                {ENTRY_TEMPLATES.map(t => (
+                  <button key={t.label} type="button"
+                    onClick={() => { editor?.chain().focus().setContent(t.content).run(); setTmplOpen(false) }}
+                    className="flex items-center gap-2 w-full text-left px-3 py-2.5 text-sm font-sans text-[#ccc] hover:bg-[#252525]">
+                    <span>{t.icon}</span><span>{t.label}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
           {/* Aa — format toggle */}
           <button type="button"
-            onMouseDown={e => { e.preventDefault(); setFmtOpen(v => !v); setMicOpen(false) }}
+            onMouseDown={e => { e.preventDefault(); setFmtOpen(v => !v); setMicOpen(false); setTmplOpen(false) }}
             className={cn(
               'flex items-center gap-1 h-8 px-2.5 rounded-lg text-xs font-sans font-semibold flex-shrink-0',
               fmtOpen ? 'bg-[#2a2a2a] text-white' : 'text-[#666]'
@@ -359,6 +384,13 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
             <Type size={13} />
             <span>Aa</span>
             {fmtOpen ? <ChevronUp size={10} /> : <ChevronDown size={10} />}
+          </button>
+
+          {/* Zen mode */}
+          <button type="button"
+            onMouseDown={e => { e.preventDefault(); setZenMode(v => !v) }}
+            className="w-8 h-8 flex items-center justify-center rounded-lg text-[#666] flex-shrink-0">
+            <Maximize2 size={13} />
           </button>
         </div>
 
@@ -647,6 +679,30 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
         </div>
 
       </div>
+
+      {/* Word count */}
+      {(() => { const w = countWords(value); const mins = Math.max(1, Math.round(w / 200)); return w > 0 ? (
+        <p className="text-xs font-sans text-[#555] px-1 pt-1">{w} {w === 1 ? 'word' : 'words'} · {mins} min read</p>
+      ) : null })()}
+
+      {/* Zen overlay */}
+      {zenMode && (
+        <div className="fixed inset-0 z-40 bg-black/80" onClick={() => setZenMode(false)}>
+          <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 max-w-2xl mx-auto px-4" onClick={e => e.stopPropagation()}>
+            <div className="flex justify-end mb-2">
+              <button type="button" onMouseDown={e => { e.preventDefault(); setZenMode(false) }}
+                className="flex items-center gap-1 text-xs text-[#666] hover:text-[#aaa] font-sans">
+                <Minimize2 size={13} /> Exit Zen
+              </button>
+            </div>
+            <div style={{ border: '1px solid #2a2a2a', background: '#111', borderRadius: 12 }}>
+              <div className="px-4 py-3 min-h-[320px]">
+                <EditorContent editor={editor} />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <style>{`
         .ProseMirror { color: #e0e0e0; outline: none; line-height: 1.75; }
