@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
-import { Plus, Trash2, Pencil, Check } from 'lucide-react'
+import { Plus, Trash2, Pencil, Check, Mic, MicOff } from 'lucide-react'
 
 export type TodoItem = { text: string; done: boolean }
 
@@ -15,12 +15,38 @@ export function TasksTab({
   const [newText, setNewText] = useState('')
   const [editingIdx, setEditingIdx] = useState<number | null>(null)
   const [editText, setEditText] = useState('')
+  const [listening, setListening] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const editRef = useRef<HTMLInputElement>(null)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const recRef = useRef<any>(null)
 
   useEffect(() => {
     if (editingIdx !== null) editRef.current?.focus()
   }, [editingIdx])
+
+  function toggleMic() {
+    if (listening) {
+      recRef.current?.stop()
+      setListening(false)
+      return
+    }
+    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+    if (!SR) return
+    const rec = new SR()
+    rec.lang = 'en-US'
+    rec.continuous = false
+    rec.interimResults = false
+    rec.onresult = (e: any) => {
+      const text = Array.from(e.results).map((r: any) => r[0].transcript).join(' ').trim()
+      if (text) setNewText(prev => (prev ? prev + ' ' + text : text))
+    }
+    rec.onend = () => { setListening(false); inputRef.current?.focus() }
+    rec.onerror = () => setListening(false)
+    recRef.current = rec
+    rec.start()
+    setListening(true)
+  }
 
   function addTask() {
     const text = newText.trim()
@@ -108,6 +134,11 @@ export function TasksTab({
           className="flex-1 px-4 py-2.5 rounded-xl text-sm font-sans text-white focus:outline-none focus:ring-2 focus:ring-amber-warm"
           style={{ background: '#1a1a1a', border: '1px solid #2a2a2a' }}
         />
+        <button type="button" onMouseDown={e => { e.preventDefault(); toggleMic() }}
+          className="w-10 h-10 flex items-center justify-center rounded-xl flex-shrink-0 transition-colors"
+          style={{ background: listening ? '#c4933f' : '#1a1a1a', border: '1px solid #2a2a2a', color: listening ? '#fff' : '#888' }}>
+          {listening ? <MicOff size={16} /> : <Mic size={16} />}
+        </button>
         <button type="button" onClick={addTask} disabled={!newText.trim()}
           className="w-10 h-10 flex items-center justify-center rounded-xl bg-amber-warm text-white disabled:opacity-40 flex-shrink-0">
           <Plus size={16} />
