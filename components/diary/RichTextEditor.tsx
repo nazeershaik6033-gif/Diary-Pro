@@ -16,11 +16,10 @@ import {
   List, ListOrdered, AlignLeft, AlignCenter, AlignRight,
   RotateCcw, RotateCw, ChevronDown, Table as TableIcon,
   Minus, Plus, Mic, Square, Check, X, Type,
-  Volume2, Globe, AlignJustify, ChevronUp, LayoutTemplate, Maximize2, Minimize2,
+  Volume2, Globe, AlignJustify, ChevronUp,
 } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import { useEffect, useState, useRef, useCallback } from 'react'
-import { ENTRY_TEMPLATES } from '@/lib/entryTemplates'
 
 /* ── FontSize extension ── */
 const FontSize = Extension.create({
@@ -80,25 +79,22 @@ const HEADINGS = [
 ] as const
 
 const LANGUAGES = [
-  { label: 'English', code: 'en-US' },
-  { label: 'Telugu',  code: 'te-IN' },
-  { label: 'Hindi',   code: 'hi-IN' },
+  { label: 'English (US)',  code: 'en-US' },
+  { label: 'English (UK)',  code: 'en-GB' },
+  { label: 'Hindi',         code: 'hi-IN' },
+  { label: 'Spanish',       code: 'es-ES' },
+  { label: 'French',        code: 'fr-FR' },
+  { label: 'German',        code: 'de-DE' },
+  { label: 'Arabic',        code: 'ar-SA' },
+  { label: 'Chinese',       code: 'zh-CN' },
+  { label: 'Japanese',      code: 'ja-JP' },
+  { label: 'Portuguese',    code: 'pt-BR' },
 ]
-
-function countWords(html: string): number {
-  const text = html.replace(/<[^>]*>/g, ' ').replace(/&[a-z]+;/gi, ' ')
-  return text.trim().split(/\s+/).filter(w => w.length > 0).length
-}
 
 export function RichTextEditor({ value, onChange, placeholder = 'Write your thoughts…' }: RichTextEditorProps) {
 
-  /* panel states */
+  /* formatting panel */
   const [fmtOpen,        setFmtOpen]        = useState(false)
-  const [micOpen,        setMicOpen]        = useState(false)
-  const [templateOpen,   setTemplateOpen]   = useState(false)
-  const [zenMode,        setZenMode]        = useState(false)
-
-  /* formatting dropdowns */
   const [headingOpen,    setHeadingOpen]    = useState(false)
   const [fontSizeOpen,   setFontSizeOpen]   = useState(false)
   const [fontFamilyOpen, setFontFamilyOpen] = useState(false)
@@ -106,7 +102,8 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
   const [tableRows,      setTableRows]      = useState('3')
   const [tableCols,      setTableCols]      = useState('3')
 
-  /* dictation */
+  /* mic panel */
+  const [micOpen,      setMicOpen]      = useState(false)
   const [langOpen,     setLangOpen]     = useState(false)
   const [dictLang,     setDictLang]     = useState(LANGUAGES[0])
   const [autoPunct,    setAutoPunct]    = useState(true)
@@ -124,8 +121,8 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
   const fontSizeRef   = useRef<HTMLDivElement>(null)
   const fontFamilyRef = useRef<HTMLDivElement>(null)
   const tableRef      = useRef<HTMLDivElement>(null)
+  const micPanelRef   = useRef<HTMLDivElement>(null)
   const langRef       = useRef<HTMLDivElement>(null)
-  const templateRef   = useRef<HTMLDivElement>(null)
 
   const editor = useEditor({
     extensions: [
@@ -145,6 +142,7 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
     if (editor && value !== editor.getHTML()) editor.commands.setContent(value, false)
   }, []) // eslint-disable-line
 
+  /* outside-click: close all dropdowns */
   useEffect(() => {
     const fn = (e: MouseEvent) => {
       if (!headingRef.current?.contains(e.target as Node))    setHeadingOpen(false)
@@ -152,7 +150,6 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
       if (!fontFamilyRef.current?.contains(e.target as Node)) setFontFamilyOpen(false)
       if (!tableRef.current?.contains(e.target as Node))      setTableOpen(false)
       if (!langRef.current?.contains(e.target as Node))       setLangOpen(false)
-      if (!templateRef.current?.contains(e.target as Node))   setTemplateOpen(false)
     }
     document.addEventListener('mousedown', fn)
     return () => document.removeEventListener('mousedown', fn)
@@ -164,36 +161,48 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
   const startListening = useCallback(() => {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition
     if (!SR) { setDictError('Speech recognition not supported (use Chrome or Safari).'); return }
-    setDictError(''); setLiveText(''); setPreviewText(''); finalRef.current = ''
+
+    setDictError('')
+    setLiveText('')
+    setPreviewText('')
+    finalRef.current = ''
 
     const rec = new SR()
     recRef.current = rec
-    rec.continuous = true; rec.interimResults = true; rec.lang = dictLang.code
+    rec.continuous     = true
+    rec.interimResults = true
+    rec.lang           = dictLang.code
 
     rec.onresult = (e: any) => {
       let interim = ''
       for (let i = e.resultIndex; i < e.results.length; i++) {
         const t = e.results[i][0].transcript
-        if (e.results[i].isFinal) finalRef.current += autoPunct ? t : t.replace(/[.,!?;:]/g, '') + ' '
-        else interim += t
+        if (e.results[i].isFinal) {
+          finalRef.current += autoPunct ? t : t.replace(/[.,!?;:]/g, '') + ' '
+        } else {
+          interim += t
+        }
       }
       setLiveText((finalRef.current + interim).trim())
     }
+
     rec.onerror = (e: any) => {
       if (e.error === 'not-allowed') setDictError('Microphone permission denied.')
       else if (e.error !== 'no-speech' && e.error !== 'aborted') setDictError(`Error: ${e.error}`)
     }
+
     rec.onend = () => {
       setIsListening(false)
       const result = finalRef.current.trim()
       if (result) { setPreviewText(result); setLiveText('') }
       else setLiveText(prev => { if (prev) { setPreviewText(prev); return '' } return '' })
     }
+
     try { rec.start(); setIsListening(true) }
     catch { setDictError('Could not start microphone.') }
   }, [dictLang, autoPunct])
 
-  const stopListening  = useCallback(() => { recRef.current?.stop() }, [])
+  const stopListening = useCallback(() => { recRef.current?.stop() }, [])
 
   const playbackText = useCallback(() => {
     const text = previewText || liveText
@@ -207,24 +216,32 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
     window.speechSynthesis.speak(utt)
   }, [previewText, liveText, dictLang])
 
-  const stopPlayback = useCallback(() => { window.speechSynthesis?.cancel(); setIsPlaying(false) }, [])
+  const stopPlayback = useCallback(() => {
+    window.speechSynthesis?.cancel()
+    setIsPlaying(false)
+  }, [])
 
   const insertDictation = useCallback(() => {
     if (!editor || !previewText) return
-    if (dictMode === 'replace') editor.chain().focus().selectAll().deleteSelection().insertContent(previewText.trim() + ' ').run()
-    else editor.chain().focus().insertContent(previewText.trim() + ' ').run()
-    setPreviewText(''); setLiveText('')
+    if (dictMode === 'replace') {
+      editor.chain().focus().selectAll().deleteSelection().insertContent(previewText.trim() + ' ').run()
+    } else {
+      editor.chain().focus().insertContent(previewText.trim() + ' ').run()
+    }
+    setPreviewText('')
+    setLiveText('')
   }, [editor, previewText, dictMode])
 
   const discardDictation = useCallback(() => {
-    window.speechSynthesis?.cancel(); setIsPlaying(false)
-    setPreviewText(''); setLiveText(''); setDictError('')
+    window.speechSynthesis?.cancel()
+    setIsPlaying(false)
+    setPreviewText('')
+    setLiveText('')
+    setDictError('')
   }, [])
 
   if (!editor) return null
 
-  const wordCount  = countWords(value)
-  const readMins   = Math.max(1, Math.ceil(wordCount / 200))
   const curFontSize   = editor.getAttributes('textStyle').fontSize ?? '16'
   const curFontFamily = editor.getAttributes('textStyle').fontFamily ?? ''
   const curFontLabel  = FONT_FAMILIES.find(f => f.value === curFontFamily)?.label ?? 'Font'
@@ -249,6 +266,7 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
     setHeadingOpen(false); setFontSizeOpen(false); setFontFamilyOpen(false); setTableOpen(false)
   }
 
+  /* ── Sub-components ── */
   const TB = ({ onPress, active, title, children, className }: {
     onPress: () => void; active?: boolean; title: string; children: React.ReactNode; className?: string
   }) => (
@@ -273,18 +291,13 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
   const Div = () => <div className="w-px h-5 bg-[#2a2a2a] mx-0.5 flex-shrink-0" />
   const ddStyle = { background: '#1a1a1a', border: '1px solid #2a2a2a', boxShadow: '0 4px 16px rgba(0,0,0,0.6)' }
 
-  /* ════════════════ RENDER ════════════════ */
+  const hasDictContent = isListening || liveText || previewText || dictError
+
   return (
     <>
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Dancing+Script&display=swap');`}</style>
 
-      {/* Zen mode overlay */}
-      {zenMode && (
-        <div className="fixed inset-0 z-40 bg-black/70" onClick={() => setZenMode(false)} />
-      )}
-
-      <div className={cn('relative', zenMode && 'z-50')}
-        style={{ border: '1px solid #2a2a2a', background: '#111', borderRadius: 12 }}>
+      <div style={{ border: '1px solid #2a2a2a', background: '#111', borderRadius: 12 }}>
 
         {/* ── Bubble menu ── */}
         <BubbleMenu editor={editor} tippyOptions={{ duration: 80, placement: 'top' }}
@@ -303,101 +316,60 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
         </BubbleMenu>
 
         {/* ══ MINIMAL TOOLBAR ══ */}
-        {!zenMode && (
-          <div className="flex items-center gap-1 px-2 py-1.5 scrollbar-none"
-            style={{ borderBottom: '1px solid #2a2a2a', background: '#1a1a1a', borderRadius: '12px 12px 0 0' }}>
+        <div className="flex items-center gap-1 px-2 py-1.5 scrollbar-none"
+          style={{ borderBottom: '1px solid #2a2a2a', background: '#1a1a1a', borderRadius: fmtOpen || hasDictContent ? '12px 12px 0 0' : micOpen ? '12px 12px 0 0' : '12px 12px 0 0' }}>
 
-            {/* 🎤 Record — left, prominent */}
-            <button type="button"
-              onMouseDown={e => { e.preventDefault(); setMicOpen(v => !v); setFmtOpen(false); setTemplateOpen(false) }}
-              className={cn('flex items-center gap-1.5 h-9 px-3 rounded-xl text-sm font-sans font-semibold flex-shrink-0',
-                micOpen || isListening ? 'text-white' : 'text-[#c4933f]')}
-              style={micOpen || isListening
-                ? { background: '#c4933f' }
-                : { background: 'rgba(196,147,63,0.12)', border: '1px solid rgba(196,147,63,0.3)' }}>
-              <Mic size={15} /><span>Record</span>
-            </button>
+          {/* 🎤 Mic — left, prominent */}
+          <button type="button"
+            onMouseDown={e => { e.preventDefault(); setMicOpen(v => !v); setFmtOpen(false) }}
+            className={cn(
+              'flex items-center gap-1.5 h-9 px-3 rounded-xl text-sm font-sans font-semibold flex-shrink-0 transition-colors',
+              micOpen || isListening
+                ? 'text-white'
+                : 'text-[#c4933f]'
+            )}
+            style={micOpen || isListening
+              ? { background: '#c4933f' }
+              : { background: 'rgba(196,147,63,0.12)', border: '1px solid rgba(196,147,63,0.3)' }}>
+            <Mic size={15} />
+            <span>Record</span>
+          </button>
 
-            <Div />
+          <Div />
 
-            {/* B I */}
-            <TB onPress={() => editor.chain().focus().toggleBold().run()}   active={editor.isActive('bold')}   title="Bold">  <Bold   size={14} /></TB>
-            <TB onPress={() => editor.chain().focus().toggleItalic().run()} active={editor.isActive('italic')} title="Italic"><Italic size={14} /></TB>
+          {/* B I */}
+          <TB onPress={() => editor.chain().focus().toggleBold().run()}   active={editor.isActive('bold')}   title="Bold">  <Bold   size={14} /></TB>
+          <TB onPress={() => editor.chain().focus().toggleItalic().run()} active={editor.isActive('italic')} title="Italic"><Italic size={14} /></TB>
 
-            <Div />
+          <Div />
 
-            {/* Undo / Redo */}
-            <TB onPress={() => editor.chain().focus().undo().run()} title="Undo"><RotateCcw size={13} /></TB>
-            <TB onPress={() => editor.chain().focus().redo().run()} title="Redo"><RotateCw  size={13} /></TB>
+          {/* Undo / Redo */}
+          <TB onPress={() => editor.chain().focus().undo().run()} title="Undo"><RotateCcw size={13} /></TB>
+          <TB onPress={() => editor.chain().focus().redo().run()} title="Redo"><RotateCw  size={13} /></TB>
 
-            <div className="flex-1" />
+          <div className="flex-1" />
 
-            {/* Templates */}
-            <div ref={templateRef} className="relative flex-shrink-0">
-              <button type="button"
-                onMouseDown={e => { e.preventDefault(); setTemplateOpen(v => !v); setFmtOpen(false); setMicOpen(false) }}
-                className={cn('flex items-center gap-1 h-8 px-2 rounded-lg text-xs font-sans font-medium flex-shrink-0',
-                  templateOpen ? 'bg-[#2a2a2a] text-white' : 'text-[#666]')}>
-                <LayoutTemplate size={13} />
-              </button>
-              {templateOpen && (
-                <div className="absolute top-9 right-0 z-50 rounded-xl overflow-hidden" style={{ ...ddStyle, minWidth: 192 }}>
-                  <p className="text-[10px] font-sans text-[#555] uppercase tracking-wider px-3 pt-2.5 pb-1">Templates</p>
-                  {ENTRY_TEMPLATES.map(t => (
-                    <button key={t.label} type="button"
-                      onMouseDown={e => e.preventDefault()}
-                      onClick={() => {
-                        editor.chain().focus().setContent(t.content).run()
-                        onChange(t.content)
-                        setTemplateOpen(false)
-                      }}
-                      className="flex items-center gap-2.5 w-full text-left px-3 py-2.5 hover:bg-[#252525] transition-colors">
-                      <span className="text-base">{t.icon}</span>
-                      <span className="text-sm text-[#ddd] font-sans">{t.label}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Aa — format toggle */}
-            <button type="button"
-              onMouseDown={e => { e.preventDefault(); setFmtOpen(v => !v); setMicOpen(false); setTemplateOpen(false) }}
-              className={cn('flex items-center gap-1 h-8 px-2.5 rounded-lg text-xs font-sans font-semibold flex-shrink-0',
-                fmtOpen ? 'bg-[#2a2a2a] text-white' : 'text-[#666]')}>
-              <Type size={13} />
-              <span>Aa</span>
-              {fmtOpen ? <ChevronUp size={10} /> : <ChevronDown size={10} />}
-            </button>
-
-            {/* Zen mode */}
-            <button type="button"
-              onMouseDown={e => { e.preventDefault(); setZenMode(v => !v) }}
-              className="w-8 h-8 flex items-center justify-center rounded-lg text-[#555] flex-shrink-0"
-              title="Zen mode">
-              <Maximize2 size={13} />
-            </button>
-          </div>
-        )}
-
-        {/* Zen mode exit bar */}
-        {zenMode && (
-          <div className="flex items-center justify-between px-3 py-2"
-            style={{ borderBottom: '1px solid #2a2a2a', background: '#1a1a1a', borderRadius: '12px 12px 0 0' }}>
-            <span className="text-xs text-[#555] font-sans">Zen mode — tap outside to exit</span>
-            <button type="button" onMouseDown={e => { e.preventDefault(); setZenMode(false) }}
-              className="flex items-center gap-1 text-xs text-[#888] font-sans">
-              <Minimize2 size={12} /> Exit
-            </button>
-          </div>
-        )}
+          {/* Aa — format toggle */}
+          <button type="button"
+            onMouseDown={e => { e.preventDefault(); setFmtOpen(v => !v); setMicOpen(false) }}
+            className={cn(
+              'flex items-center gap-1 h-8 px-2.5 rounded-lg text-xs font-sans font-semibold flex-shrink-0',
+              fmtOpen ? 'bg-[#2a2a2a] text-white' : 'text-[#666]'
+            )}>
+            <Type size={13} />
+            <span>Aa</span>
+            {fmtOpen ? <ChevronUp size={10} /> : <ChevronDown size={10} />}
+          </button>
+        </div>
 
         {/* ══ MIC PANEL ══ */}
-        {micOpen && !zenMode && (
-          <div style={{ borderBottom: '1px solid #2a2a2a', background: '#0f0f0f' }}>
-            {/* Sub-options */}
+        {micOpen && (
+          <div ref={micPanelRef} style={{ borderBottom: '1px solid #2a2a2a', background: '#0f0f0f' }}>
+
+            {/* Sub-options row */}
             {!isListening && !previewText && (
               <div className="px-3 pt-3 pb-2 flex flex-wrap gap-2">
+
                 {/* Language */}
                 <div ref={langRef} className="relative">
                   <button type="button"
@@ -409,13 +381,12 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
                     <ChevronDown size={9} className="text-[#555]" />
                   </button>
                   {langOpen && (
-                    <div className="absolute top-9 left-0 z-50 rounded-xl overflow-hidden" style={{ ...ddStyle, minWidth: 140 }}>
+                    <div className="absolute top-9 left-0 z-50 rounded-xl overflow-y-auto max-h-52" style={{ ...ddStyle, minWidth: 168 }}>
                       {LANGUAGES.map(l => (
                         <button key={l.code} type="button"
                           onClick={() => { setDictLang(l); setLangOpen(false) }}
-                          className={cn('flex items-center gap-2 w-full text-left px-3 py-2.5 text-sm',
+                          className={cn('block w-full text-left px-3 py-2 text-sm',
                             dictLang.code === l.code ? 'text-amber-warm font-semibold' : 'text-[#ccc] hover:bg-[#252525]')}>
-                          {dictLang.code === l.code && <Check size={12} className="text-amber-warm flex-shrink-0" />}
                           {l.label}
                         </button>
                       ))}
@@ -423,7 +394,7 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
                   )}
                 </div>
 
-                {/* Punctuation */}
+                {/* Punctuation toggle */}
                 <button type="button" onClick={() => setAutoPunct(v => !v)}
                   className={cn('flex items-center gap-1.5 h-8 px-2.5 rounded-lg text-xs font-sans',
                     autoPunct ? 'text-amber-warm' : 'text-[#666]')}
@@ -446,7 +417,7 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
               </div>
             )}
 
-            {/* Start / Stop button */}
+            {/* Record / Stop button */}
             {!previewText && (
               <div className="px-3 pb-3">
                 {!isListening ? (
@@ -465,7 +436,7 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
               </div>
             )}
 
-            {/* Live transcript */}
+            {/* Live transcript while listening */}
             {isListening && (
               <div className="px-3 pb-3">
                 <div className="flex items-center gap-2 mb-1.5">
@@ -478,29 +449,33 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
                 <div className="rounded-xl px-3 py-2 min-h-[48px]" style={{ background: '#1a1a1a', border: '1px solid #2a2a2a' }}>
                   {liveText
                     ? <p className="text-sm text-[#e0e0e0] leading-relaxed">{liveText}<span className="animate-pulse text-[#555]">▋</span></p>
-                    : <p className="text-sm text-[#444] italic">Start speaking…</p>}
+                    : <p className="text-sm text-[#444] italic">Start speaking…</p>
+                  }
                 </div>
               </div>
             )}
 
-            {/* Preview */}
+            {/* Preview after recording */}
             {previewText && !isListening && (
               <div className="px-3 pb-3">
-                <p className="text-xs text-[#666] mb-1.5 font-sans">Preview — {dictMode === 'replace' ? 'replaces all content' : 'appends to text'}</p>
+                <p className="text-xs text-[#666] mb-1.5 font-sans">Preview — {dictMode === 'replace' ? 'will replace all content' : 'will append to text'}</p>
                 <div className="rounded-xl px-3 py-2.5 mb-2.5" style={{ background: '#1a1a1a', border: '1px solid #2a2a2a' }}>
                   <p className="text-sm text-[#e0e0e0] leading-relaxed">{previewText}</p>
                 </div>
+                {/* Action buttons */}
                 <div className="flex gap-2">
                   <button type="button" onClick={insertDictation}
                     className="flex-1 py-2 rounded-xl text-sm font-sans font-semibold text-white flex items-center justify-center gap-1.5"
                     style={{ background: '#c4933f' }}>
                     <Check size={13} /> Insert
                   </button>
-                  <button type="button" onClick={isPlaying ? stopPlayback : playbackText}
+                  <button type="button"
+                    onClick={isPlaying ? stopPlayback : playbackText}
                     className={cn('py-2 px-3 rounded-xl text-sm font-sans flex items-center gap-1.5',
                       isPlaying ? 'text-white' : 'text-[#888]')}
                     style={{ background: isPlaying ? '#2a2a2a' : '#1a1a1a', border: '1px solid #2a2a2a' }}>
-                    <Volume2 size={13} />{isPlaying ? 'Stop' : 'Play'}
+                    <Volume2 size={13} />
+                    {isPlaying ? 'Stop' : 'Play'}
                   </button>
                   <button type="button" onClick={() => { discardDictation(); startListening() }}
                     className="py-2 px-3 rounded-xl text-sm font-sans text-[#888] flex items-center gap-1.5"
@@ -516,16 +491,24 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
               </div>
             )}
 
-            {dictError && <div className="px-3 pb-3"><p className="text-xs text-red-400">{dictError}</p></div>}
+            {/* Error */}
+            {dictError && (
+              <div className="px-3 pb-3">
+                <p className="text-xs text-red-400">{dictError}</p>
+              </div>
+            )}
           </div>
         )}
 
-        {/* ══ FORMATTING PANEL ══ */}
-        {fmtOpen && !zenMode && (
+        {/* ══ FORMATTING PANEL (collapsible) ══ */}
+        {fmtOpen && (
           <div style={{ borderBottom: '1px solid #2a2a2a' }}>
-            {/* Row A */}
+
+            {/* Row A: Heading · Font size · Lists */}
             <div className="flex items-center gap-1 px-2 py-1.5 overflow-x-auto scrollbar-none"
               style={{ borderBottom: '1px solid #222', background: '#181818' }}>
+
+              {/* Heading */}
               <div ref={headingRef} className="relative flex-shrink-0">
                 <button type="button"
                   onMouseDown={e => { e.preventDefault(); closeFormatDropdowns(); setHeadingOpen(v => !v) }}
@@ -538,13 +521,16 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
                       <button key={h.level} type="button"
                         onMouseDown={e => e.preventDefault()}
                         onClick={() => {
-                          h.level === 0 ? editor.chain().focus().setParagraph().run()
+                          h.level === 0
+                            ? editor.chain().focus().setParagraph().run()
                             : editor.chain().focus().toggleHeading({ level: h.level as 1|2|3 }).run()
                           setHeadingOpen(false)
                         }}
                         className={cn('block w-full text-left px-3 py-2 hover:bg-[#252525]',
-                          h.level === 0 ? 'text-sm text-[#aaa]' : h.level === 1 ? 'text-xl font-bold text-white'
-                          : h.level === 2 ? 'text-base font-semibold text-[#ddd]' : 'text-sm font-medium text-[#ccc]')}>
+                          h.level === 0 ? 'text-sm text-[#aaa]'
+                          : h.level === 1 ? 'text-xl font-bold text-white'
+                          : h.level === 2 ? 'text-base font-semibold text-[#ddd]'
+                          : 'text-sm font-medium text-[#ccc]')}>
                         {h.label}
                       </button>
                     ))}
@@ -552,6 +538,8 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
                 )}
               </div>
               <Div />
+
+              {/* Font size */}
               <div ref={fontSizeRef} className="relative flex items-center flex-shrink-0">
                 <button type="button" onMouseDown={e => { e.preventDefault(); adjustSize(-1) }}
                   className="w-7 h-8 flex items-center justify-center rounded-l-lg text-[#888]"><Minus size={11} /></button>
@@ -574,6 +562,7 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
                 )}
               </div>
               <Div />
+
               <TB onPress={() => editor.chain().focus().toggleBulletList().run()}  active={editor.isActive('bulletList')}  title="Bullets"><List        size={14} /></TB>
               <TB onPress={() => editor.chain().focus().toggleOrderedList().run()} active={editor.isActive('orderedList')} title="Numbered"><ListOrdered size={14} /></TB>
               <Div />
@@ -582,14 +571,18 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
               <TB onPress={() => editor.chain().focus().setTextAlign('right').run()}  active={editor.isActive({ textAlign: 'right' })}  title="Right"> <AlignRight  size={14} /></TB>
             </div>
 
-            {/* Row B */}
-            <div className="flex items-center gap-1 px-2 py-1.5 overflow-x-auto scrollbar-none" style={{ background: '#141414' }}>
+            {/* Row B: B·I·U·S·Code · Font family · Table */}
+            <div className="flex items-center gap-1 px-2 py-1.5 overflow-x-auto scrollbar-none"
+              style={{ background: '#141414' }}>
+
               <TB onPress={() => editor.chain().focus().toggleBold().run()}      active={editor.isActive('bold')}      title="Bold">         <Bold size={14} /></TB>
               <TB onPress={() => editor.chain().focus().toggleItalic().run()}    active={editor.isActive('italic')}    title="Italic">       <Italic size={14} /></TB>
               <TB onPress={() => editor.chain().focus().toggleUnderline().run()} active={editor.isActive('underline')} title="Underline">    <UnderlineIcon size={14} /></TB>
               <TB onPress={() => editor.chain().focus().toggleStrike().run()}    active={editor.isActive('strike')}    title="Strike">       <Strikethrough size={14} /></TB>
               <TB onPress={() => editor.chain().focus().toggleCode().run()}      active={editor.isActive('code')}      title="Code">         <Code size={14} /></TB>
               <Div />
+
+              {/* Font family */}
               <div ref={fontFamilyRef} className="relative flex-shrink-0">
                 <button type="button"
                   onMouseDown={e => { e.preventDefault(); closeFormatDropdowns(); setFontFamilyOpen(v => !v) }}
@@ -602,7 +595,8 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
                       <button key={f.value} type="button"
                         onMouseDown={e => e.preventDefault()}
                         onClick={() => {
-                          f.value ? (editor.chain().focus() as any).setFontFamily(f.value).run()
+                          f.value
+                            ? (editor.chain().focus() as any).setFontFamily(f.value).run()
                             : (editor.chain().focus() as any).unsetFontFamily().run()
                           setFontFamilyOpen(false)
                         }}
@@ -616,6 +610,8 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
                 )}
               </div>
               <Div />
+
+              {/* Table */}
               <div ref={tableRef} className="relative flex-shrink-0">
                 <TB onPress={() => { closeFormatDropdowns(); setTableOpen(v => !v) }} title="Table" active={tableOpen}>
                   <TableIcon size={14} />
@@ -635,7 +631,9 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
                     </div>
                     <button type="button" onClick={doInsertTable}
                       className="w-full py-2 rounded-xl text-sm font-sans font-semibold text-white"
-                      style={{ background: '#c4933f' }}>Insert</button>
+                      style={{ background: '#c4933f' }}>
+                      Insert
+                    </button>
                   </div>
                 )}
               </div>
@@ -644,18 +642,10 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
         )}
 
         {/* ══ Editor ══ */}
-        <div className={cn('px-4 py-3', zenMode ? 'min-h-[60vh]' : 'min-h-[160px]')}>
+        <div className="px-4 py-3 min-h-[160px]">
           <EditorContent editor={editor} />
         </div>
 
-        {/* ══ Word count bar ══ */}
-        {wordCount > 0 && (
-          <div className="px-4 py-1.5 flex items-center gap-3 border-t border-[#1e1e1e]">
-            <span className="text-[11px] font-sans text-[#444]">{wordCount} {wordCount === 1 ? 'word' : 'words'}</span>
-            <span className="text-[#333]">·</span>
-            <span className="text-[11px] font-sans text-[#444]">{readMins} min read</span>
-          </div>
-        )}
       </div>
 
       <style>{`

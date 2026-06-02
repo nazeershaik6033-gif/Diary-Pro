@@ -17,7 +17,6 @@ import { toDateString } from '@/lib/utils/date'
 import { subDays } from 'date-fns'
 import { db } from '@/lib/db'
 import { cn } from '@/lib/utils/cn'
-import { getDailyPrompt } from '@/lib/writingPrompts'
 
 interface FormValues {
   date: string
@@ -39,8 +38,6 @@ export default function NewDiaryEntryPage() {
   const [loading, setLoading] = useState(false)
   const [activeTab, setActiveTab] = useState<Tab>('Write')
   const [todos, setTodos] = useState<TodoItem[]>([])
-  const [promptDismissed, setPromptDismissed] = useState(false)
-  const dailyPrompt = getDailyPrompt()
 
   // Silently carry forward incomplete tasks from yesterday
   useEffect(() => {
@@ -171,22 +168,13 @@ export default function NewDiaryEntryPage() {
 
         {/* Tab content */}
         {activeTab === 'Write' && (
-          <>
-            {!promptDismissed && (
-              <div className="flex items-start gap-3 rounded-xl px-4 py-3" style={{ background: '#1a1a1a', border: '1px solid #2a2a2a' }}>
-                <span className="text-lg flex-shrink-0">✏️</span>
-                <p className="flex-1 text-sm font-sans text-[#ccc] italic leading-relaxed">{dailyPrompt}</p>
-                <button type="button" onClick={() => setPromptDismissed(true)} className="text-[#555] hover:text-[#aaa] text-lg leading-none flex-shrink-0">×</button>
-              </div>
+          <Controller
+            name="content"
+            control={control}
+            render={({ field }) => (
+              <RichTextEditor value={field.value} onChange={field.onChange} placeholder="Write your thoughts…" />
             )}
-            <Controller
-              name="content"
-              control={control}
-              render={({ field }) => (
-                <RichTextEditor value={field.value} onChange={field.onChange} placeholder="Write your thoughts…" />
-              )}
-            />
-          </>
+          />
         )}
 
         {activeTab === 'Tasks' && (
