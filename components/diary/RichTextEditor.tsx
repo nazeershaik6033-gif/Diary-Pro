@@ -494,9 +494,13 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
             {previewText && !isListening && (
               <div className="px-3 pb-3">
                 <p className="text-xs text-[#666] mb-1.5 font-sans">Preview — {dictMode === 'replace' ? 'will replace all content' : 'will append to text'}</p>
-                <div className="rounded-xl px-3 py-2.5 mb-2.5" style={{ background: '#1a1a1a', border: '1px solid #2a2a2a' }}>
-                  <p className="text-sm text-[#e0e0e0] leading-relaxed">{previewText}</p>
-                </div>
+                <textarea
+                  value={previewText}
+                  onChange={e => setPreviewText(e.target.value)}
+                  rows={3}
+                  className="w-full rounded-xl px-3 py-2.5 mb-2.5 text-sm text-[#e0e0e0] leading-relaxed resize-none focus:outline-none font-sans"
+                  style={{ background: '#1a1a1a', border: '1px solid #2a2a2a' }}
+                />
                 {/* Action buttons */}
                 <div className="flex gap-2">
                   <button type="button" onClick={insertDictation}
