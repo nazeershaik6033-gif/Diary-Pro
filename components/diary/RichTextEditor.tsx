@@ -193,6 +193,9 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your thou
 
     rec.onerror = (e: any) => {
       if (e.error === 'not-allowed') setDictError('Microphone permission denied.')
+      else if (e.error === 'service-not-allowed' || e.error === 'language-not-supported') {
+        setDictError(`${dictLang.label} not supported on this device. Try downloading the language pack in your device settings, or switch to English.`)
+      }
       else if (e.error !== 'no-speech' && e.error !== 'aborted') setDictError(`Error: ${e.error}`)
     }
 
