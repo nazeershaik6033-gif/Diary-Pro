@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Dark background — rx=115 matches iOS squircle mask -->
+  <rect width="512" height="512" fill="#111111" rx="115"/>
+
+  <!-- Amber glow (subtle radial) -->
+  <radialGradient id="glow" cx="50%" cy="48%" r="38%">
+    <stop offset="0%" stop-color="#c4933f" stop-opacity="0.18"/>
+    <stop offset="100%" stop-color="#c4933f" stop-opacity="0"/>
+  </radialGradient>
+  <rect width="512" height="512" rx="115" fill="url(#glow)"/>
+
+  <!-- Fountain pen nib — centered, artwork within 130–382 (safe zone) -->
+  <!-- Barrel body -->
+  <rect x="231" y="130" width="50" height="148" rx="25" fill="#1e1e1e" stroke="#2e2e2e" stroke-width="2"/>
+  <!-- Gold accent ring top -->
+  <rect x="225" y="272" width="62" height="13" rx="6" fill="#c4933f"/>
+  <!-- Gold accent ring bottom -->
+  <rect x="225" y="289" width="62" height="8" rx="4" fill="#a87832"/>
+  <!-- Grip section -->
+  <rect x="233" y="297" width="46" height="42" rx="5" fill="#181818" stroke="#2a2a2a" stroke-width="1.5"/>
+  <!-- Nib taper body -->
+  <path d="M 233 339 L 279 339 L 272 371 L 240 371 Z" fill="#c4933f"/>
+  <!-- Nib tip triangle -->
+  <path d="M 240 371 L 272 371 L 256 382 Z" fill="#a87832"/>
+  <!-- Nib center slit -->
+  <line x1="256" y1="355" x2="256" y2="382" stroke="#111" stroke-width="3" stroke-linecap="round"/>
+  <!-- Ink drop highlight on nib -->
+  <ellipse cx="256" cy="350" rx="4" ry="2.5" fill="#ffd580" opacity="0.5"/>
+
+  <!-- Three ruled lines (journal lines) in upper half -->
+  <line x1="152" y1="185" x2="232" y2="185" stroke="#c4933f" stroke-width="3.5" stroke-linecap="round" opacity="0.7"/>
+  <line x1="152" y1="210" x2="232" y2="210" stroke="#c4933f" stroke-width="3.5" stroke-linecap="round" opacity="0.45"/>
+  <line x1="152" y1="235" x2="232" y2="235" stroke="#c4933f" stroke-width="3.5" stroke-linecap="round" opacity="0.25"/>
+
+  <!-- Same lines on right of pen -->
+  <line x1="280" y1="185" x2="360" y2="185" stroke="#c4933f" stroke-width="3.5" stroke-linecap="round" opacity="0.7"/>
+  <line x1="280" y1="210" x2="360" y2="210" stroke="#c4933f" stroke-width="3.5" stroke-linecap="round" opacity="0.45"/>
+  <line x1="280" y1="235" x2="360" y2="235" stroke="#c4933f" stroke-width="3.5" stroke-linecap="round" opacity="0.25"/>
+</svg>
